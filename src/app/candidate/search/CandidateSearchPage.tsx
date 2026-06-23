@@ -376,7 +376,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
           {/* Results */}
           {!loading && !isTyping && results && results.rows.length > 0 && (
             <>
-              <div className="flex flex-col gap-3" key={`results-${results.matchingCount}-${page}`} style={{ animation: "shFadeIn 300ms ease-out" }}>
+              <div className="flex flex-col gap-3 animate-[shFadeIn_300ms_ease-out]" key={`results-${results.matchingCount}-${page}`}>
                 {results.rows.map((row) => (
                   <Link
                     key={row.id}

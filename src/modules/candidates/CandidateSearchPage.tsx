@@ -78,7 +78,7 @@ export function CandidateSearchPage({
       header: "",
       className: "w-10",
       cell: (row) => (
-        <div className="w-8 h-8 rounded-full bg-[#1f73b7] flex items-center justify-center text-white text-xs font-bold">
+        <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
           {candidateInitials(row.name)}
         </div>
       ),
@@ -143,7 +143,7 @@ export function CandidateSearchPage({
       <header className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <Link href={homePath} className="flex items-center gap-2 text-foreground no-underline">
-            <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1f73b7] text-white text-xs font-bold">
+            <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
               SH
             </span>
             <span className="font-semibold text-sm hidden sm:inline">Candidates</span>
