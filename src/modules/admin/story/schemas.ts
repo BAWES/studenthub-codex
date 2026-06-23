@@ -16,6 +16,8 @@ export const storyItemSchema = z.object({
   story_time_spent: z.number().int().nullable(),
   story_created_at: z.date().nullable(),
   story_last_updated_at: z.date().nullable(),
+  request_position_title: z.string().nullable().optional(),
+  staff_name: z.string().nullable().optional(),
 });
 
 export const listStoriesResultSchema = z.object({

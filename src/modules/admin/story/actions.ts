@@ -39,16 +39,30 @@ export async function listStories(
         story_time_spent: true,
         story_created_at: true,
         story_last_updated_at: true,
+        request: {
+          select: { request_position_title: true },
+        },
+        staff: {
+          select: { staff_name: true },
+        },
       },
     }),
     prisma.story.count(),
   ]);
 
   const stories = rows.map((row) => ({
-    ...row,
-    staff_id: row.staff_id ?? null,
+    story_uuid: row.story_uuid,
+    request_uuid: row.request_uuid,
     suggestion_uuid: row.suggestion_uuid ?? null,
+    staff_id: row.staff_id ?? null,
+    number_of_employees: row.number_of_employees,
+    story_status: row.story_status,
     is_old: row.is_old ?? null,
+    story_time_spent: row.story_time_spent,
+    story_created_at: row.story_created_at,
+    story_last_updated_at: row.story_last_updated_at,
+    request_position_title: row.request?.request_position_title ?? null,
+    staff_name: row.staff?.staff_name ?? null,
   }));
 
   const result = {
