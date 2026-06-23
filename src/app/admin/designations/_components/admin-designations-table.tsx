@@ -2,6 +2,10 @@
 
 import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -27,12 +31,12 @@ export function AdminDesignationsTable({ session, designations }: Props) {
         { label: "Total designations", value: designations.length, note: "Job titles in the system" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-border bg-muted p-5">
+      <Card className="mb-6">
+        <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add designation</h3>
           <CreateDesignationForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Designations"
@@ -51,13 +55,14 @@ export function AdminDesignationsTable({ session, designations }: Props) {
                   onCancel={() => setEditingUuid(null)}
                 />
               ) : (
-                <button
+                <Button
                   type="button"
-                  className="text-sm hover:underline text-primary"
+                  variant="ghost"
+                  className="text-sm px-0 h-auto hover:underline"
                   onClick={() => setEditingUuid(row.designation_uuid)}
                 >
                   {row.designation_name_en}
-                </button>
+                </Button>
               )
             ),
           },
@@ -71,9 +76,10 @@ export function AdminDesignationsTable({ session, designations }: Props) {
             label: "Actions",
             render: (row) =>
               editingUuid !== row.designation_uuid ? (
-                <button
+                <Button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete "${row.designation_name_en}"?`)) {
                       await deleteDesignation(row.designation_uuid);
@@ -82,7 +88,7 @@ export function AdminDesignationsTable({ session, designations }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
@@ -115,29 +121,27 @@ function CreateDesignationForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">English name</label>
-        <input
+        <Label className="text-xs font-medium text-muted-foreground">English name</Label>
+        <Input
           name="nameEn"
           required
           maxLength={255}
           placeholder="e.g. Software Engineer"
-          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground"        />
+          className="h-9"
+        />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Arabic name</label>
-        <input
+        <Label className="text-xs font-medium text-muted-foreground">Arabic name</Label>
+        <Input
           name="nameAr"
           maxLength={255}
           placeholder="مهندس برمجيات"
-          className="h-9 rounded-lg px-3 text-sm border bg-background text-foreground"        />
+          className="h-9"
+        />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
@@ -174,33 +178,25 @@ function EditDesignationForm({
 
   return (
     <form action={action} className="flex items-center gap-2">
-      <input
+      <Input
         name="nameEn"
         defaultValue={row.designation_name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-muted border-border text-foreground"
+        className="w-40 h-8"
       />
-      <input
+      <Input
         name="nameAr"
         defaultValue={row.designation_name_ar ?? ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-muted border-border text-foreground"
+        className="w-40 h-8"
       />
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="h-8 rounded px-3 text-xs text-muted-foreground"
-      >
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs text-destructive">{state.error}</p>
       ) : null}
