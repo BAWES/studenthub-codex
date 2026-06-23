@@ -686,8 +686,6 @@ h2 {
   margin-bottom: 2px;
 }
 
-}
-
 .roleOption {
   min-height: 62px;
   position: relative;
@@ -4795,9 +4793,7 @@ kbd {
 /* Public product entry points */
 
 
-.portalChooserPromise span,
-
-
+.portalChooserPromise span {
   max-width: 900px;
 }
 
@@ -8070,14 +8066,6 @@ kbd {
   }
 }
 
-  margin: 0.35em 0 0.35em;
-  font-size: clamp(22px, 3.4vw, 38px);
-  font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-
 /* ── Glass hover enhancement for portal cards ───────────────────────── */
 [data-slot="glass-panel"]:hover {
   border-color: var(--sh-glass-border-strong) !important;
@@ -8618,8 +8606,6 @@ kbd {
 }
 
 /* ── OS Landing — Section layout container ──────────────────── */
-  margin-top: 0;
-}
 
 /* ── OS Landing — Smooth theme transitions ─────────────────── */
 /* Only body/html get smooth dark/light theme crossfade */
@@ -8782,9 +8768,7 @@ body {
 }
 
 /* ── OS Landing — Glow CTA button ───────────────────────────────────── */
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px color-mix(in srgb, var(--sh-info) 22%, transparent);
-}
+
 
 .shMockupDramatic {
   width: min(920px, 76vw);

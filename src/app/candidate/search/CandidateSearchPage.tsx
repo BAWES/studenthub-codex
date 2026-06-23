@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
+import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import MatchScoreBadge from "@/components/matching/MatchScoreBadge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -233,7 +234,7 @@ export function CandidateSearchPage({ session, initialData }: { session: Session
       if (val) params.set(key, val);
     }
     const qs = params.toString();
-    router.replace(`/candidate/search${qs ? `?${qs}` : ""}`, { scroll: false });
+    router.replace(`/candidate/search${qs ? `?${qs}` : ""}` as Route, { scroll: false });
   }, [router]);
 
   const totalPages = results ? Math.ceil(results.matchingCount / ITEMS_PER_PAGE) : 0;
