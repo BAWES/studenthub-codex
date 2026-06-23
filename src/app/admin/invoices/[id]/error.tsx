@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { RefreshCw, ArrowLeft } from "lucide-react";
+import type { Route } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -41,7 +42,7 @@ export default function InvoiceDetailError({
               Try again
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/admin/invoices">
+              <Link href={"/admin/invoices" as Route}>
                 <ArrowLeft className="h-4 w-4" />
                 Back to invoices
               </Link>
