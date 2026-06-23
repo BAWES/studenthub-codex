@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import type { Role } from "@/modules/auth/types";
 
 export interface MobileFABProps {
@@ -22,9 +23,9 @@ export interface MobileFABProps {
 }
 
 /**
- * Glass-morphism Floating Action Button for mobile viewports.
+ * Floating Action Button for mobile viewports.
  *
- * - 56px glass circle with backdrop blur
+ * - 56px rounded-full button with Zendesk Coral accent
  * - Role-aware primary action on tap
  * - Optional speed-dial menu on long-press / external toggle
  * - Hides when keyboard is open
@@ -40,12 +41,17 @@ export function MobileFAB({
     <>
       {/* Speed-dial menu (rendered above FAB when open) */}
       {speedDialOpen && speedDial.length > 0 && (
-        <div className="shMobileFABSpeedDial" role="menu" aria-label={`${role} speed dial`}>
+        <div
+          className="absolute bottom-20 right-4 flex flex-col gap-2"
+          role="menu"
+          aria-label={`${role} speed dial`}
+        >
           {speedDial.map((item) => (
-            <button
+            <Button
               key={item.label}
-              type="button"
-              className="shMobileFABSpeedDialItem"
+              variant="secondary"
+              size="sm"
+              className="rounded-full shadow-lg min-w-[120px]"
               role="menuitem"
               onClick={(e) => {
                 e.stopPropagation();
@@ -54,20 +60,27 @@ export function MobileFAB({
             >
               {item.icon ? <span aria-hidden="true">{item.icon}</span> : null}
               <span>{item.label}</span>
-            </button>
+            </Button>
           ))}
         </div>
       )}
 
       {/* FAB button */}
-      <button
+      <Button
         type="button"
-        className={cn("shMobileFAB", hidden && "shMobileFABHidden")}
+        size="icon"
+        className={cn(
+          "fixed bottom-6 right-6 z-50 size-14 rounded-full shadow-xl",
+          "bg-[#eb6651] hover:bg-[#d45441] text-white",
+          "transition-all duration-200 ease-in-out",
+          "text-2xl font-light leading-none",
+          hidden && "opacity-0 pointer-events-none scale-0",
+        )}
         aria-label={`${role} quick action`}
         onClick={primaryAction}
       >
         +
-      </button>
+      </Button>
     </>
   );
 }

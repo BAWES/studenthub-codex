@@ -13,6 +13,7 @@ export default async function AdminFulltimerDetailPage({
 }) {
   const { id } = await params;
   const session = await requireRoleCapability("admin", "admin.system");
+
   const fulltimer = await getFulltimer(id);
 
   if (!fulltimer) {

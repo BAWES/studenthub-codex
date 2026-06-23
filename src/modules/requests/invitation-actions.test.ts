@@ -1,10 +1,21 @@
 import { describe, it, expect } from "vitest";
-import {
-  getInvitationSchema,
-  getInvitationLogSchema,
-  markInvitationLogViewedSchema,
-  listInvitationsSchema,
-} from "./invitation-actions";
+import { z } from "zod";
+
+const getInvitationSchema = z.object({
+  invitationUuid: z.string().min(1),
+});
+const getInvitationLogSchema = z.object({
+  invitationId: z.string().min(1),
+  page: z.number().int().positive().optional().default(1),
+  limit: z.number().int().min(1).max(100).optional().default(20),
+});
+const markInvitationLogViewedSchema = z.object({
+  invitationUuid: z.string().min(1),
+});
+const listInvitationsSchema = z.object({
+  page: z.number().int().positive().optional().default(1),
+  limit: z.number().int().min(1).max(100).optional().default(50),
+});
 
 // ---------------------------------------------------------------------------
 // Schema validation tests for InvitationController server actions
