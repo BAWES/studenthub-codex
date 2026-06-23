@@ -10,6 +10,21 @@ type Props = {
   data: DashboardData;
 };
 
+// ─── Bar color variant helper ──────────────────────────────────────────
+
+function barVariant(label: string): string {
+  const l = label.toLowerCase();
+  if (l.includes("approved") || l.includes("completed") || l.includes("active") || l.includes("live"))
+    return "success";
+  if (l.includes("pending") || l.includes("review") || l.includes("draft"))
+    return "warning";
+  if (l.includes("rejected") || l.includes("denied") || l.includes("archived"))
+    return "error";
+  if (l.includes("transferred") || l.includes("assigned"))
+    return "info";
+  return "info";
+}
+
 export function AdminDashboardContent({ session, data }: Props) {
   const { metrics, statusMix, recentCandidates, recentCompanies, recentRequests, recentTransfers, prMergeMetrics } = data;
 
@@ -44,13 +59,13 @@ export function AdminDashboardContent({ session, data }: Props) {
                 {statusMix.map((status) => {
                   const total = statusMix.reduce((s, a) => s + a.value, 0);
                   const pct = total > 0 ? (status.value / total) * 100 : 0;
-                  const colors = ["#eb6651", "#f59e0b", "#22c55e", "#6366f1", "#8b5cf6", "#06b6d4"];
                   return (
                     <div
                       key={status.label}
+                      className="h-full transition-all duration-500"
                       style={{
                         width: `${pct}%`,
-                        backgroundColor: colors[statusMix.indexOf(status) % colors.length],
+                        backgroundColor: `var(--sh-${barVariant(status.label)}-bg)`,
                         minWidth: pct > 0 ? "4px" : "0",
                       }}
                       title={`${status.label}: ${status.value}`}
