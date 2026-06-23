@@ -26,7 +26,7 @@ export function UniversityDetailForm({ university }: Props) {
     formData.set("university_data_source", dataSource);
 
     await updateUniversity({
-      university_id: university.university_id,
+      universityId: university.university_id,
       university_name_en: nameEn,
       university_name_ar: nameAr || undefined,
       university_data_source: Number(dataSource) || undefined,

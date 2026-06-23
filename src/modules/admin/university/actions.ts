@@ -60,6 +60,7 @@ const updateUniversitySchema = z.object({
     .string()
     .max(100)
     .optional(),
+  university_data_source: z.coerce.number().int().optional(),
 });
 
 const deleteUniversitySchema = z.object({
@@ -238,7 +239,7 @@ export async function updateUniversity(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid university data");
   }
 
-  const { universityId, university_name_en, university_name_ar } = parsed.data;
+  const { universityId, university_name_en, university_name_ar, university_data_source } = parsed.data;
 
   // Verify the record exists
   const existing = await prisma.university.findFirst({
@@ -253,6 +254,7 @@ export async function updateUniversity(
   };
   if (university_name_en !== undefined) updateData.university_name_en = university_name_en;
   if (university_name_ar !== undefined) updateData.university_name_ar = university_name_ar || null;
+  if (university_data_source !== undefined) updateData.university_data_source = university_data_source;
 
   await prisma.university.update({
     where: { university_id: universityId },

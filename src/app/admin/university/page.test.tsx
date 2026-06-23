@@ -1,17 +1,17 @@
 import { describe, it, expect } from "vitest";
-import { universityListItemSchema, listUniversitiesResultSchema } from "./schemas";
-import type { UniversityListItem, ListUniversitiesResult } from "./schemas";
+import { universityListItemSchema, listUniversityResultSchema } from "./schemas";
+import type { UniversityListItem, ListUniversityResult } from "./schemas";
 
 /**
  * Page migration test for admin/university.
  *
  * Verifies that universityListItemSchema accepts the data returned by the
- * listUniversities server action, and that UniversityListItem fields map
+ * listUniversity server action, and that UniversityListItem fields map
  * correctly to table columns.
  */
 describe("admin university page — data contract", () => {
-  it("listUniversitiesResultSchema accepts empty list result", () => {
-    const r = listUniversitiesResultSchema.safeParse({
+  it("listUniversityResultSchema accepts empty list result", () => {
+    const r = listUniversityResultSchema.safeParse({
       records: [],
       total: 0,
       page: 1,
@@ -30,7 +30,7 @@ describe("admin university page — data contract", () => {
       university_name_en: "Kuwait University",
       university_name_ar: "جامعة الكويت",
       university_data_source: 1,
-      candidate_count: 42,
+      deleted: 0,
     };
     const parsed = universityListItemSchema.safeParse(r);
     expect(parsed.success).toBe(true);
@@ -38,7 +38,7 @@ describe("admin university page — data contract", () => {
       expect(parsed.data.university_id).toBe(r.university_id);
       expect(parsed.data.university_name_en).toBe(r.university_name_en);
       expect(parsed.data.university_name_ar).toBe(r.university_name_ar);
-      expect(parsed.data.candidate_count).toBe(42);
+      expect(parsed.data.deleted).toBe(0);
     }
   });
 
@@ -48,16 +48,16 @@ describe("admin university page — data contract", () => {
       university_name_en: "American University of Kuwait",
       university_name_ar: "الجامعة الأميركية في الكويت",
       university_data_source: 2,
-      candidate_count: 137,
+      deleted: 0,
     };
     expect(record.university_id).toBe(5);
     expect(record.university_name_en).toBe("American University of Kuwait");
     expect(record.university_name_ar).toBe("الجامعة الأميركية في الكويت");
-    expect(record.candidate_count).toBe(137);
+    expect(record.deleted).toBe(0);
   });
 
-  it("ListUniversitiesResult has expected shape (matches listUniversities return)", () => {
-    const result: ListUniversitiesResult = {
+  it("ListUniversityResult has expected shape (matches listUniversity return)", () => {
+    const result: ListUniversityResult = {
       records: [],
       total: 0,
       page: 1,
@@ -82,14 +82,14 @@ describe("admin university page — data contract", () => {
       university_name_en: null,
       university_name_ar: null,
       university_data_source: null,
-      candidate_count: null,
+      deleted: 0,
     });
     expect(r.success).toBe(true);
     if (r.success) {
       expect(r.data.university_name_en).toBeNull();
       expect(r.data.university_name_ar).toBeNull();
       expect(r.data.university_data_source).toBeNull();
-      expect(r.data.candidate_count).toBeNull();
+      expect(r.data.deleted).toBe(0);
     }
   });
 });

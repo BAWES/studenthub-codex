@@ -9,6 +9,25 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
+const benefits = [
+  {
+    title: "Purpose-built portals",
+    body: "Each role gets exactly the right tools — no clutter, no missing features, no one-size-fits-all compromises.",
+  },
+  {
+    title: "Smart candidate search",
+    body: "Typo-tolerant, filter-rich search across countries, skills, and statuses. Saved searches for repeat workflows.",
+  },
+  {
+    title: "End-to-end workflows",
+    body: "From profile readiness to timesheets and payments — every step is connected in one system.",
+  },
+  {
+    title: "Production-grade foundation",
+    body: "Built for real data volumes, real teams, and real compliance — not a prototype.",
+  },
+];
+
 const portalRoles = ["candidate", "staff", "company", "admin", "inspector"] as const;
 
 const portalIcons: Record<(typeof portalRoles)[number], React.ComponentType<{ className?: string }>> = {
