@@ -2558,6 +2558,19 @@ model webhook {
   @@index([event], map: "idx-webhook-event")
 }
 
+model salary_scale {
+  salary_scale_uuid       String    @id @db.Char(60)
+  salary_scale_name_en    String    @db.VarChar(255)
+  salary_scale_name_ar    String?   @db.VarChar(255)
+  salary_scale_min_salary Decimal?  @db.Decimal(10, 3)
+  salary_scale_mid_salary Decimal?  @db.Decimal(10, 3)
+  salary_scale_max_salary Decimal?  @db.Decimal(10, 3)
+  salary_scale_currency   String?   @default("KWD") @db.Char(3)
+  salary_scale_sort_order Int?      @db.SmallInt
+  salary_scale_created_at DateTime? @db.DateTime(0)
+  salary_scale_updated_at DateTime? @db.DateTime(0)
+}
+
 enum chat_message_from {
   candidate
   company
