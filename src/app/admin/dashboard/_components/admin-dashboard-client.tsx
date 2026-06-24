@@ -127,7 +127,7 @@ export function AdminDashboardClient({ session, dashboard }: Props) {
             <div className="space-y-4">
               {/* Visual bar */}
               <div
-                className="flex h-2 w-full overflow-hidden rounded-full bg-muted"
+                className="flex h-2 w-full overflow-hidden rounded-full bg-border"
                 aria-hidden="true"
               >
                 {dashboard.statusMix.map((status) => {

@@ -36,8 +36,8 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
       ]}
     >
       {/* Summary card */}
-      <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
+      <Card className="mb-6">
+        <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">
             Connection summary
           </h3>
@@ -69,37 +69,41 @@ export function AdminAwsTable({ session, entries, awsResult }: Props) {
               </p>
             </div>
           </div>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       {/* Config entries table */}
       {hasEntries ? (
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Config key</TableHead>
-                <TableHead>Value</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {entries.map((entry) => (
-                <TableRow key={entry.key}>
-                  <TableCell className="font-mono text-xs">{entry.key}</TableCell>
-                  <TableCell className={`font-mono text-xs ${entry.value ? "text-foreground" : "text-muted-foreground"}`}>
-                    {entry.value || "—"}
-                  </TableCell>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Config key</TableHead>
+                  <TableHead>Value</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {entries.map((entry) => (
+                  <TableRow key={entry.key}>
+                    <TableCell className="font-mono text-xs">{entry.key}</TableCell>
+                    <TableCell className={`font-mono text-xs ${entry.value ? "text-foreground" : "text-muted-foreground"}`}>
+                      {entry.value || "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            No AWS config keys found. Configure them in the server environment.
-          </p>
-        </div>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No AWS config keys found. Configure them in the server environment.
+            </p>
+          </CardContent>
+        </Card>
       )}
     </WorkspaceShell>
   );

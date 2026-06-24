@@ -18,7 +18,7 @@ import {
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DegreeItem } from "../schemas";
-import { createDegree, updateDegree, deleteDegree, getDegreeGroupOptions } from "../actions";
+import { updateDegree, deleteDegree, createDegree, getDegreeGroupOptions } from "../actions";
 
 type GroupOption = { degree_group_uuid: string; degree_group_name_en: string };
 
