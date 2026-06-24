@@ -165,8 +165,8 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
       onSubmit={() => setTimeout(() => { formRef.current?.reset(); }, 100)}
     >
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Store name</label>
-        <input
+        <Label className="text-xs font-medium text-muted-foreground">Store name</Label>
+        <Input
           name="storeName"
           required
           maxLength={255}
@@ -174,8 +174,8 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Location</label>
-        <input
+        <Label className="text-xs font-medium text-muted-foreground">Location</Label>
+        <Input
           name="storeLocation"
           required
           maxLength={255}
@@ -183,28 +183,24 @@ function CreateStoreForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Brand UUID</label>
-        <input
+        <Label className="text-xs font-medium text-muted-foreground">Brand UUID</Label>
+        <Input
           name="brandUuid"
           maxLength={36}
           placeholder="Optional"
         />
       </div>
       <div className="grid gap-1">
-        <label className="text-xs font-medium text-muted-foreground">Mall UUID</label>
-        <input
+        <Label className="text-xs font-medium text-muted-foreground">Mall UUID</Label>
+        <Input
           name="mallUuid"
           maxLength={36}
           placeholder="Optional"
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs w-full text-destructive">{state.error}</p>
       ) : null}
@@ -249,27 +245,19 @@ function EditStoreForm({
         maxLength={255}
         className="w-40"
       />
-      <input
+      <Input
         name="storeLocation"
         defaultValue={row.store_location}
         required
         maxLength={255}
         className="w-40"
       />
-      <button
-        type="submit"
-        disabled={pending}
-        className="h-8 rounded px-3 text-xs font-semibold bg-primary text-primary-foreground"
-      >
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="h-8 rounded px-3 text-xs text-muted-foreground"
-      >
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
         Cancel
-      </button>
+      </Button>
       {state?.error ? (
         <p className="text-xs text-destructive w-full">{state.error}</p>
       ) : null}
