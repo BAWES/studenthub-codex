@@ -1,6 +1,8 @@
 "use client";
 
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import Link from "next/link";
+import type { Route } from "next";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
 import { MetricCard } from "@/components/ui/metric-card";
 import {
@@ -45,11 +47,12 @@ function RecentApplicationsTable({ applications }: { applications: RecentApplica
           <TableHead>Job</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Date</TableHead>
+          <TableHead aria-label="Open application" />
         </TableRow>
       </TableHeader>
       <TableBody>
         {applications.map((app) => (
-          <TableRow key={app.applicationId}>
+          <TableRow key={app.applicationId} data-os-navigable tabIndex={0}>
             <TableCell className="font-medium">
               {app.candidateName ?? `Candidate #${app.candidateId}`}
             </TableCell>
@@ -59,6 +62,14 @@ function RecentApplicationsTable({ applications }: { applications: RecentApplica
             </TableCell>
             <TableCell className="text-muted-foreground">
               {new Date(app.createdAt).toLocaleDateString()}
+            </TableCell>
+            <TableCell>
+              <Link
+                href={`/employer/applications/${app.applicationId}` as Route}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Open
+              </Link>
             </TableCell>
           </TableRow>
         ))}
