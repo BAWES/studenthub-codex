@@ -4,6 +4,7 @@ import { getCandidateDetail } from "@/modules/candidates/candidate-detail";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import {
   Mail,
   Phone,
@@ -21,7 +22,6 @@ import {
   Globe,
   User,
 } from "lucide-react";
-import NextLink from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -47,17 +47,12 @@ export default async function StaffCandidateDetailPage({
   const c = detail.candidate;
 
   return (
-    <div className="p-6 space-y-6">
-      {/* ── Breadcrumb ─────────────────────────────────────── */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <NextLink href="/staff/candidates" className="hover:text-foreground transition-colors">
-          Candidates
-        </NextLink>
-        <span>/</span>
-        <span className="text-foreground font-medium">
-          {c.candidate_name ?? `#${c.candidate_id}`}
-        </span>
-      </div>
+    <WorkspaceShell
+      session={session}
+      eyebrow="Staff / Candidate"
+      title={c.candidate_name ?? `#${c.candidate_id}`}
+      metrics={detail.metrics}
+    >
 
       {/* ── Profile Header ──────────────────────────────────── */}
       <Card>
@@ -105,20 +100,6 @@ export default async function StaffCandidateDetailPage({
                 ) : null}
               </div>
 
-              {/* Metrics */}
-              {detail.metrics.length > 0 && (
-                <div className="flex gap-4 mt-4 flex-wrap">
-                  {detail.metrics.map((metric, i) => (
-                    <div
-                      key={i}
-                      className="rounded-lg border border-border bg-muted/30 px-3.5 py-2"
-                    >
-                      <div className="text-xs text-muted-foreground">{metric.label}</div>
-                      <div className="text-sm font-semibold">{metric.value}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
@@ -544,7 +525,7 @@ export default async function StaffCandidateDetailPage({
           )}
         </TabsContent>
       </Tabs>
-    </div>
+    </WorkspaceShell>
   );
 }
 
