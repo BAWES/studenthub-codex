@@ -94,4 +94,35 @@ describe("DataTable", () => {
     renderTable();
     expect(screen.queryByRole("link", { name: "Open" })).toBeNull();
   });
+
+  // ── Keyboard navigation support ──────────────────────────────
+
+  it("attaches data-os-navigable to each data row for j/k keyboard nav", () => {
+    renderTable();
+    const rows = screen.getAllByRole("row");
+    // rows[0] = thead row, rows[1..3] = tbody data rows
+    const dataRows = rows.slice(1);
+    expect(dataRows).toHaveLength(3);
+    for (const row of dataRows) {
+      // React renders boolean HTML attributes as the string "true"
+      expect(row.getAttribute("data-os-navigable")).toBe("true");
+    }
+  });
+
+  it("sets tabIndex={0} on each data row for focusability", () => {
+    renderTable();
+    const rows = screen.getAllByRole("row");
+    const dataRows = rows.slice(1);
+    for (const row of dataRows) {
+      expect(row.getAttribute("tabindex")).toBe("0");
+    }
+  });
+
+  it("does NOT attach data-os-navigable to the empty-state row", () => {
+    renderEmptyTable();
+    const rows = screen.getAllByRole("row");
+    expect(rows).toHaveLength(2); // header row + empty state row
+    const emptyRow = rows[1];
+    expect(emptyRow.getAttribute("data-os-navigable")).toBeNull();
+  });
 });
