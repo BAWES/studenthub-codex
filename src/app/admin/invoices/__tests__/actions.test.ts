@@ -10,10 +10,7 @@ vi.mock("next/cache", () => ({
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     invoice: {
-      findMany: vi.fn(),
-      findFirst: vi.fn(),
-      count: vi.fn(),
-      create: vi.fn(),
+      findUnique: vi.fn(),
       update: vi.fn(),
     },
   },
@@ -21,19 +18,17 @@ vi.mock("@/lib/prisma", () => ({
 
 // Mock session
 vi.mock("@/modules/auth/session", () => ({
-  requireCapability: vi.fn().mockResolvedValue(undefined),
+  requireRoleCapability: vi.fn().mockResolvedValue(undefined),
 }));
 
 const {
-  listInvoices,
-  getInvoice,
-  createInvoice,
+  getInvoiceDetail,
   updateInvoice,
   deleteInvoice,
 } = await import("../actions");
 
 // ---------------------------------------------------------------------------
-// admin/invoices actions
+// admin/invoices actions (refactored API)
 // ---------------------------------------------------------------------------
 
 describe("admin/invoices actions", () => {
@@ -42,177 +37,52 @@ describe("admin/invoices actions", () => {
   });
 
   // -----------------------------------------------------------------------
-  // listInvoices
+  // getInvoiceDetail
   // -----------------------------------------------------------------------
 
-  describe("listInvoices", () => {
-    it("returns empty result when no invoices exist", async () => {
-      vi.mocked(prisma.invoice.findMany).mockResolvedValue([]);
-      vi.mocked(prisma.invoice.count).mockResolvedValue(0);
-
-      const result = await listInvoices({});
-
-      expect(result.items).toHaveLength(0);
-      expect(result.total).toBe(0);
-      expect(result.page).toBe(1);
-      expect(result.totalPages).toBe(0);
-    });
-
-    it("returns paginated invoice rows", async () => {
-      vi.mocked(prisma.invoice.findMany).mockResolvedValue([
-        {
-          invoice_id: 1,
-          transfer_id: 10,
-          invoice_date: new Date("2026-06-01"),
-          invoice_status: "paid",
-          transfer: {
-            transfer_id: 10,
-            total: { toString: () => "500.000" },
-            currency_code: "KWD",
-            company: { company_name: "Test Co" },
-          },
-        } as any,
-      ]);
-      vi.mocked(prisma.invoice.count).mockResolvedValue(1);
-
-      const result = await listInvoices({ page: 1, limit: 10 });
-
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]).toMatchObject({
+  describe("getInvoiceDetail", () => {
+    it("returns invoice detail with transfer and company info", async () => {
+      vi.mocked(prisma.invoice.findUnique).mockResolvedValue({
         invoice_id: 1,
-        transfer_id: 10,
-        company_name: "Test Co",
-        invoice_status: "paid",
-        total: "500.000",
-        currency_code: "KWD",
-      });
-      expect(result.total).toBe(1);
-    });
-
-    it("filters by invoice status", async () => {
-      vi.mocked(prisma.invoice.findMany).mockResolvedValue([]);
-      vi.mocked(prisma.invoice.count).mockResolvedValue(0);
-
-      await listInvoices({ status: "unpaid" });
-
-      const where = vi.mocked(prisma.invoice.findMany).mock.calls[0][0]?.where as any;
-      expect(where.invoice_status).toBe("unpaid");
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // getInvoice
-  // -----------------------------------------------------------------------
-
-  describe("getInvoice", () => {
-    it("returns invoice detail with candidate payouts", async () => {
-      vi.mocked(prisma.invoice.findFirst).mockResolvedValue({
-        invoice_id: 1,
-        transfer_id: 10,
         invoice_date: new Date("2026-06-01"),
         invoice_status: "paid",
+        transfer_id: 10,
         transfer: {
           transfer_id: 10,
           total: { toString: () => "500.000" },
           company_total: null,
           currency_code: "KWD",
-          payment_received_on: null,
-          company: {
-            company_name: "Test Co",
-            company_email: "test@co.com",
-          },
-          transfer_candidate: [
-            {
-              tc_id: 1,
-              hours: 40,
-              paid: 1,
-              candidate_total: { toString: () => "400.000" },
-              candidate: { candidate_name: "Alice" },
-            },
-            {
-              tc_id: 2,
-              hours: 20,
-              paid: 0,
-              candidate_total: { toString: () => "100.000" },
-              candidate: { candidate_name: "Bob" },
-            },
-          ],
+          transfer_status: "completed",
+          start_date: new Date("2026-05-01"),
+          end_date: new Date("2026-05-31"),
+          company: { company_id: 1, company_name: "Test Co" },
         },
       } as any);
 
-      const result = await getInvoice(1);
+      const result = await getInvoiceDetail(1);
 
-      expect(result.invoice).not.toBeNull();
-      expect(result.invoice?.invoice_id).toBe(1);
-      expect(result.invoice?.invoice_status).toBe("paid");
-      expect(result.candidate_payouts).toHaveLength(2);
-      expect(result.candidate_payouts[0].candidate_name).toBe("Alice");
-      expect(result.candidate_payouts[0].paid).toBe(1);
-      expect(result.metrics).toHaveLength(4);
+      expect(result).not.toBeNull();
+      expect(result?.invoice_id).toBe(1);
+      expect(result?.invoice_status).toBe("paid");
+      expect(result?.transfer?.company?.company_name).toBe("Test Co");
     });
 
-    it("returns null invoice when not found", async () => {
-      vi.mocked(prisma.invoice.findFirst).mockResolvedValue(null);
+    it("returns null when invoice not found", async () => {
+      vi.mocked(prisma.invoice.findUnique).mockResolvedValue(null);
 
-      const result = await getInvoice(999);
+      const result = await getInvoiceDetail(999);
 
-      expect(result.invoice).toBeNull();
-      expect(result.candidate_payouts).toEqual([]);
-      expect(result.metrics).toEqual([]);
+      expect(result).toBeNull();
     });
 
-    it("requires positive invoice ID", async () => {
-      await expect(getInvoice(-1)).rejects.toThrow();
-    });
-  });
+    it("queries with proper include shape", async () => {
+      vi.mocked(prisma.invoice.findUnique).mockResolvedValue(null);
 
-  // -----------------------------------------------------------------------
-  // createInvoice
-  // -----------------------------------------------------------------------
+      await getInvoiceDetail(1);
 
-  describe("createInvoice", () => {
-    it("creates an invoice with minimal fields", async () => {
-      vi.mocked(prisma.invoice.create).mockResolvedValue({
-        invoice_id: 1,
-      } as any);
-
-      const result = await createInvoice({
-        invoice_status: "unpaid",
-      });
-
-      expect(result.invoice_id).toBe(1);
-      expect(vi.mocked(prisma.invoice.create).mock.calls[0][0]?.data).toMatchObject({
-        invoice_status: "unpaid",
-      });
-    });
-
-    it("creates an invoice with all fields", async () => {
-      vi.mocked(prisma.invoice.create).mockResolvedValue({
-        invoice_id: 2,
-      } as any);
-
-      await createInvoice({
-        transfer_id: 10,
-        invoice_date: "2026-06-15",
-        invoice_status: "paid",
-      });
-
-      const data = vi.mocked(prisma.invoice.create).mock.calls[0][0]?.data as any;
-      expect(data.transfer_id).toBe(10);
-      expect(data.invoice_date).toBeInstanceOf(Date);
-      expect(data.invoice_status).toBe("paid");
-    });
-
-    it("creates invoice with default status when only minimal data given", async () => {
-      vi.mocked(prisma.invoice.create).mockResolvedValue({
-        invoice_id: 3,
-      } as any);
-
-      const result = await createInvoice({} as any);
-
-      expect(result.invoice_id).toBe(3);
-      const data = vi.mocked(prisma.invoice.create).mock.calls[0][0]?.data as any;
-      expect(data.invoice_status).toBe("unpaid");
+      const call = vi.mocked(prisma.invoice.findUnique).mock.calls[0][0];
+      expect(call?.where).toEqual({ invoice_id: 1 });
+      expect(call?.include).toHaveProperty("transfer");
     });
   });
 
@@ -224,45 +94,49 @@ describe("admin/invoices actions", () => {
     it("updates invoice status", async () => {
       vi.mocked(prisma.invoice.update).mockResolvedValue({} as any);
 
-      const result = await updateInvoice({
-        invoiceId: 1,
-        invoice_status: "paid",
-      });
+      await updateInvoice(1, { invoice_status: "paid" });
 
-      expect(result.invoice_id).toBe(1);
-      expect(vi.mocked(prisma.invoice.update).mock.calls[0][0]?.data).toMatchObject({
-        invoice_status: "paid",
-      });
+      const data = vi.mocked(prisma.invoice.update).mock.calls[0][0]?.data as any;
+      expect(data.invoice_status).toBe("paid");
     });
 
-    it("only includes provided fields in update data", async () => {
+    it("updates invoice date", async () => {
+      vi.mocked(prisma.invoice.update).mockResolvedValue({} as any);
+      const testDate = new Date("2026-07-01");
+
+      await updateInvoice(1, { invoice_date: testDate });
+
+      const data = vi.mocked(prisma.invoice.update).mock.calls[0][0]?.data as any;
+      expect(data.invoice_date).toBe(testDate);
+    });
+
+    it("updates transfer_id", async () => {
       vi.mocked(prisma.invoice.update).mockResolvedValue({} as any);
 
-      await updateInvoice({
-        invoiceId: 5,
-        transfer_id: 20,
-      });
+      await updateInvoice(5, { transfer_id: 20 });
 
       const data = vi.mocked(prisma.invoice.update).mock.calls[0][0]?.data as any;
       expect(data.transfer_id).toBe(20);
-      expect(data.invoice_status).toBeUndefined();
-      expect(data.invoice_date).toBeUndefined();
     });
 
-    it("converts invoice_date string to Date", async () => {
+    it("sets undefined for omitted optional fields", async () => {
       vi.mocked(prisma.invoice.update).mockResolvedValue({} as any);
 
-      await updateInvoice({
-        invoiceId: 1,
-        invoice_date: "2026-07-01",
-      });
+      await updateInvoice(1, { invoice_status: "paid" });
 
       const data = vi.mocked(prisma.invoice.update).mock.calls[0][0]?.data as any;
-      expect(data.invoice_date).toBeInstanceOf(Date);
+      expect(data.invoice_status).toBe("paid");
+      expect(data.invoice_date).toBeUndefined();
+      expect(data.transfer_id).toBeUndefined();
     });
 
-    it("throws on missing invoiceId", async () => {
-      await expect(updateInvoice({} as any)).rejects.toThrow();
+    it("revalidates the invoices path after update", async () => {
+      const { revalidatePath } = await import("next/cache");
+      vi.mocked(prisma.invoice.update).mockResolvedValue({} as any);
+
+      await updateInvoice(1, { invoice_status: "unpaid" });
+
+      expect(revalidatePath).toHaveBeenCalledWith("/admin/invoices");
     });
   });
 
@@ -274,16 +148,19 @@ describe("admin/invoices actions", () => {
     it("soft-deletes an invoice", async () => {
       vi.mocked(prisma.invoice.update).mockResolvedValue({} as any);
 
-      const result = await deleteInvoice({ invoiceId: 1 });
+      await deleteInvoice(1);
 
-      expect(result.invoice_id).toBe(1);
-      expect(vi.mocked(prisma.invoice.update).mock.calls[0][0]?.data).toMatchObject({
-        deleted: 1,
-      });
+      const data = vi.mocked(prisma.invoice.update).mock.calls[0][0]?.data as any;
+      expect(data.deleted).toBe(1);
     });
 
-    it("throws on invalid invoice ID", async () => {
-      await expect(deleteInvoice({ invoiceId: -1 })).rejects.toThrow();
+    it("revalidates the invoices path after delete", async () => {
+      const { revalidatePath } = await import("next/cache");
+      vi.mocked(prisma.invoice.update).mockResolvedValue({} as any);
+
+      await deleteInvoice(1);
+
+      expect(revalidatePath).toHaveBeenCalledWith("/admin/invoices");
     });
   });
 });

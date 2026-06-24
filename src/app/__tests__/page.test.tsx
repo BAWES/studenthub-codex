@@ -73,6 +73,7 @@ afterEach(() => {
 
 // ── Import component ────────────────────────────────────────────
 import LandingPage from "@/components/landing/LandingPage";
+import Home from "@/app/page";
 
 // ── Tests ────────────────────────────────────────────────────────
 

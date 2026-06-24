@@ -7,7 +7,7 @@ import { InvoiceMetricCards } from "./invoice-metric-cards";
 import { InvoiceFilters, type InvoiceFilterValues } from "./invoice-filters";
 import { InvoiceDataTable } from "./invoice-data-table";
 import { InvoiceDetailDrawer } from "./invoice-detail-drawer";
-import { listInvoices, getInvoice } from "../actions";
+import { listInvoices, getInvoice } from "@/modules/admin/invoices";
 import type { InvoiceRow, InvoiceDetail } from "../schemas";
 
 // ---------------------------------------------------------------------------

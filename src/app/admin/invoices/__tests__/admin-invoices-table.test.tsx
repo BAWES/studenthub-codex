@@ -140,8 +140,8 @@ describe("AdminInvoicesTable", () => {
 
     await waitFor(() => {
       expect(mockUpdateInvoice).toHaveBeenCalledWith(
+        2,
         expect.objectContaining({
-          invoiceId: 2,
           invoice_status: "paid",
         }),
       );
@@ -164,8 +164,8 @@ describe("AdminInvoicesTable", () => {
 
     await waitFor(() => {
       expect(mockUpdateInvoice).toHaveBeenCalledWith(
+        1,
         expect.objectContaining({
-          invoiceId: 1,
           invoice_status: "unpaid",
         }),
       );
@@ -202,7 +202,7 @@ describe("AdminInvoicesTable", () => {
     await user.click(deleteButtons[0]);
 
     await waitFor(() => {
-      expect(mockDeleteInvoice).toHaveBeenCalledWith({ invoiceId: 1 });
+      expect(mockDeleteInvoice).toHaveBeenCalledWith(1);
     });
     expect(mockRefresh).toHaveBeenCalled();
     confirmSpy.mockRestore();

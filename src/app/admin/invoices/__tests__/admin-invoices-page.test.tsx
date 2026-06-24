@@ -8,7 +8,7 @@ vi.mock("../_components/invoice-metric-cards", () => ({ InvoiceMetricCards: vi.f
 vi.mock("../_components/invoice-filters", () => ({ InvoiceFilters: vi.fn(() => <div data-testid="invoice-filters" />) }));
 vi.mock("../_components/invoice-data-table", () => ({ InvoiceDataTable: vi.fn(() => <div data-testid="invoice-data-table" />) }));
 vi.mock("../_components/invoice-detail-drawer", () => ({ InvoiceDetailDrawer: vi.fn(() => <div data-testid="invoice-detail-drawer" />) }));
-vi.mock("../actions", () => ({
+vi.mock("@/modules/admin/invoices", () => ({
   listInvoices: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, limit: 20, totalPages: 0 }),
   getInvoice: vi.fn().mockResolvedValue({ invoice: null, candidate_payouts: [], metrics: [] }),
 }));

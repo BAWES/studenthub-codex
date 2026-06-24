@@ -23,7 +23,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
       setError(null);
       const newStatus = row.invoice_status === "paid" ? "unpaid" : "paid";
       try {
-        await updateInvoice({ invoiceId: row.invoice_id, invoice_status: newStatus } as any);
+        await updateInvoice(row.invoice_id, { invoice_status: newStatus });
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to update invoice status");
@@ -37,7 +37,7 @@ export function AdminInvoicesTable({ session, invoices }: Props) {
       setError(null);
       if (!confirm(`Delete invoice #${row.invoice_id}?`)) return;
       try {
-        await deleteInvoice({ invoiceId: row.invoice_id });
+        await deleteInvoice(row.invoice_id);
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to delete invoice");
