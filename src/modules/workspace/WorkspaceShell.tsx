@@ -140,7 +140,7 @@ function WorkspaceList({ title, rows }: { title: string; rows: Row[] }) {
     <Card className="min-h-[360px]">
       <div className="flex items-center justify-between gap-4 px-4 py-3.5 border-b border-border">
         <h2 className="text-xl mb-0">{title}</h2>
-        <span className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-coral border border-coral/20 bg-coral/5 font-bold text-sm rounded">{count}</span>
+        <span className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-coral border border-coral/20 bg-coral/5 font-bold text-sm rounded">{rows.length}</span>
       </div>
       <div className="divide-y divide-border">
         {rows.length ? (

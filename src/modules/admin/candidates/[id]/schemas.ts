@@ -37,6 +37,24 @@ export const deleteCandidateSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Admin Document Upload / Delete schemas
+// ---------------------------------------------------------------------------
+
+export const adminUploadDocumentSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+  documentType: z.enum(["photo", "cv", "video", "civilFront", "civilBack"], {
+    errorMap: () => ({ message: "Invalid document type. Must be one of: photo, cv, video, civilFront, civilBack." }),
+  }),
+});
+
+export const adminDeleteDocumentSchema = z.object({
+  candidateId: z.coerce.number().int().positive("Candidate ID is required"),
+  documentType: z.enum(["photo", "cv", "video", "civilFront", "civilBack"], {
+    errorMap: () => ({ message: "Invalid document type. Must be one of: photo, cv, video, civilFront, civilBack." }),
+  }),
+});
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -44,6 +62,13 @@ export type GetCandidateDetailInput = z.input<typeof getCandidateDetailSchema>;
 export type UpdateCandidateStatusInput = z.input<typeof updateCandidateStatusSchema>;
 export type UpdateCandidateInput = z.input<typeof updateCandidateSchema>;
 export type DeleteCandidateInput = z.input<typeof deleteCandidateSchema>;
+
+export type AdminDocumentActionResult = {
+  success: boolean;
+  error?: string;
+  filePath?: string;
+  s3Key?: string;
+};
 
 export type CandidateFullDetail = {
   candidate: {
