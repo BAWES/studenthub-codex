@@ -30,24 +30,53 @@ describe("PaymentDataTable", () => {
 
   it("shows loading skeleton when loading", () => {
     const { container } = render(<PaymentDataTable payments={[]} total={0} page={1} totalPages={0} loading={true} error={null} onRowClick={vi.fn()} onRetry={vi.fn()} />);
-    expect(container.querySelector('[aria-hidden="true"]')).toBeDefined();
+    // DataTablePage renders DataTableSkeleton when loading
+    const skeletons = container.querySelectorAll('[class*="animate-pulse"]');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
-  it("shows empty state when no payments", () => {
+  it("uses standard empty state when no payments", () => {
     render(<PaymentDataTable payments={[]} total={0} page={1} totalPages={0} {...baseProps} />);
-    expect(screen.getByText(/No payments yet/)).toBeDefined();
+    expect(screen.getByText(/No records found/)).toBeDefined();
   });
 
   it("shows error state when error is present", () => {
     render(<PaymentDataTable payments={[]} total={0} page={1} totalPages={0} loading={false} error="Failed to load" onRowClick={vi.fn()} onRetry={vi.fn()} />);
-    expect(screen.getByText(/Could not load payments/)).toBeDefined();
-    expect(screen.getByText("Retry")).toBeDefined();
+    expect(screen.getByText(/Error loading data/)).toBeDefined();
+    expect(screen.getByText("Failed to load")).toBeDefined();
   });
 
-  it("shows status badges", () => {
+  it("shows status badges for payment statuses", () => {
     render(<PaymentDataTable payments={samplePayments} total={samplePayments.length} page={1} totalPages={1} {...baseProps} />);
     expect(screen.getByText("AUTHORISED")).toBeDefined();
     expect(screen.getByText("PAID")).toBeDefined();
     expect(screen.getByText("VOIDED")).toBeDefined();
+  });
+
+  it("shows reconciled check indicators", () => {
+    render(<PaymentDataTable payments={samplePayments} total={samplePayments.length} page={1} totalPages={1} {...baseProps} />);
+    expect(screen.getAllByLabelText("Reconciled").length).toBe(2);
+    expect(screen.getAllByLabelText("Not reconciled").length).toBe(1);
+  });
+
+  it("formats dates in readable format", () => {
+    render(<PaymentDataTable payments={samplePayments} total={samplePayments.length} page={1} totalPages={1} {...baseProps} />);
+    // Jun 10, 2026 format
+    expect(screen.getByText("Jun 10, 2026")).toBeDefined();
+    expect(screen.getByText("Jun 9, 2026")).toBeDefined();
+    expect(screen.getByText("Jun 8, 2026")).toBeDefined();
+  });
+
+  it("formats amounts with currency", () => {
+    render(<PaymentDataTable payments={samplePayments} total={samplePayments.length} page={1} totalPages={1} {...baseProps} />);
+    expect(screen.getByText(/4,500\s*KWD/)).toBeDefined();
+    expect(screen.getByText(/1,200\s*KWD/)).toBeDefined();
+    expect(screen.getByText(/7,800\s*KWD/)).toBeDefined();
+  });
+
+  it("renders rows with data-os-navigable for j/k keyboard nav", () => {
+    render(<PaymentDataTable payments={samplePayments} total={samplePayments.length} page={1} totalPages={1} {...baseProps} />);
+    const rows = document.querySelectorAll('[data-os-navigable]');
+    expect(rows.length).toBe(3);
   });
 });

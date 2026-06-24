@@ -7,6 +7,7 @@ import { DataTable, type DataTableColumn } from "./DataTable";
 import { DataTableSkeleton } from "./Skeletons";
 import { Search, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
 import {
   EMPTY_NO_RECORDS,
   EMPTY_HINT_DEFAULT,
@@ -52,6 +53,10 @@ export type DataTablePageProps<T extends { id: string | number }> = {
   actions?: ReactNode;
   /** Optional className override. */
   className?: string;
+  /** Handler fired when a row is clicked (client-side side-effects, drawer open, etc.). */
+  onRowClick?: (row: T) => void;
+  /** Optional retry handler shown in the error state. */
+  onRetry?: () => void;
 };
 
 // ── Default filter function ─────────────────────────────────
@@ -84,6 +89,8 @@ export function DataTablePage<T extends { id: string | number }>({
   page = 1,
   onPageChange,
   actions,
+  onRowClick,
+  onRetry,
   className,
 }: DataTablePageProps<T>) {
   // Internal search state when uncontrolled
@@ -130,6 +137,11 @@ export function DataTablePage<T extends { id: string | number }>({
             <span className="text-sm text-muted-foreground">
               {error}
             </span>
+            {onRetry ? (
+              <Button variant="default" size="sm" onClick={onRetry} className="mt-2">
+                Retry
+              </Button>
+            ) : null}
           </div>
         </div>
       </section>
@@ -183,6 +195,7 @@ export function DataTablePage<T extends { id: string | number }>({
             rows={filtered}
             columns={columns}
             rowHref={rowHref}
+            onRowClick={onRowClick}
             totalPages={totalPages}
             page={page}
             onPageChange={onPageChange}

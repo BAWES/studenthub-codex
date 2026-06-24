@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { ReactNode, KeyboardEvent } from "react";
+import { useCallback } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import {
@@ -33,6 +34,7 @@ export function DataTable<T extends { id: string | number }>({
   rows,
   columns,
   rowHref,
+  onRowClick,
   loading,
   totalPages,
   page,
@@ -43,11 +45,23 @@ export function DataTable<T extends { id: string | number }>({
   rows: T[];
   columns: DataTableColumn<T>[];
   rowHref?: ((row: T) => Route) | string;
+  /** Handler fired when a row is clicked (client-side side-effects, drawer open, etc.). */
+  onRowClick?: (row: T) => void;
   loading?: boolean;
   totalPages?: number;
   page?: number;
   onPageChange?: (page: number) => void;
 }) {
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent, row: T) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onRowClick?.(row);
+      }
+    },
+    [onRowClick],
+  );
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -64,12 +78,21 @@ export function DataTable<T extends { id: string | number }>({
               <TableHead key={column.key}>{column.label}</TableHead>
             ))}
             {rowHref ? <TableHead aria-label="Open record" /> : null}
+            {onRowClick && !rowHref ? <TableHead aria-label="Select record" /> : null}
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.length ? (
             rows.map((row) => (
-              <TableRow key={row.id} data-os-navigable tabIndex={0}>
+              <TableRow
+                key={row.id}
+                data-os-navigable
+                tabIndex={0}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                onKeyDown={onRowClick ? (e) => handleKeyDown(e, row) : undefined}
+                role={onRowClick ? "button" : undefined}
+                className={onRowClick ? "cursor-pointer" : undefined}
+              >
                 {columns.map((column) => (
                   <TableCell key={column.key}>
                     {column.render(row)}
@@ -85,11 +108,16 @@ export function DataTable<T extends { id: string | number }>({
                     </Link>
                   </TableCell>
                 ) : null}
+                {onRowClick && !rowHref ? (
+                  <TableCell>
+                    <span className="text-sm text-muted-foreground">Open</span>
+                  </TableCell>
+                ) : null}
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length + (rowHref ? 1 : 0)} className="h-32 text-center">
+              <TableCell colSpan={columns.length + (rowHref ? 1 : 0) + (onRowClick && !rowHref ? 1 : 0)} className="h-32 text-center">
                 <div className="flex flex-col items-center gap-1 py-8">
                   <strong className="text-sm font-medium text-foreground">No records found</strong>
                   <span className="text-sm text-muted-foreground max-w-xs">
