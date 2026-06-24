@@ -83,13 +83,13 @@ export function JobEditForm({ job, readOnly }: Props) {
 
   const inputClass = readOnly
     ? "w-full rounded-lg border border-input/50 bg-card px-4 py-2.5 text-sm text-muted-foreground cursor-not-allowed"
-    : "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30";
+    : "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-coral focus:ring-1 focus:ring-[#eb6651]/30";
   const textareaClass = readOnly
     ? "w-full rounded-lg border border-input/50 bg-card px-4 py-2.5 text-sm text-muted-foreground cursor-not-allowed min-h-[80px]"
-    : "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30 min-h-[80px]";
+    : "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-coral focus:ring-1 focus:ring-[#eb6651]/30 min-h-[80px]";
   const selectClass = readOnly
     ? "w-full rounded-lg border border-input/50 bg-card px-4 py-2.5 text-sm text-muted-foreground cursor-not-allowed"
-    : "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30";
+    : "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-coral focus:ring-1 focus:ring-[#eb6651]/30";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
@@ -136,7 +136,7 @@ export function JobEditForm({ job, readOnly }: Props) {
           onChange={(e) => setDescription(e.target.value)}
           className={readOnly
             ? "w-full rounded-lg border border-input/50 bg-card px-4 py-2.5 text-sm text-muted-foreground cursor-not-allowed min-h-[120px]"
-            : "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-[#eb6651] focus:ring-1 focus:ring-[#eb6651]/30 min-h-[120px]"}
+            : "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm outline-none focus:border-coral focus:ring-1 focus:ring-[#eb6651]/30 min-h-[120px]"}
           placeholder="Describe the role..."
           required
           readOnly={readOnly}

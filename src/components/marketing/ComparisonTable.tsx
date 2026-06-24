@@ -127,11 +127,11 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
 
       {/* Score summary */}
       <div className="max-w-[600px] mx-auto mb-6">
-        <div className="rounded-xl p-4 flex items-center justify-center gap-3 bg-gradient-to-br from-[#1f73b7]/5 to-[#1f73b7]/2 border border-[#1f73b7]/15">
+        <div className="rounded-xl p-4 flex items-center justify-center gap-3 bg-gradient-to-br from-blue-zendesk/5 to-blue-zendesk/2 border border-blue-zendesk/15">
           <span className="shLandingScoreDot shLandingScoreFull" />
           <span className="text-sm font-semibold text-foreground">
             StudentHub scores{" "}
-            <span className="text-[#1f73b7]">
+            <span className="text-blue-zendesk">
               {shFullScore}/{totalFeatures}
             </span>{" "}
             features — more than any alternative.
@@ -152,7 +152,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                   key={col.key}
                   className={cn(
                     "text-center p-3 text-xs font-semibold border-b border-border min-w-[120px]",
-                    col.accent ? "text-[#1f73b7] bg-[#1f73b7]/5" : "text-muted-foreground bg-card"
+                    col.accent ? "text-blue-zendesk bg-blue-zendesk/5" : "text-muted-foreground bg-card"
                   )}
                 >
                   {col.label}
@@ -167,7 +167,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                 <tr>
                   <td
                     colSpan={5}
-                    className="text-[10px] font-bold uppercase tracking-wider p-2 px-3 text-[#1f73b7] bg-[#1f73b7]/3 border-b border-border"
+                    className="text-[10px] font-bold uppercase tracking-wider p-2 px-3 text-blue-zendesk bg-blue-zendesk/3 border-b border-border"
                   >
                     {cat.category}
                   </td>
@@ -191,7 +191,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                         key={col.key}
                         className={cn(
                           "text-center p-3 border-b border-border",
-                          col.accent ? "bg-[#1f73b7]/3" : "bg-transparent"
+                          col.accent ? "bg-blue-zendesk/3" : "bg-transparent"
                         )}
                       >
                         <ScoreDot value={row[col.key]} />
@@ -213,7 +213,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
             className="rounded-xl overflow-hidden shLandingCard"
           >
             <div
-              className="p-3 text-[11px] font-bold uppercase tracking-wider text-[#1f73b7] bg-[#1f73b7]/5 border-b border-border"
+              className="p-3 text-[11px] font-bold uppercase tracking-wider text-blue-zendesk bg-blue-zendesk/5 border-b border-border"
             >
               {cat.category}
             </div>
@@ -238,7 +238,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
                       <span
                         className={cn(
                           "font-medium",
-                          col.accent ? "text-[#1f73b7]" : "text-muted-foreground"
+                          col.accent ? "text-blue-zendesk" : "text-muted-foreground"
                         )}
                       >
                         {col.label}

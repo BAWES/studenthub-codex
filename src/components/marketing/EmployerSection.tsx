@@ -97,7 +97,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
       aria-label="For employers"
     >
       <div className="text-center mb-8 md:mb-10">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-[#eb6651] bg-[#eb6651]/10">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-coral bg-coral/10">
           For employers
         </span>
         <h2 className="shLandingSectionTitle mt-3">
@@ -128,7 +128,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
               style={{ transitionDelay: `${i * 80}ms` }}
             >
               {/* Icon */}
-              <div className="size-10 rounded-lg flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 bg-[#1f73b7]/10 text-[#1f73b7]">
+              <div className="size-10 rounded-lg flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 bg-blue-zendesk/10 text-blue-zendesk">
                 <Icon className="size-5" aria-hidden="true" />
               </div>
 
@@ -140,7 +140,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
               </p>
 
               {/* Stat */}
-              <div className="mt-3 pt-3 text-[11px] font-semibold flex items-center gap-1.5 border-t border-border text-[#1f73b7]">
+              <div className="mt-3 pt-3 text-[11px] font-semibold flex items-center gap-1.5 border-t border-border text-blue-zendesk">
                 <Sparkles className="size-3" />
                 {feat.stat}
               </div>
@@ -153,7 +153,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
       <div className="text-center mt-8">
         <Button
           asChild
-          className="shadow-lg bg-[#eb6651] hover:bg-[#d45441]"
+          className="shadow-lg bg-coral hover:bg-coral-hover"
         >
           <a href="/signup?role=company">Start hiring today</a>
         </Button>

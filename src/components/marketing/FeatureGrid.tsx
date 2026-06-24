@@ -255,7 +255,7 @@ export default function FeatureGrid({
   return (
     <section className={cn(className)} aria-label="Key features">
       <div className="text-center mb-8 md:mb-10">
-        <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
+        <p className="text-blue-zendesk text-[11px] font-black uppercase tracking-wider mb-2">
           Everything you need
         </p>
         <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-foreground text-center">

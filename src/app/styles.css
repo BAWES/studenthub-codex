@@ -22,6 +22,7 @@
   --color-input: var(--input);
   --color-blue: var(--blue);
   --color-blue-deep: var(--blue-deep);
+  --color-blue-zendesk: var(--blue-zendesk);
   --color-ring: var(--ring);
   --color-coral: var(--sh-coral);
   --color-coral-hover: var(--sh-coral-hover);
@@ -45,6 +46,7 @@
   --grid-line: rgba(214, 220, 231, 0.42);
   --blue: #0b63ce;
   --blue-deep: #084b9b;
+  --blue-zendesk: #1f73b7;
   --green: #24835b;
   --amber: #a66212;
   --rose: #b42357;
@@ -69,6 +71,9 @@
   --border: var(--line);
   --input: var(--line);
   --ring: #2563eb;
+  --sh-coral: #eb6651;
+  --sh-coral-hover: #d45441;
+  --sh-coral-light: rgba(235, 102, 81, 0.15);
   --radius: 8px;
 }
 
@@ -84,6 +89,7 @@
   --grid-line: rgba(80, 96, 126, 0.22);
   --blue: #8abfff;
   --blue-deep: #5aa4ff;
+  --blue-zendesk: #8abfff;
   --green: #6ed5a0;
   --amber: #e8ae63;
   --rose: #ff8aac;

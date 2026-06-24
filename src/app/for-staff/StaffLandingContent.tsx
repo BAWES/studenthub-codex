@@ -193,7 +193,7 @@ export default function StaffLandingContent({
           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-[var(--paper)] z-0" aria-hidden="true" />
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
-            <p className="text-[#eb6651] text-[11px] font-black uppercase tracking-wider mb-2">
+            <p className="text-coral text-[11px] font-black uppercase tracking-wider mb-2">
               Start placing faster
             </p>
             <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-[var(--ink)] text-center">
