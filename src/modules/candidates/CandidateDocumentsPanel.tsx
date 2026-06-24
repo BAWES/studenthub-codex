@@ -89,7 +89,7 @@ export function CandidateDocumentsPanel({ candidateId }: Props) {
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await staffListCandidateDocuments({ candidateId });
+      const result = await staffListCandidateDocuments(candidateId);
       setDocuments(result.items);
     } catch (e) {
       console.error("[CandidateDocumentsPanel] Failed to list documents:", e);
