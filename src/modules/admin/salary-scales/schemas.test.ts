@@ -6,15 +6,14 @@ import {
 } from "./schemas";
 import type { SalaryScaleListItem, ListSalaryScalesResult } from "./schemas";
 
-describe("salaryScaleListItemSchema", () => {
-  const validItem: SalaryScaleListItem = {
-    salary_scale_id: 1,
-    salary_scale_name_en: "Grade 1",
-    salary_scale_name_ar: null,
-    salary_scale_min_amount: 500,
-    salary_scale_max_amount: 1000,
-    candidate_count: null,
-  };
+const validItem: SalaryScaleListItem = {
+  salary_scale_id: 1,
+  salary_scale_name_en: "Grade 1",
+  salary_scale_name_ar: null,
+  salary_scale_min_amount: 500,
+  salary_scale_max_amount: 1000,
+  candidate_count: null,
+};
 
 describe("salaryScaleListItemSchema", () => {
   it("accepts a valid salary scale item", () => {

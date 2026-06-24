@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  listSalaryScalesSchema,
-  salaryScaleListItemSchema,
-  listSalaryScalesResultSchema,
-} from "./schemas";
-import type { SalaryScaleListItem, ListSalaryScalesResult } from "./schemas";
+import { listSalaryScalesSchema } from "./schemas";
+import { listSalaryScales, updateSalaryScale, deleteSalaryScale } from "./actions";
 
 // ── Hoisted mock functions ──────────────────────────────────
 const { mockRequireCapability, mockFindMany, mockCount, mockUpdate, mockDelete, mockCreate } =
@@ -32,7 +28,6 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     salary_scale: {
       findMany: mockFindMany,
-      findFirst: vi.fn(),
       count: mockCount,
       update: mockUpdate,
       delete: mockDelete,
@@ -42,7 +37,6 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-import { listSalaryScales } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Input schema validation
@@ -83,89 +77,6 @@ describe("listSalaryScalesSchema", () => {
     if (result.success) {
       expect(result.data.page).toBe(3);
     }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Output schema validation — salaryScaleListItemSchema
-// ---------------------------------------------------------------------------
-
-describe("salaryScaleListItemSchema", () => {
-  it("accepts a valid salary scale item", () => {
-    const item: SalaryScaleListItem = {
-      salary_scale_id: 1,
-      salary_scale_name_en: "Grade 1",
-      salary_scale_name_ar: null,
-      salary_scale_min_amount: 500,
-      salary_scale_max_amount: 1000,
-      candidate_count: null,
-    };
-    const result = salaryScaleListItemSchema.safeParse(item);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts nullable fields", () => {
-    const item: SalaryScaleListItem = {
-      salary_scale_id: 2,
-      salary_scale_name_en: "Grade 2",
-      salary_scale_name_ar: null,
-      salary_scale_min_amount: null,
-      salary_scale_max_amount: null,
-      candidate_count: null,
-    };
-    const result = salaryScaleListItemSchema.safeParse(item);
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects missing salary_scale_id", () => {
-    const result = salaryScaleListItemSchema.safeParse({
-      salary_scale_name_en: "Test",
-    });
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("listSalaryScalesResultSchema", () => {
-  it("accepts a valid list result with items", () => {
-    const result: ListSalaryScalesResult = {
-      records: [
-        {
-          salary_scale_id: 1,
-          salary_scale_name_en: "Grade 1",
-          salary_scale_name_ar: null,
-          salary_scale_min_amount: null,
-          salary_scale_max_amount: null,
-          candidate_count: null,
-        },
-      ],
-      total: 1,
-      page: 1,
-      limit: 50,
-      totalPages: 1,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts empty records array", () => {
-    const result: ListSalaryScalesResult = {
-      records: [],
-      total: 0,
-      page: 1,
-      limit: 50,
-      totalPages: 0,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects non-array records", () => {
-    const result = {
-      records: "not-an-array",
-      total: 0,
-      page: 1,
-      limit: 50,
-      totalPages: 0,
-    });
-    expect(result.success).toBe(false);
   });
 });
 
