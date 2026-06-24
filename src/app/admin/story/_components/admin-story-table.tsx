@@ -179,7 +179,7 @@ function CreateStoryForm({ onSuccess }: { onSuccess: () => void }) {
         <Label className="text-xs font-medium">Status</Label>
         <Select name="storyStatus" defaultValue="0">
           <SelectTrigger className="w-28">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="0">Draft</SelectItem>
