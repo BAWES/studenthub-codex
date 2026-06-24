@@ -7,6 +7,7 @@ import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { StoryItem } from "../schemas";
@@ -210,12 +211,16 @@ function EditStoryForm({
       <Input name="requestUuid" defaultValue={row.request_uuid} required className="w-40 h-8 text-sm" />
       <Input name="staffId" type="number" defaultValue={row.staff_id ?? ""} placeholder="Staff ID" className="w-24 h-8 text-sm" />
       <Input name="numberOfEmployees" type="number" defaultValue={row.number_of_employees ?? ""} placeholder="#" className="w-20 h-8 text-sm" />
-      <select name="storyStatus" defaultValue={row.story_status}
-        className="h-8 rounded-md border border-input bg-transparent px-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30">
-        <option value="0">Draft</option>
-        <option value="1">Active</option>
-        <option value="2">Closed</option>
-      </select>
+      <Select name="storyStatus" defaultValue={String(row.story_status)}>
+        <SelectTrigger className="h-8 w-24 text-sm">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="0">Draft</SelectItem>
+          <SelectItem value="1">Active</SelectItem>
+          <SelectItem value="2">Closed</SelectItem>
+        </SelectContent>
+      </Select>
       <input name="isOld" type="checkbox" defaultChecked={row.is_old ?? false} className="hidden" />
       <Input name="storyTimeSpent" type="number" defaultValue={row.story_time_spent ?? ""} placeholder="Time" className="w-16 h-8 text-sm" />
       <Button type="submit" disabled={pending} size="sm">

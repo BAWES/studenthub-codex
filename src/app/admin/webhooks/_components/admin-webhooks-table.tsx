@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { WebhookListItem } from "../schemas";
@@ -178,14 +179,17 @@ function CreateWebhookForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <div className="grid gap-1">
         <Label htmlFor="method">Method</Label>
-        <select id="method" name="method"
-          className="h-9 rounded-lg px-3 text-sm border border-input bg-background text-foreground"
-        >
-          <option value="">Auto</option>
-          {HTTP_METHODS.map((m) => (
-            <option key={m} value={m}>{m}</option>
-          ))}
-        </select>
+        <Select id="method" name="method" defaultValue="">
+          <SelectTrigger className="h-9 rounded-lg px-3 text-sm border border-input bg-background text-foreground w-28">
+            <SelectValue placeholder="Auto" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Auto</SelectItem>
+            {HTTP_METHODS.map((m) => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
@@ -237,14 +241,17 @@ function EditWebhookForm({
         maxLength={255}
         className="w-48"
       />
-      <select name="method" defaultValue={row.method ?? ""}
-        className="h-8 rounded px-2 text-sm border border-input bg-background text-foreground w-24"
-      >
-        <option value="">Auto</option>
-        {HTTP_METHODS.map((m) => (
-          <option key={m} value={m}>{m}</option>
-        ))}
-      </select>
+      <Select name="method" defaultValue={row.method ?? ""}>
+        <SelectTrigger className="h-8 rounded px-2 text-sm border border-input bg-background text-foreground w-24">
+          <SelectValue placeholder="Auto" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Auto</SelectItem>
+          {HTTP_METHODS.map((m) => (
+            <SelectItem key={m} value={m}>{m}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
       </Button>
