@@ -2,6 +2,7 @@
 
 import type { ReactNode, MouseEventHandler } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 // ---------------------------------------------------------------------------
 // Illustration variants — each is a hand-crafted SVG illustration with
@@ -165,23 +166,25 @@ export function EmptyState({
 
   return (
     <div
-      className={cn("shEmptyStateOs", className)}
+      className={cn("grid gap-2.5 justify-items-center text-center p-10 rounded-xl bg-card border border-border shadow-sm", className)}
       data-variant={variant}
     >
-      <div className="shEmptyStateOsIllust" aria-hidden="true">
+      <div className="grid place-items-center size-[72px] mb-1 opacity-85" aria-hidden="true">
         <Illustration />
       </div>
-      <strong className="shEmptyStateOsMessage">{message}</strong>
-      {hint ? <p className="shEmptyStateOsHint">{hint}</p> : null}
+      <strong className="text-sm font-semibold text-foreground leading-tight max-w-[380px]">{message}</strong>
+      {hint ? <p className="text-sm text-muted-foreground leading-snug m-0 max-w-[380px]">{hint}</p> : null}
       {action ? (
-        <button
+        <Button
           type="button"
-          className="shEmptyStateOsAction"
+          variant="outline"
+          size="sm"
           onClick={action.onClick}
+          className="mt-2"
         >
-          {action.icon ? <span className="shEmptyStateOsActionIcon" aria-hidden="true">{action.icon}</span> : null}
+          {action.icon ? <span className="inline-flex text-primary" aria-hidden="true">{action.icon}</span> : null}
           {action.label}
-        </button>
+        </Button>
       ) : null}
     </div>
   );

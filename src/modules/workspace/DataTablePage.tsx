@@ -6,6 +6,7 @@ import type { Route } from "next";
 import { DataTable, type DataTableColumn } from "./DataTable";
 import { DataTableSkeleton } from "./Skeletons";
 import { Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   EMPTY_NO_RECORDS,
@@ -113,11 +114,11 @@ export function DataTablePage<T extends { id: string | number }>({
   if (error) {
     return (
       <section className={className}>
-        <div className="shTableGlass">
-          <div className="shTableHeader">
+        <div className="rounded-xl bg-card border border-border shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between gap-4 p-4 border-b border-border sticky top-0 z-[5] bg-card">
             <div>
-              <h2>{title}</h2>
-              <p>{description}</p>
+              <h2 className="text-[15px] font-bold tracking-tight mb-0.5">{title}</h2>
+              <p className="text-sm text-muted-foreground">{description}</p>
             </div>
           </div>
           <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-center">
@@ -138,33 +139,33 @@ export function DataTablePage<T extends { id: string | number }>({
 
   return (
     <section className={className}>
-      <div className="shTableGlass">
-        {/* Glass header */}
-        <div className="shTableHeader">
+      <div className="rounded-xl bg-card border border-border shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 p-4 border-b border-border sticky top-0 z-[5] bg-card">
           <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
+            <h2 className="text-[15px] font-bold tracking-tight mb-0.5">{title}</h2>
+            <p className="text-sm text-muted-foreground">{description}</p>
           </div>
           {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
         </div>
 
-        {/* Glass search bar */}
+        {/* Search bar */}
         {searchable ? (
-          <div className="shTableSearch">
-            <div className="shTableSearchWrap">
-              <Search size={15} className="shTableSearchIcon" aria-hidden="true" />
-              <input
+          <div className="px-5 py-3 border-b border-border">
+            <div className="relative flex items-center">
+              <Search size={15} className="absolute left-3 text-muted-foreground pointer-events-none" aria-hidden="true" />
+              <Input
                 data-command-search
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className="shTableSearchInput"
+                className="w-full h-9 pl-9 pr-9 text-sm"
               />
               {searchValue ? (
                 <button
                   type="button"
-                  className="shTableSearchClear"
+                  className="absolute right-1.5 inline-flex items-center justify-center size-6 rounded-md border-0 bg-transparent text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-colors"
                   onClick={() => setSearchValue("")}
                   aria-label="Clear search"
                 >
