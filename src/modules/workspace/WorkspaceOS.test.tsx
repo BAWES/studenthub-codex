@@ -166,6 +166,85 @@ describe("WorkspaceOS — RaycastCommandPalette integration", () => {
   });
 });
 
+describe("WorkspaceOS — admin entity page catalog in command palette", () => {
+  it("shows Financial section with bank, invoices, payments, salary pages", () => {
+    renderOS();
+
+    // Open palette
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    // Section headings for entity catalog — use getAllByText since some
+    // section names may also appear as command titles
+    expect(screen.getAllByText("Financial").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Data").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("System").length).toBeGreaterThanOrEqual(1);
+    // "Settings" appears as both a section heading and a command title
+    expect(screen.getAllByText("Settings").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows specific admin entity pages inside their category sections", () => {
+    renderOS();
+
+    // Open palette
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    // Check a representative page from each category
+    // Use getAllByText since some pages may appear in both nav and catalog
+    const bankAccounts = screen.getAllByText("Bank Accounts");
+    expect(bankAccounts.length).toBeGreaterThanOrEqual(1);
+
+    const majors = screen.getAllByText("Majors");
+    expect(majors.length).toBeGreaterThanOrEqual(1);
+
+    const webhooks = screen.getAllByText("Webhooks");
+    expect(webhooks.length).toBeGreaterThanOrEqual(1);
+
+    const tickets = screen.getAllByText("Tickets");
+    expect(tickets.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows G-chord shortcuts on key admin pages", () => {
+    renderOS();
+
+    // Open palette
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    // G-chord shortcuts should appear as kbd elements
+    const gC = screen.getAllByText("G C");
+    expect(gC.length).toBeGreaterThanOrEqual(1);
+
+    const gR = screen.getAllByText("G R");
+    expect(gR.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows People, Requests, Events, Tracking section headings", () => {
+    renderOS();
+
+    // Open palette
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    expect(screen.getAllByText("People").length).toBeGreaterThanOrEqual(1);
+    // "Requests" appears as both section heading and command title
+    expect(screen.getAllByText("Requests").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Events").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Tracking").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Compliance").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows entity pages alongside existing Navigation and Quick Scopes sections", () => {
+    renderOS();
+
+    // Open palette
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    // Existing sections still present
+    expect(screen.getByText("Navigation")).toBeInTheDocument();
+    expect(screen.getByText("Quick Scopes")).toBeInTheDocument();
+
+    // New entity catalog sections also present
+    expect(screen.getByText("Financial")).toBeInTheDocument();
+  });
+});
 describe("WorkspaceOS — shell structure", () => {
   it("renders StudentHub branding in sidebar", () => {
     renderOS();
