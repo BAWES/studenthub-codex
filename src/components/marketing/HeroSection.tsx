@@ -51,7 +51,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl min-h-[min(700px,calc(100svh_-_90px))] grid grid-cols-1 lg:grid-cols-[1fr_440px] items-center gap-0 shLandingCardStrong"
+      className="relative overflow-hidden rounded-2xl min-h-[min(700px,calc(100svh_-_90px))] grid grid-cols-1 lg:grid-cols-[1fr_440px] items-center gap-0 bg-card border border-border shadow-sm"
       aria-label="StudentHub — connecting students with the right employers"
     >
       {/* Subtle grid pattern overlay */}
@@ -97,18 +97,12 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
         </div>
 
         {/* Headline — tighter tracking for premium feel */}
-        <h1
-          className="text-[clamp(32px,5vw,56px)] font-bold leading-[1.05] tracking-[-0.03em] mb-4"
-          style={{ color: "var(--ink)" }}
-        >
+        <h1 className="text-[clamp(32px,5vw,56px)] font-bold leading-[1.05] tracking-[-0.03em] mb-4 text-foreground">
           {content.headline}
         </h1>
 
         {/* Subhead */}
-        <p
-          className="text-[clamp(15px,1.6vw,17px)] leading-relaxed max-w-[540px] mb-6"
-          style={{ color: "var(--muted)" }}
-        >
+        <p className="text-[clamp(15px,1.6vw,17px)] leading-relaxed max-w-[540px] mb-6 text-muted-foreground">
           {content.subhead}
         </p>
 
@@ -117,7 +111,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           {onCtaClick ? (
             <button
               onClick={onCtaClick}
-              className="shLandingBtnPrimary"
+              className="inline-flex items-center gap-1.5 min-h-[42px] px-5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 shadow-md"
               style={{
                 backgroundColor: SH_BLUE,
                 boxShadow: `0 4px 14px ${SH_BLUE}40`,
@@ -130,7 +124,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           ) : (
             <Link
               href={{ pathname: "/signup", query: { role: "candidate" } }}
-              className="shLandingBtnPrimary group"
+              className="inline-flex items-center gap-1.5 min-h-[42px] px-5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 shadow-md group"
               style={{
                 backgroundColor: SH_BLUE,
                 boxShadow: `0 4px 14px ${SH_BLUE}40`,
@@ -143,7 +137,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           )}
           <Link
             href={{ pathname: "/signup", query: { role: "company" } }}
-            className="shLandingBtnPrimary group"
+            className="inline-flex items-center gap-1.5 min-h-[42px] px-5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 shadow-md group"
             style={{
               backgroundColor: SH_CORAL,
               boxShadow: `0 4px 14px ${SH_CORAL}50`,
@@ -155,21 +149,15 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           </Link>
           <Link
             href="/login"
-            className="shLandingBtnGhost"
+            className="inline-flex items-center gap-1 min-h-[42px] px-5 rounded-xl text-sm font-semibold text-muted-foreground border border-border bg-transparent transition-all duration-200 hover:bg-muted/20 hover:text-foreground"
           >
             Sign in
           </Link>
         </div>
 
         {/* Social proof */}
-        <div
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium mb-5"
-          style={{
-            color: "var(--muted)",
-            backgroundColor: "var(--secondary)",
-          }}
-        >
-          <Sparkles className="size-3" style={{ color: SH_CORAL }} />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium mb-5 bg-secondary text-muted-foreground">
+          <Sparkles className="size-3 shrink-0" style={{ color: SH_CORAL }} />
           {content.proof}
         </div>
 
@@ -184,8 +172,8 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             </span>
             {content.studentBenefits.map((b) => (
               <div key={b} className="flex items-center gap-1.5 py-0.5">
-                <CheckCircle2 className="size-3 shrink-0" style={{ color: "var(--green)" }} />
-                <span className="text-xs" style={{ color: "var(--muted)" }}>
+                <CheckCircle2 className="size-3 shrink-0 text-green-600 dark:text-green-400" />
+                <span className="text-xs text-muted-foreground">
                   {b}
                 </span>
               </div>
@@ -200,8 +188,8 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             </span>
             {content.employerBenefits.map((b) => (
               <div key={b} className="flex items-center gap-1.5 py-0.5">
-                <CheckCircle2 className="size-3 shrink-0" style={{ color: "var(--green)" }} />
-                <span className="text-xs" style={{ color: "var(--muted)" }}>
+                <CheckCircle2 className="size-3 shrink-0 text-green-600 dark:text-green-400" />
+                <span className="text-xs text-muted-foreground">
                   {b}
                 </span>
               </div>
@@ -212,22 +200,19 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
       {/* ── Right Column: Premium Mockup ──────────────────── */}
       <div className="relative z-[2] flex items-center justify-center p-[clamp(20px,4vw,48px)] max-lg:pt-6 max-lg:pb-10 max-lg:min-h-[340px]">
-        <div className="shLandingMockup w-full max-w-[420px]">
+        <div className="w-full max-w-[420px] rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           {/* Mockup header */}
-          <div className="shLandingMockupHeader">
-            <div className="shLandingMockupDot" style={{ backgroundColor: "#ef4444" }} />
-            <div className="shLandingMockupDot" style={{ backgroundColor: "#eab308" }} />
-            <div className="shLandingMockupDot" style={{ backgroundColor: "#22c55e" }} />
-            <span
-              className="ml-2 text-[11px] font-medium"
-              style={{ color: "var(--muted)" }}
-            >
+          <div className="flex items-center gap-1.5 px-3 py-2.5 border-b border-border bg-muted/10">
+            <div className="size-2.5 rounded-full bg-red-500" />
+            <div className="size-2.5 rounded-full bg-amber-500" />
+            <div className="size-2.5 rounded-full bg-green-500" />
+            <span className="ml-2 text-[11px] font-medium text-muted-foreground">
               StudentHub — Staff-matched roles
             </span>
           </div>
 
           {/* Mockup body */}
-          <div className="shLandingMockupBody">
+          <div className="p-3 grid gap-2.5 bg-card">
             {/* Search bar */}
             <div
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
@@ -240,11 +225,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               <Search className="size-3.5 shrink-0" />
               Search open roles, companies, locations...
               <span
-                className="ml-auto text-[10px] px-1.5 py-0.5 rounded font-mono"
-                style={{
-                  backgroundColor: "var(--surface)",
-                  border: "1px solid var(--border)",
-                }}
+                className="ml-auto text-[10px] px-1.5 py-0.5 rounded font-mono bg-card border border-border"
               >
                 ⌘K
               </span>
@@ -252,7 +233,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
 
             {/* Result card */}
             <div
-              className="rounded-xl p-4 shLandingCardHover"
+              className="rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               style={{
                 background: `linear-gradient(135deg, ${SH_BLUE}10, ${SH_BLUE}04)`,
                 border: `1px solid ${SH_BLUE}20`,
@@ -266,25 +247,16 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
                 >
                   Matched roles
                 </span>
-                <span
-                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{
-                    color: "var(--green)",
-                    backgroundColor: `${"#24835b"}12`,
-                  }}
-                >
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full text-green-600 dark:text-green-400" style={{ backgroundColor: `#24835b12` }}>
                   <CheckCircle2 className="size-2.5" />
                   Profile ready
                 </span>
               </div>
 
-              <strong
-                className="block text-[clamp(32px,5vw,48px)] leading-[0.9] mt-1 font-black tracking-tight"
-                style={{ color: "var(--ink)" }}
-              >
+              <strong className="block text-[clamp(32px,5vw,48px)] leading-[0.9] mt-1 font-black tracking-tight text-foreground">
                 care assistant
               </strong>
-              <span className="text-xs block mt-1" style={{ color: "var(--muted)" }}>
+              <span className="text-xs block mt-1 text-muted-foreground">
                 12 matching roles · Kuwait City · KWD 3-5/hr
               </span>
 
@@ -321,22 +293,16 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-xl p-3 shLandingCardHover"
+                  className="rounded-xl p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                   style={{
                     backgroundColor: `${SH_BLUE}06`,
                     border: "1px solid var(--border)",
                   }}
                 >
-                  <span
-                    className="text-[9px] font-bold uppercase tracking-wider block"
-                    style={{ color: "var(--muted)" }}
-                  >
+                  <span className="text-[9px] font-bold uppercase tracking-wider block text-muted-foreground">
                     {item.label}
                   </span>
-                  <strong
-                    className="text-sm block mt-0.5"
-                    style={{ color: "var(--ink)" }}
-                  >
+                  <strong className="text-sm block mt-0.5 text-foreground">
                     {item.value}
                   </strong>
                 </div>
@@ -354,7 +320,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             >
               <Building2 className="size-3.5 shrink-0" />
               <span className="font-medium">Employer view:</span>
-              <span style={{ color: "var(--muted)" }}>
+              <span className="text-muted-foreground">
                 Post jobs, review candidates, approve timesheets
               </span>
             </div>
