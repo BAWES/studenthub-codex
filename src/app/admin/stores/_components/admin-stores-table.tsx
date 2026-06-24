@@ -102,7 +102,7 @@ export function AdminStoresTable({ session, stores }: Props) {
             render: (row) => (
               <Badge variant={row.store_status === 10 ? "default" : "secondary"}>
                 {row.store_status === 10 ? "Active" : "Inactive"}
-              </span>
+              </Badge>
             ),
           },
           {
@@ -124,7 +124,7 @@ export function AdminStoresTable({ session, stores }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}

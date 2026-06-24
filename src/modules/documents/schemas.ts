@@ -28,6 +28,11 @@ export const uploadDocumentSchema = z.object({
   file_size: z.number().int().nonnegative().optional(),
   file_description: z.string().max(65535).optional(),
 });
+export const deleteDocumentSchema = z.object({
+  file_uuid: z
+    .string({ required_error: "File UUID is required" })
+    .min(1, "File UUID is required"),
+});
 // ---------------------------------------------------------------------------
 // Output validation schemas
 // ---------------------------------------------------------------------------
@@ -81,3 +86,4 @@ export type DocumentItem = z.output<typeof documentItemSchema>;
 export type DocumentDetail = z.output<typeof documentDetailSchema>;
 export type ListDocumentsResult = z.output<typeof listDocumentsResultSchema>;
 export type UploadDocumentResult = z.output<typeof uploadDocumentResultSchema>;
+export type DeleteDocumentInput = z.input<typeof deleteDocumentSchema>;

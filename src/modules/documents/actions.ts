@@ -12,11 +12,13 @@ import {
   listDocumentsSchema,
   getDocumentSchema,
   uploadDocumentSchema,
+  deleteDocumentSchema,
   listDocumentsResultSchema,
   documentDetailSchema,
   uploadDocumentResultSchema,
   type ListDocumentsInput,
   type UploadDocumentInput,
+  type DeleteDocumentInput,
   type DocumentItem,
   type ListDocumentsResult,
   type UploadDocumentResult,
@@ -248,6 +250,34 @@ export async function uploadDocument(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// deleteDocumentRecord
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a document record by file_uuid.
+ * Requires "document.write" capability.
+ */
+export async function deleteDocumentRecord(
+  input: DeleteDocumentInput,
+): Promise<{ success: boolean }> {
+  await requireCapability("document.write");
+
+  const parsed = deleteDocumentSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid delete parameters",
+    );
+  }
+
+  await prisma.file.delete({
+    where: { file_uuid: parsed.data.file_uuid },
+  });
+
+  revalidatePath("/admin/documents");
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------
