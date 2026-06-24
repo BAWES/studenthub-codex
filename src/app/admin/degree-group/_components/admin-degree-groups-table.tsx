@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DegreeGroupItem } from "../schemas";
@@ -85,22 +86,37 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.degree_group_uuid ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={async () => {
-                    if (confirm(`Delete degree group "${row.degree_group_name_en}"?`)) {
-                      const result = await deleteDegreeGroup(row.degree_group_uuid);
-                      if (result.operation === "error") {
-                        alert(result.message);
-                      }
-                      router.refresh();
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete degree group?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently remove "{row.degree_group_name_en}". This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={async () => {
+                        const result = await deleteDegreeGroup(row.degree_group_uuid);
+                        if (result.operation === "error") {
+                          alert(result.message);
+                        }
+                        router.refresh();
+                      }}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               ) : null,
           },
         ]}
