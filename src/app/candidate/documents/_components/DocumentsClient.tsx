@@ -6,6 +6,9 @@ import type {
   UploadDocumentState,
   DeleteDocumentState,
 } from "@/modules/candidates/documents";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function acceptFor(type: string): string {
   switch (type) {
@@ -46,55 +49,61 @@ function DocumentCard({
   const hasFile = Boolean(doc.filePath);
 
   return (
-    <div className="detailPanel">
-      <h3>{doc.label}</h3>
-      <p className="detailPanelNote">
-        {hasFile
-          ? `File: ${doc.filePath?.split("/").pop()}`
-          : "No file uploaded yet."}
-      </p>
-
-      {hasFile && doc.fileUrl && (
-        <p>
-          <a
-            href={doc.fileUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="textButton"
-          >
-            View file
-          </a>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm">{doc.label}</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-3">
+        <p className="text-sm text-muted-foreground m-0">
+          {hasFile
+            ? `File: ${doc.filePath?.split("/").pop()}`
+            : "No file uploaded yet."}
         </p>
-      )}
 
-      <div className="flex flex-wrap gap-2">
-        <form action={uploadAction}>
-          <input type="hidden" name="type" value={doc.type} />
-          <input
-            type="file"
-            name={`file_${doc.type}`}
-            accept={acceptFor(doc.type)}
-            required
-          />
-          <button type="submit" disabled={uploadPending} className="ghostButton">
-            {uploadPending ? "Uploading..." : "Upload"}
-          </button>
-        </form>
-
-        {hasFile && (
-          <form action={deleteAction}>
-            <input type="hidden" name="documentType" value={doc.type} />
-            <button
-              type="submit"
-              disabled={deletePending}
-              className="ghostButton danger"
+        {hasFile && doc.fileUrl && (
+          <p>
+            <a
+              href={doc.fileUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
             >
-              {deletePending ? "Removing..." : "Remove"}
-            </button>
-          </form>
+              View file
+            </a>
+          </p>
         )}
-      </div>
-    </div>
+
+        <div className="flex flex-wrap gap-2">
+          <form action={uploadAction} className="flex items-center gap-2">
+            <input type="hidden" name="type" value={doc.type} />
+            <input
+              type="file"
+              name={`file_${doc.type}`}
+              accept={acceptFor(doc.type)}
+              required
+              className="text-sm text-foreground file:mr-3 file:rounded file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-sm file:font-medium file:text-primary hover:file:bg-primary/20"
+            />
+            <Button type="submit" variant="secondary" size="sm" disabled={uploadPending}>
+              {uploadPending ? "Uploading..." : "Upload"}
+            </Button>
+          </form>
+
+          {hasFile && (
+            <form action={deleteAction}>
+              <input type="hidden" name="documentType" value={doc.type} />
+              <Button
+                type="submit"
+                variant="destructive"
+                size="sm"
+                disabled={deletePending}
+              >
+                {deletePending ? "Removing..." : "Remove"}
+              </Button>
+            </form>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -120,7 +129,7 @@ export function DocumentsClient({
 
   return (
     <section>
-      {error && <p className="formError">{error}</p>}
+      {error && <Alert variant="destructive" className="py-2 text-sm mb-4">{error}</Alert>}
 
       <div className="flex flex-col gap-4">
         {items.map((doc) => (

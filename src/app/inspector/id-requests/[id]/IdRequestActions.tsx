@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { approveIdRequest, rejectIdRequest } from "@/modules/candidates/actions";
+import { Button } from "@/components/ui/button";
 
 export function IdRequestActions({
   requestUuid,
@@ -27,10 +28,10 @@ export function IdRequestActions({
         }}
       >
         <input type="hidden" name="requestUuid" value={requestUuid} />
-        <div className="formActions">
-          <button type="submit" className="acceptButton" disabled={approvePending}>
+        <div className="flex gap-2 pt-2">
+          <Button type="submit" disabled={approvePending}>
             {approvePending ? "Approving..." : "Approve request"}
-          </button>
+          </Button>
         </div>
         {approveState.error && (
           <p className="text-sm text-destructive mt-1">{approveState.error}</p>
@@ -40,15 +41,15 @@ export function IdRequestActions({
       <form action={rejectAction}>
         <input type="hidden" name="requestUuid" value={requestUuid} />
         {!showReject ? (
-          <div className="formActions">
-            <button type="button" className="rejectButton" onClick={() => setShowReject(true)}>
+          <div className="flex gap-2 pt-2">
+            <Button type="button" variant="destructive" onClick={() => setShowReject(true)}>
               Reject request
-            </button>
+            </Button>
           </div>
         ) : (
           <>
-            <label>
-              <span>Rejection reason</span>
+            <label className="grid gap-1">
+              <span className="text-sm font-medium text-muted-foreground">Rejection reason</span>
               <textarea
                 name="reason"
                 rows={3}
@@ -56,18 +57,19 @@ export function IdRequestActions({
                 minLength={10}
                 maxLength={500}
                 placeholder="Explain why this ID verification request is being rejected (min 10 characters)..."
+                className="min-h-[60px] rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
               />
             </label>
             {rejectState.error && (
               <p className="text-sm text-destructive mt-1">{rejectState.error}</p>
             )}
-            <div className="formActions">
-              <button type="submit" className="rejectButton" disabled={rejectPending}>
+            <div className="flex gap-2 pt-2">
+              <Button type="submit" variant="destructive" disabled={rejectPending}>
                 {rejectPending ? "Rejecting..." : "Confirm rejection"}
-              </button>
-              <button type="button" onClick={() => setShowReject(false)} disabled={rejectPending}>
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setShowReject(false)} disabled={rejectPending}>
                 Cancel
-              </button>
+              </Button>
             </div>
           </>
         )}

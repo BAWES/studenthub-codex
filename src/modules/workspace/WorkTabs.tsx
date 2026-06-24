@@ -117,13 +117,28 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
   if (!state.tabs.length) return null;
 
   return (
-    <nav className="workTabs" aria-label="Recently opened records">
+    <nav
+      className="flex items-center gap-1 overflow-x-auto scrollbar-none p-0 pb-0.5"
+      aria-label="Recently opened records"
+    >
       {state.tabs.map((tab) => {
         const active = pathname === tab.path;
         return (
-          <span key={tab.path} className={`workTab ${active ? "active" : ""}`}>
+          <span
+            key={tab.path}
+            className={`inline-flex items-center overflow-hidden shrink-0 rounded-md border ${
+              active
+                ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950/20"
+                : "border-border bg-card"
+            }`}
+          >
             <button
               type="button"
+              className={`min-h-8 inline-flex items-center border-0 bg-none px-2.5 text-xs font-bold whitespace-nowrap cursor-pointer ${
+                active
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-foreground hover:text-blue-600 dark:hover:text-blue-400"
+              }`}
               onClick={() => router.push(tab.path as Route)}
               aria-current={active ? "page" : undefined}
             >
@@ -131,7 +146,7 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
             </button>
             <button
               type="button"
-              className="workTabClose"
+              className="min-w-6 min-h-6 inline-flex items-center justify-center border-0 border-l border-border bg-none text-muted-foreground cursor-pointer p-0 hover:text-rose-500 hover:bg-rose-500/10 dark:hover:text-rose-400 dark:hover:bg-rose-400/10"
               aria-label={`Close ${tab.label}`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -144,7 +159,12 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
         );
       })}
       {state.tabs.length > 1 ? (
-        <button type="button" className="workTabsClear" onClick={state.closeAll} aria-label="Close all tabs">
+        <button
+          type="button"
+          className="min-h-8 inline-flex items-center shrink-0 border border-transparent rounded-md bg-none text-muted-foreground/70 text-[11px] font-semibold px-2.5 whitespace-nowrap cursor-pointer hover:text-rose-500 hover:border-border dark:hover:text-rose-400"
+          onClick={state.closeAll}
+          aria-label="Close all tabs"
+        >
           Clear all
         </button>
       ) : null}

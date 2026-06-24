@@ -15,12 +15,16 @@ describe("InvitationRespondForm", () => {
 
     it("renders accept button", () => {
       render(<InvitationRespondForm invitationUuid="inv-001" currentStatus={0} />);
-      expect(screen.getByText("Accept invitation")).toBeInTheDocument();
+      const acceptBtn = screen.getByText("Accept invitation");
+      expect(acceptBtn).toBeInTheDocument();
+      expect(acceptBtn.tagName).toBe("BUTTON");
     });
 
     it("renders reject button", () => {
       render(<InvitationRespondForm invitationUuid="inv-001" currentStatus={0} />);
-      expect(screen.getByText("Reject invitation")).toBeInTheDocument();
+      const rejectBtn = screen.getByText("Reject invitation");
+      expect(rejectBtn).toBeInTheDocument();
+      expect(rejectBtn.tagName).toBe("BUTTON");
     });
 
     it("renders both accept and reject buttons", () => {
@@ -36,18 +40,6 @@ describe("InvitationRespondForm", () => {
       ) as HTMLInputElement;
       expect(hiddenInput).toBeInTheDocument();
       expect(hiddenInput?.value).toBe("inv-001");
-    });
-
-    it("renders accept button with acceptButton class", () => {
-      render(<InvitationRespondForm invitationUuid="inv-001" currentStatus={0} />);
-      const acceptBtn = screen.getByText("Accept invitation");
-      expect(acceptBtn.className).toContain("acceptButton");
-    });
-
-    it("renders reject button with rejectButton class", () => {
-      render(<InvitationRespondForm invitationUuid="inv-001" currentStatus={0} />);
-      const rejectBtn = screen.getByText("Reject invitation");
-      expect(rejectBtn.className).toContain("rejectButton");
     });
   });
 

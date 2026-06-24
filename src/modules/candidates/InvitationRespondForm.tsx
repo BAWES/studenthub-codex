@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { respondToInvitation } from "@/modules/candidates/actions";
+import { Alert } from "@/components/ui/alert";
 
 export function InvitationRespondForm({
   invitationUuid,
@@ -14,9 +15,9 @@ export function InvitationRespondForm({
 
   if (currentStatus === 1 || currentStatus === 2) {
     return (
-      <section className="candidateEditForm">
-        <h2>Response</h2>
-        <p className="formNotice">
+      <section className="grid gap-4">
+        <h2 className="text-lg font-semibold text-foreground m-0">Response</h2>
+        <p className="text-sm text-muted-foreground m-0">
           You have already {currentStatus === 1 ? "accepted" : "rejected"} this invitation.
         </p>
       </section>
@@ -24,19 +25,19 @@ export function InvitationRespondForm({
   }
 
   return (
-    <form action={action} className="candidateEditForm">
-      <h2>Respond to Invitation</h2>
-      {state.error ? <p className="formError">{state.error}</p> : null}
+    <form action={action} className="grid gap-4">
+      <h2 className="text-lg font-semibold text-foreground m-0">Respond to Invitation</h2>
+      {state.error ? <Alert variant="destructive" className="py-2 text-sm">{state.error}</Alert> : null}
 
       <input type="hidden" name="invitationUuid" value={invitationUuid} />
 
-      <div className="formActions">
+      <div className="flex gap-2 pt-2">
         <button
           type="submit"
           name="action"
           value="accept"
           disabled={pending}
-          className="acceptButton"
+          className="inline-flex items-center justify-center h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? "Sending..." : "Accept invitation"}
         </button>
@@ -45,7 +46,7 @@ export function InvitationRespondForm({
           name="action"
           value="reject"
           disabled={pending}
-          className="rejectButton"
+          className="inline-flex items-center justify-center h-9 rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground shadow hover:bg-destructive/90 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? "Sending..." : "Reject invitation"}
         </button>
