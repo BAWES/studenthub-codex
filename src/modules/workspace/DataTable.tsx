@@ -15,6 +15,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export type DataTableColumn<T> = {
   key: string;
@@ -90,11 +91,12 @@ export function DataTable<T extends { id: string | number }>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length + (rowHref ? 1 : 0)} className="h-32 text-center">
-                <div className="flex flex-col items-center gap-1 py-8">
-                  <strong className="text-sm font-medium text-foreground">No records found</strong>
-                  <span className="text-sm text-muted-foreground max-w-xs">
-                    This view is connected to the prod clone, but this account has no matching rows yet.
-                  </span>
+                <div className="py-14 px-6">
+                  <EmptyState
+                    variant="empty"
+                    title="No records found"
+                    description="This view has no matching rows yet."
+                  />
                 </div>
               </TableCell>
             </TableRow>
