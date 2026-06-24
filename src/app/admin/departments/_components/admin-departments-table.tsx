@@ -4,10 +4,12 @@ import { useActionState, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DepartmentRow } from "../schemas";
 import { createDepartment, updateDepartment, deleteDepartment } from "../actions";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 type Props = {
   session: SessionUser;
@@ -84,21 +86,33 @@ export function AdminDepartmentsTable({ session, departments }: Props) {
             label: "Actions",
             render: (row) =>
               editingUuid !== row.department_uuid ? (
-                <button
-                  type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
-                  onClick={async () => {
-                    if (confirm(`Delete "${row.department_name_en}"?`)) {
-                      const result = await deleteDepartment({ departmentUuid: row.department_uuid });
-                      if (result.operation === "error") {
-                        alert(result.message);
-                      }
-                      router.refresh();
-                    }
-                  }}
-                >
-                  Delete
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete department?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently remove "{row.department_name_en}". This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={async () => {
+                        const result = await deleteDepartment({ departmentUuid: row.department_uuid });
+                        if (result.operation === "error") {
+                          alert(result.message);
+                        }
+                        router.refresh();
+                      }}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               ) : null,
           },
         ]}

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { TagItem } from "../schemas";
@@ -85,23 +86,38 @@ export function AdminTagsTable({ session, tags }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.tag_id ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={async () => {
-                    if (confirm(`Delete tag "${row.tag}"?`)) {
-                      const result = await deleteTag(row.tag_id);
-                      if (result.operation === "error") {
-                        alert(result.message);
-                      }
-                      router.refresh();
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete tag &ldquo;{row.tag}&rdquo;?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently remove this tag. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={async () => {
+                        const result = await deleteTag(row.tag_id);
+                        if (result.operation === "error") {
+                          alert(result.message);
+                        }
+                        router.refresh();
+                      }}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               ) : null,
           },
         ]}
