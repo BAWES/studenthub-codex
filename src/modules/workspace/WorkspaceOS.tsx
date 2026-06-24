@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback, useId } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import type { SessionUser } from "@/modules/auth/types";
 import { logoutAction } from "@/modules/auth/actions";
@@ -13,15 +13,7 @@ import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
 import { searchCandidatesForPalette, type CandidatePaletteResult } from "./searchPalette";
 import { PageTransition } from "./PageTransition";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandShortcut,
-} from "@/components/ui/command";
+import { RaycastCommandPalette } from "./RaycastCommandPalette";
 
 // ── Command types ─────────────────────────────────────────────
 
@@ -125,6 +117,36 @@ function buildOSCommands(navItems: NavItem[], role: string): OSCommand[] {
   return [...nav, ...scopes];
 }
 
+// ── Convert candidate search results to OSCommand items ─────────
+
+function candidateResultsToCommands(
+  results: CandidatePaletteResult[],
+  role: string,
+): OSCommand[] {
+  return results.map((c) => ({
+    id: `candidate-${c.id}`,
+    title: c.name,
+    subtitle: c.email || c.uid,
+    section: "Candidates",
+    href: `/${role}/candidates/${c.id}`,
+  }));
+}
+
+// ── Group commands by section ──────────────────────────────────
+
+function groupBySection(commands: OSCommand[]): [string, OSCommand[]][] {
+  const map = new Map<string, OSCommand[]>();
+  for (const cmd of commands) {
+    const list = map.get(cmd.section);
+    if (list) {
+      list.push(cmd);
+    } else {
+      map.set(cmd.section, [cmd]);
+    }
+  }
+  return Array.from(map.entries());
+}
+
 // ── WorkspaceOS Component ──────────────────────────────────────
 
 export function WorkspaceOS({
@@ -135,17 +157,43 @@ export function WorkspaceOS({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
   const navItems = useMemo(() => navForRole(session.role), [session.role]);
-  const commandDialogId = useId();
 
   // ── Command palette state ────────────────────────────────────
   const [cmdOpen, setCmdOpen] = useState(false);
   const [cmdQuery, setCmdQuery] = useState("");
+  const [cmdIndex, setCmdIndex] = useState(0);
+  const cmdInputRef = useRef<HTMLInputElement>(null);
   const [cmdCandidates, setCmdCandidates] = useState<CandidatePaletteResult[]>([]);
   const seqRef = useRef("");
 
   const commands = useMemo(() => buildOSCommands(navItems, session.role), [navItems, session.role]);
+
+  // Candidate commands: async search results converted to OSCommand[]
+  const candidateCommands = useMemo(
+    () => candidateResultsToCommands(cmdCandidates, session.role),
+    [cmdCandidates, session.role],
+  );
+
+  // All flat commands for keyboard index tracking
+  const allFlatCommands = useMemo(
+    () => [...commands, ...candidateCommands],
+    [commands, candidateCommands],
+  );
+
+  // Grouped commands by section (includes candidates when present)
+  const groupedCommands = useMemo((): [string, OSCommand[]][] => {
+    const base = groupBySection(commands);
+    if (candidateCommands.length > 0) {
+      base.push(["Candidates", candidateCommands]);
+    }
+    return base;
+  }, [commands, candidateCommands]);
+
+  // Reset index when flat list changes (candidates arrive/leave)
+  useEffect(() => {
+    setCmdIndex(0);
+  }, [allFlatCommands.length]);
 
   // Debounced candidate search for CMD+K
   useEffect(() => {
@@ -186,6 +234,33 @@ export function WorkspaceOS({
         e.preventDefault();
         setCmdOpen(true);
         return;
+      }
+
+      // ── Palette keyboard navigation ──────────────────────────
+      if (cmdOpen) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          setCmdOpen(false);
+          return;
+        }
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          setCmdIndex((prev) => (prev + 1) % Math.max(allFlatCommands.length, 1));
+          return;
+        }
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          setCmdIndex((prev) => (prev - 1 + allFlatCommands.length) % Math.max(allFlatCommands.length, 1));
+          return;
+        }
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const cmd = allFlatCommands[cmdIndex];
+          if (cmd) {
+            visit(cmd.href);
+          }
+          return;
+        }
       }
 
       // G then key chord navigation
@@ -235,7 +310,7 @@ export function WorkspaceOS({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [cmdOpen, commands, visit]);
+  }, [cmdOpen, commands, visit, allFlatCommands, cmdIndex]);
 
   const chords = useMemo(() => roleChords(session.role), [session.role]);
 
@@ -284,88 +359,20 @@ export function WorkspaceOS({
         <WorkspaceMobileNavigation items={navItems} role={session.role} />
       </main>
 
-      {/* ── Command Palette (shadcn CommandDialog) ────────── */}
-      <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
-        <CommandInput
-          placeholder="Jump to a view, search records, or run an action..."
-          data-command-search
-          value={cmdQuery}
-          onValueChange={setCmdQuery}
-        />
-        <CommandList>
-          <CommandEmpty>
-            <div className="flex flex-col items-center gap-1 py-6">
-              <strong className="text-sm text-muted-foreground">No command found</strong>
-              <span className="text-xs text-muted-foreground/70">
-                Try a view, record name, scope, or shortcut.
-              </span>
-            </div>
-          </CommandEmpty>
-          {/* Group by section using cmdk's built-in grouping */}
-          <CommandGroup heading="Navigation">
-            {commands
-              .filter((c) => c.section === "Navigation")
-              .map((cmd) => (
-                <CommandItem
-                  key={cmd.id}
-                  value={`${cmd.title} ${cmd.subtitle}`}
-                  onSelect={() => visit(cmd.href)}
-                >
-                  <span className="flex flex-col">
-                    <strong className="text-sm">{cmd.title}</strong>
-                    <small className="text-xs text-muted-foreground">{cmd.subtitle}</small>
-                  </span>
-                  {cmd.shortcut && <CommandShortcut>{cmd.shortcut}</CommandShortcut>}
-                </CommandItem>
-              ))}
-          </CommandGroup>
-          <CommandGroup heading="Quick Scopes">
-            {commands
-              .filter((c) => c.section === "Quick Scopes")
-              .map((cmd) => (
-                <CommandItem
-                  key={cmd.id}
-                  value={`${cmd.title} ${cmd.subtitle}`}
-                  onSelect={() => visit(cmd.href)}
-                >
-                  <span className="flex flex-col">
-                    <strong className="text-sm">{cmd.title}</strong>
-                    <small className="text-xs text-muted-foreground">{cmd.subtitle}</small>
-                  </span>
-                  {cmd.shortcut && <CommandShortcut>{cmd.shortcut}</CommandShortcut>}
-                </CommandItem>
-              ))}
-          </CommandGroup>
-          {cmdCandidates.length > 0 && (
-            <CommandGroup heading="Candidates">
-              {cmdCandidates.map((c) => (
-                <CommandItem
-                  key={c.id}
-                  value={`candidate-${c.name}`}
-                  onSelect={() => visit(`/${session.role}/candidates/${c.id}`)}
-                >
-                  <span className="flex flex-col">
-                    <strong className="text-sm">{c.name}</strong>
-                    <small className="text-xs text-muted-foreground">{c.email || c.uid}</small>
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-        </CommandList>
-
-        {/* ── Shortcut footer ─────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 border-t border-border px-4 py-3 text-xs text-muted-foreground">
-          {chords.map((row) => (
-            <div key={row.keys} className="flex items-center gap-2">
-              <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium text-foreground">
-                {row.keys}
-              </kbd>
-              <span>{row.label}</span>
-            </div>
-          ))}
-        </div>
-      </CommandDialog>
+      {/* ── Raycast Command Palette ───────────────────────── */}
+      <RaycastCommandPalette
+        open={cmdOpen}
+        query={cmdQuery}
+        onQueryChange={setCmdQuery}
+        index={cmdIndex}
+        onIndexChange={setCmdIndex}
+        grouped={groupedCommands}
+        flatCommands={allFlatCommands}
+        onVisit={visit}
+        onClose={() => setCmdOpen(false)}
+        inputRef={cmdInputRef}
+        role={session.role}
+      />
     </WorkspaceOSContext.Provider>
   );
 }
