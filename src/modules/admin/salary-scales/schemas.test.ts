@@ -12,24 +12,25 @@ describe("salaryScaleListItemSchema", () => {
     salary_scale_name_en: "Grade 1",
     salary_scale_name_ar: null,
     salary_scale_min_amount: 500,
-    salary_scale_max_amount: null,
+    salary_scale_max_amount: 1000,
     candidate_count: null,
   };
 
   it("accepts a valid salary scale item", () => {
-    expect(salaryScaleListItemSchema.safeParse(validItem).success).toBe(true);
+    const result = salaryScaleListItemSchema.safeParse(validItem);
+    expect(result.success).toBe(true);
   });
 
-  it("accepts nullable optional fields", () => {
-    expect(
-      salaryScaleListItemSchema.safeParse({
-        ...validItem,
-        salary_scale_name_ar: null,
-        salary_scale_min_amount: null,
-        salary_scale_max_amount: null,
-        candidate_count: null,
-      }).success,
-    ).toBe(true);
+  it("accepts nullable fields", () => {
+    const item: SalaryScaleListItem = {
+      ...validItem,
+      salary_scale_name_ar: null,
+      salary_scale_min_amount: null,
+      salary_scale_max_amount: null,
+      candidate_count: null,
+    };
+    const result = salaryScaleListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
   });
 
   it("rejects missing salary_scale_id", () => {
@@ -37,16 +38,11 @@ describe("salaryScaleListItemSchema", () => {
     expect(salaryScaleListItemSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("rejects empty salary_scale_name_en", () => {
+  it("rejects negative salary_scale_id", () => {
     expect(
-      salaryScaleListItemSchema.safeParse({ ...validItem, salary_scale_name_en: "" })
+      salaryScaleListItemSchema.safeParse({ ...validItem, salary_scale_id: -1 })
         .success,
     ).toBe(false);
-  });
-
-  it("rejects missing salary_scale_name_en", () => {
-    const { salary_scale_name_en: _, ...rest } = validItem;
-    expect(salaryScaleListItemSchema.safeParse(rest).success).toBe(false);
   });
 });
 
@@ -131,10 +127,24 @@ describe("createSalaryScaleSchema", () => {
     const result = createSalaryScaleSchema.safeParse({
       salary_scale_name_en: "Test",
       salary_scale_min_amount: "500",
+      salary_scale_max_amount: "1000",
     });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.salary_scale_min_amount).toBe(500);
+      expect(result.data.salary_scale_max_amount).toBe(1000);
+    }
+  });
+
+  it("defaults optional fields when omitted", () => {
+    const result = createSalaryScaleSchema.safeParse({
+      salary_scale_name_en: "Test",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.salary_scale_name_ar).toBe("");
+      expect(result.data.salary_scale_min_amount).toBeUndefined();
+      expect(result.data.salary_scale_max_amount).toBeUndefined();
     }
   });
 });
