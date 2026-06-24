@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Route } from "next";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 type WorkTab = {
   path: string;
@@ -118,36 +117,26 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
   if (!state.tabs.length) return null;
 
   return (
-    <nav className="flex items-center gap-1 overflow-x-auto scrollbar-none px-1" aria-label="Recently opened records">
+    <nav className="workTabs" aria-label="Recently opened records">
       {state.tabs.map((tab) => {
         const active = pathname === tab.path;
         return (
-          <span
-            key={tab.path}
-            className={`inline-flex items-center overflow-hidden rounded-md border shrink-0 ${
-              active
-                ? "border-primary bg-accent"
-                : "border-border bg-card"
-            }`}
-          >
+          <span key={tab.path} className={`workTab ${active ? "active" : ""}`}>
             <button
               type="button"
               onClick={() => router.push(tab.path as Route)}
               aria-current={active ? "page" : undefined}
-              className={`inline-flex items-center border-0 bg-none px-2.5 text-xs font-bold whitespace-nowrap cursor-pointer ${
-                active ? "text-primary" : "text-foreground"
-              }`}
             >
               {tab.label}
             </button>
             <button
               type="button"
+              className="workTabClose"
               aria-label={`Close ${tab.label}`}
               onClick={(e) => {
                 e.stopPropagation();
                 state.closeTab(tab.path);
               }}
-              className="inline-flex items-center justify-center min-w-6 min-h-6 border-0 border-l border-border bg-none p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
             >
               <X size={12} />
             </button>
@@ -155,9 +144,9 @@ export function WorkTabs({ state }: { state: WorkTabState }) {
         );
       })}
       {state.tabs.length > 1 ? (
-        <Button type="button" variant="ghost" size="sm" onClick={state.closeAll} aria-label="Close all tabs">
+        <button type="button" className="workTabsClear" onClick={state.closeAll} aria-label="Close all tabs">
           Clear all
-        </Button>
+        </button>
       ) : null}
     </nav>
   );

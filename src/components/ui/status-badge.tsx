@@ -5,38 +5,42 @@ import { cn } from "@/lib/utils";
 
 type StatusLevel = "success" | "warning" | "error" | "info" | "neutral";
 
-const statusClasses: Record<StatusLevel, {
-  base: string;
+const statusConfig: Record<StatusLevel, {
+  bg: string;
+  text: string;
+  glow: string;
   dot: string;
 }> = {
   success: {
-    base: "bg-[var(--sh-success-bg)] text-[var(--sh-success)]",
-    dot: "bg-[var(--sh-success)]",
+    bg: "var(--sh-success-bg)",
+    text: "var(--sh-success)",
+    glow: "var(--sh-success-glow)",
+    dot: "var(--sh-success)",
   },
   warning: {
-    base: "bg-[var(--sh-warning-bg)] text-[var(--sh-warning)]",
-    dot: "bg-[var(--sh-warning)]",
+    bg: "var(--sh-warning-bg)",
+    text: "var(--sh-warning)",
+    glow: "var(--sh-warning-glow)",
+    dot: "var(--sh-warning)",
   },
   error: {
-    base: "bg-[var(--sh-error-bg)] text-[var(--sh-error)]",
-    dot: "bg-[var(--sh-error)]",
+    bg: "var(--sh-error-bg)",
+    text: "var(--sh-error)",
+    glow: "var(--sh-error-glow)",
+    dot: "var(--sh-error)",
   },
   info: {
-    base: "bg-[var(--sh-info-bg)] text-[var(--sh-info)]",
-    dot: "bg-[var(--sh-info)]",
+    bg: "var(--sh-info-bg)",
+    text: "var(--sh-info)",
+    glow: "var(--sh-info-glow)",
+    dot: "var(--sh-info)",
   },
   neutral: {
-    base: "bg-[var(--surface)] text-[var(--muted)]",
-    dot: "bg-[var(--muted)]",
+    bg: "var(--surface)",
+    text: "var(--muted)",
+    glow: "transparent",
+    dot: "var(--muted)",
   },
-};
-
-const glowClasses: Record<string, string> = {
-  success: "shadow-[var(--sh-success-glow)]",
-  warning: "shadow-[var(--sh-warning-glow)]",
-  error: "shadow-[var(--sh-error-glow)]",
-  info: "shadow-[var(--sh-info-glow)]",
-  neutral: "",
 };
 
 export interface StatusBadgeProps extends React.ComponentPropsWithoutRef<"span"> {
@@ -54,25 +58,30 @@ const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(function
   { className, status = "neutral", showDot = false, glow = false, size = "md", style, ...props },
   ref,
 ) {
-  const cfg = statusClasses[status];
+  const cfg = statusConfig[status];
 
   return (
     <span
       ref={ref}
       data-slot="status-badge"
       className={cn(
-        cfg.base,
-        glow && status !== "neutral" && glowClasses[status],
+        "shStatusBadgeBase",
+        glow && "shStatusBadge_glow",
         size === "sm" ? "text-[10px] px-1.5 py-0.5" : "text-[11px] px-2 py-0.5",
-        "inline-flex items-center gap-1 rounded-full font-medium",
         className,
       )}
-      style={style}
+      style={{
+        background: cfg.bg,
+        color: cfg.text,
+        boxShadow: glow ? cfg.glow : undefined,
+        ...style,
+      }}
       {...props}
     >
       {showDot && (
         <span
-          className={cn("size-1.5 rounded-full shrink-0", cfg.dot)}
+          className="size-1.5 rounded-full shrink-0"
+          style={{ background: cfg.dot }}
           aria-hidden="true"
         />
       )}

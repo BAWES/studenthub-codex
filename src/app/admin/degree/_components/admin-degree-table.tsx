@@ -18,7 +18,7 @@ import {
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DegreeItem } from "../schemas";
-import { createDegree, updateDegree, deleteDegree, getDegreeGroupOptions } from "../actions";
+import { updateDegree, deleteDegree, createDegree, getDegreeGroupOptions } from "../actions";
 
 type GroupOption = { degree_group_uuid: string; degree_group_name_en: string };
 
@@ -84,13 +84,14 @@ export function AdminDegreeTable({ session, degrees }: Props) {
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <button
+                <Button
                   type="button"
-                  className="text-sm hover:underline text-primary"
+                  variant="ghost"
+                  className="text-sm px-0 h-auto hover:underline"
                   onClick={() => setEditingId(row.degree_uuid)}
                 >
                   {row.degree_name_en}
-                </button>
+                </Button>
               ),
           },
           {
@@ -113,9 +114,10 @@ export function AdminDegreeTable({ session, degrees }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.degree_uuid ? (
-                <button
+                <Button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete degree "${row.degree_name_en}"?`)) {
                       await deleteDegree(row.degree_uuid);
@@ -124,7 +126,7 @@ export function AdminDegreeTable({ session, degrees }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}

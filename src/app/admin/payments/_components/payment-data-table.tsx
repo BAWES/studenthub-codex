@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import type { PaymentRow } from "../schemas";
 
 // ---------------------------------------------------------------------------
@@ -137,25 +138,26 @@ export function PaymentDataTable({
 
   if (error && !loading) {
     return (
-      <div className="rounded-lg border border-border bg-white p-8" role="alert">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <span className="text-3xl" aria-hidden="true">⚠️</span>
-          <div>
-            <p className="text-lg font-semibold text-foreground">Could not load payments</p>
-            <p className="text-sm mt-1 text-muted-foreground">{error}</p>
+      <Card role="alert">
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div>
+              <p className="text-lg font-semibold text-foreground">Could not load payments</p>
+              <p className="text-sm mt-1 text-muted-foreground">{error}</p>
+            </div>
+            <Button variant="default" onClick={onRetry} size="sm">
+              Retry
+            </Button>
           </div>
-          <Button variant="default" onClick={onRetry} size="sm">
-            Retry
-          </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-lg border border-border bg-white overflow-hidden">
+    <Card className="overflow-hidden">
       <div
-        className="grid gap-0 text-[11px] font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10"
+        className="grid gap-0 text-xs font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10"
         style={{ gridTemplateColumns: COLUMNS.map((c) => c.width).join(" ") }}
       >
         {COLUMNS.map((col) => (
@@ -214,26 +216,28 @@ export function PaymentDataTable({
         <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-border/10 text-muted-foreground">
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
               aria-label="Previous page"
             >
               ← Prev
-            </button>
-            <span>Page {page} of {totalPages}</span>
-            <button
+            </Button>
+            <span className="text-xs text-muted-foreground">Page {page} of {totalPages}</span>
+            <Button
+              variant="ghost"
+              size="sm"
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
               aria-label="Next page"
             >
               Next →
-            </button>
+            </Button>
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
