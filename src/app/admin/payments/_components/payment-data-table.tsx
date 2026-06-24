@@ -71,7 +71,7 @@ function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-4 py-3" aria-hidden="true">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className={`h-4 rounded bg-white/5 animate-pulse ${i === 2 ? "flex-1" : ""}`} />
+        <div key={i} className={`h-4 rounded bg-muted animate-pulse ${i === 2 ? "flex-1" : ""}`} />
       ))}
     </div>
   );
@@ -214,23 +214,25 @@ export function PaymentDataTable({
         <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-border/10 text-muted-foreground">
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">
-            <button
+            <Button
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
+              variant="outline"
+              size="sm"
               aria-label="Previous page"
             >
               ← Prev
-            </button>
+            </Button>
             <span>Page {page} of {totalPages}</span>
-            <button
+            <Button
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-md text-sm font-medium disabled:opacity-30 bg-muted/10"
+              variant="outline"
+              size="sm"
               aria-label="Next page"
             >
               Next →
-            </button>
+            </Button>
           </div>
         </div>
       )}

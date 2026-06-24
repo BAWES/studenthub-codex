@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -97,10 +98,10 @@ export function PaymentFilters({
             <label htmlFor="payment-date-from" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               From
             </label>
-            <input
+            <Input
               id="payment-date-from"
               type="date"
-              className="flex h-10 w-40 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-40"
               value={filters.dateFrom}
               onChange={(e) => handleChange("dateFrom", e.target.value)}
             />
@@ -111,10 +112,10 @@ export function PaymentFilters({
             <label htmlFor="payment-date-to" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               To
             </label>
-            <input
+            <Input
               id="payment-date-to"
               type="date"
-              className="flex h-10 w-40 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-40"
               value={filters.dateTo}
               onChange={(e) => handleChange("dateTo", e.target.value)}
             />
