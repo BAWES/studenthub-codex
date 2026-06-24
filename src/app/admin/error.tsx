@@ -15,10 +15,10 @@ export default function AdminErrorPage({
     <div className="flex min-h-[80vh] items-center justify-center bg-background p-8">
       <Card className="max-w-[420px] w-full">
         <CardContent className="flex flex-col items-center gap-5 py-10">
-          <div className="flex size-14 items-center justify-center rounded-full bg-[#eb6651]/10">
-            <span className="text-3xl font-black leading-none text-[#eb6651]">!</span>
+          <div className="flex size-14 items-center justify-center rounded-full bg-coral/10">
+            <span className="text-3xl font-black leading-none text-coral">!</span>
           </div>
-          <div className="w-12 h-[3px] rounded-sm bg-[#eb6651]" aria-hidden="true" />
+          <div className="w-12 h-[3px] rounded-sm bg-coral" aria-hidden="true" />
           <h1 className="text-xl font-bold m-0 text-foreground">
             Admin system error
           </h1>

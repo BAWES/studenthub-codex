@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
@@ -36,11 +37,9 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
       ]}
     >
       {error ? (
-        <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm border-[var(--sh-error)] text-[var(--sh-error)] bg-[var(--surface)]"
-        >
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : null}
 
       <div className="mb-4 flex gap-2">

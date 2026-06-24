@@ -28,7 +28,7 @@ export function AdminDesignationsTable({ session, designations }: Props) {
       ]}
     >
       <section className="mb-6">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add designation</h3>
           <CreateDesignationForm onSuccess={() => router.refresh()} />
         </div>
@@ -179,13 +179,13 @@ function EditDesignationForm({
         defaultValue={row.designation_name_en}
         required
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+        className="h-8 rounded px-2 text-sm border w-40 bg-card border-border text-foreground"
       />
       <input
         name="nameAr"
         defaultValue={row.designation_name_ar ?? ""}
         maxLength={255}
-        className="h-8 rounded px-2 text-sm border w-40 bg-[var(--surface)] border-[var(--border)] text-[var(--ink)]"
+        className="h-8 rounded px-2 text-sm border w-40 bg-card border-border text-foreground"
       />
       <button
         type="submit"
