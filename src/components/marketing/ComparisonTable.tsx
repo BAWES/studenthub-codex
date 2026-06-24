@@ -81,9 +81,9 @@ function getScore(value: ScoreValue): "full" | "partial" | "none" {
 
 function ScoreDot({ value }: { value: ScoreValue }) {
   const score = getScore(value);
-  const cls = score === "full" ? "inline-flex size-2.5 rounded-full bg-green-500"
-    : score === "partial" ? "inline-flex size-2.5 rounded-full bg-amber-400"
-    : "inline-flex size-2.5 rounded-full bg-muted-foreground/30";
+  const cls = score === "full" ? "shLandingScoreDot shLandingScoreFull"
+    : score === "partial" ? "shLandingScoreDot shLandingScorePartial"
+    : "shLandingScoreDot shLandingScoreNone";
   return <span className={cls} />;
 }
 
@@ -109,16 +109,16 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
       aria-label="Feature comparison"
     >
       <div className="text-center mb-8 md:mb-10">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide text-[#1f73b7] bg-[#1f73b7]/10">
+        <span className="shLandingEyebrow">
           <Sparkles className="size-3" />
           See the difference
         </span>
-        <h2 className="text-[clamp(24px,3.5vw,36px)] font-bold leading-[1.15] tracking-[-0.02em] text-foreground mt-3">
+        <h2 className="shLandingSectionTitle mt-3">
           {persona === "candidate"
             ? "Why students choose StudentHub."
             : "Why companies choose StudentHub."}
         </h2>
-        <p className="text-sm leading-relaxed max-w-[600px] mx-auto text-muted-foreground mt-2">
+        <p className="shLandingSectionSub mx-auto mt-2">
           {persona === "candidate"
             ? "StudentHub gives you tools that job boards and agencies can't match."
             : "One platform replaces four legacy tools."}
@@ -128,7 +128,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
       {/* Score summary */}
       <div className="max-w-[600px] mx-auto mb-6">
         <div className="rounded-xl p-4 flex items-center justify-center gap-3 bg-gradient-to-br from-[#1f73b7]/5 to-[#1f73b7]/2 border border-[#1f73b7]/15">
-          <span className="inline-flex size-2.5 rounded-full bg-green-500" />
+          <span className="shLandingScoreDot shLandingScoreFull" />
           <span className="text-sm font-semibold text-foreground">
             StudentHub scores{" "}
             <span className="text-[#1f73b7]">
@@ -140,7 +140,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
       </div>
 
       {/* Desktop: solid table */}
-      <div className="hidden md:block overflow-x-auto rounded-xl bg-card border border-border shadow-sm">
+      <div className="hidden md:block overflow-x-auto rounded-xl shLandingCardStrong">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -210,7 +210,7 @@ export default function ComparisonTable({ persona = "candidate", className }: Co
         {categories.map((cat) => (
           <div
             key={cat.category}
-            className="rounded-xl overflow-hidden bg-card border border-border shadow-sm"
+            className="rounded-xl overflow-hidden shLandingCard"
           >
             <div
               className="p-3 text-[11px] font-bold uppercase tracking-wider text-[#1f73b7] bg-[#1f73b7]/5 border-b border-border"

@@ -100,10 +100,10 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-[#eb6651] bg-[#eb6651]/10">
           For employers
         </span>
-        <h2 className="text-[clamp(24px,3.5vw,36px)] font-bold leading-[1.15] tracking-[-0.02em] text-foreground mt-3">
+        <h2 className="shLandingSectionTitle mt-3">
           Hire student talent without the runaround.
         </h2>
-        <p className="text-sm leading-relaxed max-w-[600px] mx-auto text-muted-foreground mt-2">
+        <p className="shLandingSectionSub mx-auto mt-2">
           From posting a role to paying your staff — one system replaces five
           tools. No spreadsheets, no agency fees, no middlemen.
         </p>
@@ -118,8 +118,8 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
             <div
               key={feat.title}
               className={cn(
-                "group rounded-xl p-5 transition-all duration-[400ms] ease-out",
-                "border border-border bg-card shadow-sm hover:-translate-y-0.5 hover:shadow-md",
+                "group rounded-xl p-5 shLandingCardHover",
+                "border border-border bg-card",
                 "transition-all duration-[400ms] ease-out",
                 isVisible
                   ? "opacity-100 translate-y-0"

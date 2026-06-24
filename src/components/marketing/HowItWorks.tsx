@@ -55,12 +55,12 @@ export default function HowItWorks({ className }: HowItWorksProps) {
       aria-label="How it works"
     >
       <div className="text-center mb-8 md:mb-10">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide text-[#1f73b7] bg-[#1f73b7]/10">How it works</span>
-        <div className="mt-3" />
-        <h2 className="text-[clamp(24px,3.5vw,36px)] font-bold leading-[1.15] tracking-[-0.02em] text-foreground mt-3">
+        <span className="shLandingEyebrow">How it works</span>
+        <div className="shLandingGlowDivider mt-3" />
+        <h2 className="shLandingSectionTitle mt-3">
           From profile to placement in three steps.
         </h2>
-        <p className="text-sm leading-relaxed max-w-[600px] mx-auto text-muted-foreground mt-2">
+        <p className="shLandingSectionSub mx-auto mt-2">
           Whether you&apos;re a student looking for work or an employer hiring
           talent, our staff recruiters match students with the right employers
           — all on one platform.
@@ -73,7 +73,7 @@ export default function HowItWorks({ className }: HowItWorksProps) {
           return (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl bg-card border border-border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              className="relative flex flex-col items-center text-center p-6 rounded-xl shLandingCardHover bg-card border border-border"
               style={cardAnimationDelay(i)}
             >
               {/* Step number */}

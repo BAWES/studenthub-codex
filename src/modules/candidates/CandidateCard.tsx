@@ -127,11 +127,11 @@ export function CandidateCard({
           <span className="text-sm font-medium truncate min-w-0">
             {data.name}
           </span>
-          <span className="text-xs text-muted-foreground shrink-0">
+          <span className="text-xs text-[var(--muted)] shrink-0">
             {getStatusIcon() ?? data.status}
           </span>
         </div>
-        <span className="text-xs text-muted-foreground truncate">
+        <span className="text-xs text-[var(--muted)] truncate">
           {data.company}
         </span>
       </Link>
@@ -172,7 +172,7 @@ export function CandidateCard({
               </button>
             )}
             <span className="text-lg leading-tight">{getStatusIcon()}</span>
-            <span className="text-xs text-muted-foreground">{data.status}</span>
+            <span className="text-xs text-[var(--muted)]">{data.status}</span>
           </div>
           {canViewSensitive && (
             <strong className="text-sm truncate min-w-0">{data.rate}</strong>
@@ -183,7 +183,7 @@ export function CandidateCard({
         <div className="flex items-center justify-between gap-2">
           <strong className="text-base truncate">{data.name}</strong>
           {canViewPhone && data.phone && (
-            <span className="text-xs text-muted-foreground shrink-0">
+            <span className="text-xs text-[var(--muted)] shrink-0">
               {data.phone}
             </span>
           )}
@@ -191,23 +191,23 @@ export function CandidateCard({
 
         {/* Email */}
         {canViewSensitive && (
-          <small className="truncate text-xs text-muted-foreground">
+          <small className="truncate text-xs text-[var(--muted)]">
             {data.email}
           </small>
         )}
 
         {/* Company + store */}
-        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between gap-2 text-xs text-[var(--muted)]">
           <span className="truncate">{data.company}</span>
           <span className="truncate">{data.store}</span>
         </div>
 
-        {/* Admin-only: civil ID + salary breakdown */}
+        {/* Admin‑only: civil ID + salary breakdown */}
         {canViewCivilId && (data.civilIdStatus || data.salaryBreakdown) && (
-          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border text-xs">
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[var(--border)] text-xs">
             {data.civilIdStatus && (
               <div>
-                <span className="text-muted-foreground">Civil ID: </span>
+                <span className="text-[var(--muted)]">Civil ID: </span>
                 <span
                   className={cn(
                     "font-medium",
@@ -225,7 +225,7 @@ export function CandidateCard({
             )}
             {data.salaryBreakdown && (
               <div className="text-right">
-                <span className="text-muted-foreground">Salary: </span>
+                <span className="text-[var(--muted)]">Salary: </span>
                 <span className="font-medium">{data.salaryBreakdown}</span>
               </div>
             )}
@@ -248,7 +248,7 @@ export function CandidateCard({
         )}
 
         {/* Updated */}
-        <span className="text-xs text-muted-foreground">{data.updated}</span>
+        <span className="text-xs text-[var(--muted)]">{data.updated}</span>
       </Link>
     );
   }
@@ -257,16 +257,16 @@ export function CandidateCard({
   return (
     <Link
       className={cn(
-        "grid gap-[7px] border border-border rounded-lg bg-card text-foreground p-2.5 no-underline",
-        "hover:border-blue hover:shadow-[0_8px_24px_rgba(16,24,40,0.08)]",
+        "grid gap-[7px] border border-[var(--border)] rounded-lg bg-white text-[var(--ink)] p-2.5 no-underline",
+        "hover:border-[var(--blue)] hover:shadow-[0_8px_24px_rgba(16,24,40,0.08)]",
         isSelectedEffective &&
-          "shadow-[inset_3px_0_0_var(--blue),0_8px_24px_rgba(16,24,40,0.08)] border-blue",
+          "shadow-[inset_3px_0_0_var(--blue),0_8px_24px_rgba(16,24,40,0.08)] border-[var(--blue)]",
       )}
       href={href as Route}
     >
       <div className="flex items-center justify-between gap-2">
         <span>{data.signal}</span>
-        <em className="not-italic text-xs text-muted-foreground truncate min-w-0">
+        <em className="not-italic text-xs text-[var(--muted)] truncate min-w-0">
           {data.status}
         </em>
       </div>
@@ -276,14 +276,14 @@ export function CandidateCard({
       </strong>
 
       {canViewSensitive && (
-        <small className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground">
+        <small className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--muted)]">
           {data.email}
         </small>
       )}
 
       {/* Phone (staff/admin only) */}
       {canViewSensitive && data.phone && (
-        <small className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground">
+        <small className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--muted)]">
           {data.phone}
         </small>
       )}
@@ -291,7 +291,7 @@ export function CandidateCard({
       {/* Civil ID status (admin only) */}
       {canViewCivilId && data.civilIdStatus && (
         <small className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs">
-          <span className="text-muted-foreground">Civil ID: </span>
+          <span className="text-[var(--muted)]">Civil ID: </span>
           <span
             className={cn(
               "font-medium",
@@ -308,22 +308,22 @@ export function CandidateCard({
       {/* Salary breakdown (admin only) */}
       {canViewSalaryBreakdown && data.salaryBreakdown && (
         <small className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs">
-          <span className="text-muted-foreground">Salary: </span>
+          <span className="text-[var(--muted)]">Salary: </span>
           <span className="font-medium">{data.salaryBreakdown}</span>
         </small>
       )}
 
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground">
+        <span className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--muted)]">
           {data.company}
         </span>
-        <span className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground">
+        <span className="truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--muted)]">
           {data.store}
         </span>
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <em className="not-italic text-xs text-muted-foreground truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+        <em className="not-italic text-xs text-[var(--muted)] truncate min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
           {data.updated}
         </em>
         {canViewSensitive && (

@@ -169,15 +169,12 @@ export default function TestimonialCarousel({
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="text-center mb-8 md:mb-10">
-        <span
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide mb-5"
-          style={{ background: `linear-gradient(135deg, ${SH_BLUE}12, ${SH_BLUE}06)` }}
-        >
+        <span className="shLandingEyebrow" style={{ background: `linear-gradient(135deg, ${SH_BLUE}12, ${SH_BLUE}06)` }}>
           {persona === "company"
             ? "Trusted by leading employers"
             : "Trusted by candidates and employers"}
         </span>
-        <h2 className="text-[clamp(24px,3.5vw,36px)] font-bold leading-[1.15] tracking-[-0.02em] text-foreground mt-3">
+        <h2 className="shLandingSectionTitle mt-3">
           {persona === "company"
             ? "Employers that found their team."
             : "Real stories from real placements."}
@@ -188,7 +185,7 @@ export default function TestimonialCarousel({
         {/* Navigation arrows */}
         <button
           onClick={prev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden bg-card border border-border shadow-sm text-muted-foreground hover:text-foreground"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden shLandingCardStrong"
           aria-label="Previous testimonial"
         >
           <ChevronLeft className="size-4" />
@@ -196,7 +193,7 @@ export default function TestimonialCarousel({
 
         <button
           onClick={next}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden bg-card border border-border shadow-sm text-muted-foreground hover:text-foreground"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 size-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 max-sm:hidden shLandingCardStrong"
           aria-label="Next testimonial"
         >
           <ChevronRight className="size-4" />
@@ -205,20 +202,22 @@ export default function TestimonialCarousel({
         {/* Testimonial card — solid */}
         <div
           key={active}
-          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden bg-card border border-border shadow-sm"
+          className="relative rounded-xl p-8 md:p-10 text-center overflow-hidden shLandingCardStrong"
           style={{
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
             animation: "shLandingFadeIn 400ms ease",
           }}
         >
           {/* Decorative quote mark */}
-          <div
-            className="text-[72px] leading-none font-serif text-muted-foreground/20 absolute top-4 left-6 select-none"
-            aria-hidden="true"
-          >
+          <div className="shLandingQuote" aria-hidden="true">
             &ldquo;
           </div>
 
-          <blockquote className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium relative z-[1] text-foreground">
+          <blockquote
+            className="text-[clamp(16px,1.8vw,20px)] leading-relaxed mb-6 font-medium relative z-[1]"
+            style={{ color: "var(--ink)" }}
+          >
             &ldquo;{t.quote}&rdquo;
           </blockquote>
 
@@ -248,10 +247,16 @@ export default function TestimonialCarousel({
               {t.avatar}
             </div>
             <div className="text-left">
-              <strong className="block text-sm text-foreground">
+              <strong
+                className="block text-sm"
+                style={{ color: "var(--ink)" }}
+              >
                 {t.name}
               </strong>
-              <span className="text-xs text-muted-foreground">
+              <span
+                className="text-xs"
+                style={{ color: "var(--muted)" }}
+              >
                 {t.title} — {t.company}
               </span>
             </div>

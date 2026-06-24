@@ -59,8 +59,8 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
         ref={ref}
         data-slot="page-header"
         className={cn(
-          "mb-6",
-          noSpacing && "mb-0",
+          "shPageHeader",
+          noSpacing && "shPageHeader_noSpacing",
           className,
         )}
         style={{ animationDelay: `${delay}ms` }}
@@ -68,26 +68,26 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
       >
         {/* ── Breadcrumbs ───────────────────────────────────────────── */}
         {breadcrumbs && breadcrumbs.length > 0 && (
-          <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-3" aria-label="Breadcrumbs">
-            <ol className="flex items-center gap-1">
+          <nav className="shPageHeader-crumbs" aria-label="Breadcrumbs">
+            <ol>
               {breadcrumbs.map((crumb, i) => {
                 const isLast = i === breadcrumbs.length - 1;
                 return (
-                  <li key={`${crumb.label}-${i}`} className="flex items-center gap-1">
+                  <li key={`${crumb.label}-${i}`}>
                     {isLast ? (
-                      <span aria-current="page" className="text-foreground font-medium">
+                      <span aria-current="page" className="shPageHeader-crumbCurrent">
                         {crumb.label}
                       </span>
                     ) : crumb.href ? (
-                      <Link href={crumb.href as any} className="text-muted-foreground hover:text-foreground transition-colors">
+                      <Link href={crumb.href as any} className="shPageHeader-crumbLink">
                         {crumb.label}
                       </Link>
                     ) : (
-                      <span className="text-muted-foreground">{crumb.label}</span>
+                      <span className="shPageHeader-crumbText">{crumb.label}</span>
                     )}
                     {!isLast && (
                       <ChevronRight
-                        className="text-muted-foreground/50"
+                        className="shPageHeader-crumbChevron"
                         aria-hidden="true"
                         size={14}
                       />
@@ -100,21 +100,21 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
         )}
 
         {/* ── Title row ─────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="shPageHeader-titleRow">
+          <div className="shPageHeader-titleGroup">
             {backHref && (
               <Link
                 href={backHref as any}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="shPageHeader-back"
                 aria-label="Go back"
               >
                 <ArrowLeft size={18} aria-hidden="true" />
               </Link>
             )}
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+            <h1 className="shPageHeader-title">{title}</h1>
           </div>
           {action && (
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="shPageHeader-action">
               {action}
             </div>
           )}
@@ -122,7 +122,7 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
 
         {/* ── Description ───────────────────────────────────────────── */}
         {description && (
-          <p className="text-sm text-muted-foreground mt-1.5 max-w-prose">{description}</p>
+          <p className="shPageHeader-desc">{description}</p>
         )}
       </div>
     );

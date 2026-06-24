@@ -178,30 +178,25 @@ export function CommandPalette({
           key={cmd.id}
           type="button"
           className={cn(
-            "w-full flex items-center justify-between gap-3 border border-transparent rounded-md bg-transparent text-foreground px-2.5 py-2 text-left text-sm cursor-pointer transition-colors",
-            "hover:border-border hover:bg-muted/30",
-            active && "border-border bg-muted/50 shadow-sm",
+            "shCmdItem",
+            active && "shCmdItemActive",
           )}
           onMouseEnter={() => onSelectIndex(idx)}
           onClick={() => handleVisit(cmd.href)}
         >
-          <span className="min-w-0 grid gap-0.5">
-            <strong className="truncate text-sm font-semibold text-foreground">
+          <span className="shCmdItemBody">
+            <strong className="shCmdItemTitle">
               {segments.map((seg, si) =>
                 seg.match ? (
-                  <mark key={si} className="bg-transparent text-primary font-extrabold">{seg.text}</mark>
+                  <mark key={si} className="shCmdMatch">{seg.text}</mark>
                 ) : (
                   <span key={si}>{seg.text}</span>
                 ),
               )}
             </strong>
-            <small className="truncate text-[11px] font-medium text-muted-foreground">{cmd.subtitle}</small>
+            <small className="shCmdItemSub">{cmd.subtitle}</small>
           </span>
-          {cmd.shortcut ? (
-            <kbd className="shrink-0 inline-flex items-center justify-center min-w-8 h-5.5 rounded-md px-1.5 bg-muted/30 border border-border text-muted-foreground text-[11px] font-bold tracking-wide">
-              {cmd.shortcut}
-            </kbd>
-          ) : null}
+          {cmd.shortcut ? <kbd className="shCmdShortcut">{cmd.shortcut}</kbd> : null}
         </button>
       );
     },
@@ -214,23 +209,18 @@ export function CommandPalette({
   const showRecent = recent.length > 0 && !query.trim();
 
   return (
-    <div
-      className="fixed inset-0 z-[80] grid place-items-start justify-center pt-[9vh] px-4 pb-6 animate-[shCmdFadeIn_200ms_var(--sh-easing)_both]"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Command menu"
-    >
+    <div className="shCmdOverlay" role="dialog" aria-modal="true" aria-label="Command menu">
       <button
-        className="absolute inset-0 border-0 bg-background/80 backdrop-blur-sm cursor-default"
+        className="shCmdScrim"
         aria-label="Close"
         type="button"
         onClick={onClose}
       />
 
-      <section className="relative w-full max-w-[680px] overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_hsl(var(--border)),0_24px_80px_rgba(0,0,0,0.25)] animate-[shCmdSlideIn_200ms_var(--sh-easing)_both]">
+      <section className="shCmdMenu">
         {/* ── Search input ───────────────────────────────────── */}
-        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 border-b border-border px-4 py-3.5">
-          <span className="size-8 inline-flex items-center justify-center rounded-md text-muted-foreground shrink-0" aria-hidden="true">
+        <div className="shCmdInputWrap">
+          <span className="shCmdInputIcon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.3-4.3" />
@@ -252,19 +242,17 @@ export function CommandPalette({
                 onClose();
               }
             }}
-            className="min-w-0 border-0 outline-0 bg-transparent text-foreground text-[15px] font-semibold placeholder:text-muted-foreground/60 placeholder:font-medium"
+            className="shCmdInput"
           />
-          <kbd className="inline-flex items-center justify-center min-w-8 h-6 rounded-md bg-muted/20 border border-border text-muted-foreground text-[11px] font-bold shrink-0 px-1.5">
-            Esc
-          </kbd>
+          <kbd className="shCmdInputEsc">Esc</kbd>
         </div>
 
         {/* ── Results list ────────────────────────────────────── */}
-        <div className="max-h-[min(48vh,480px)] overflow-y-auto p-1.5">
+        <div className="shCmdList">
           {/* Recent section */}
           {showRecent && (
-            <div className="grid gap-0.5 [&+&]:mt-1 [&+&]:pt-1">
-              <h3 className="mx-2 my-1.5 text-muted-foreground text-[11px] font-extrabold uppercase tracking-wider">Recent</h3>
+            <div className="shCmdGroup">
+              <h3 className="shCmdGroupLabel">Recent</h3>
               {recent.map((cmd) => {
                 const idx = filtered.findIndex((f) => f.id === cmd.id);
                 const realIdx = idx >= 0 ? idx : -1;
@@ -276,8 +264,12 @@ export function CommandPalette({
           {/* Results by section */}
           {grouped.length > 0 ? (
             grouped.map(([section, items]) => (
-              <div className="grid gap-0.5 [&+&]:mt-1 [&+&]:pt-1" key={section}>
-                <h3 className="mx-2 my-1.5 text-muted-foreground text-[11px] font-extrabold uppercase tracking-wider">{section}</h3>
+              <div className="shCmdGroup" key={section}>
+                {showRecent ? (
+                  <h3 className="shCmdGroupLabel">{section}</h3>
+                ) : (
+                  <h3 className="shCmdGroupLabel">{section}</h3>
+                )}
                 {items.map((cmd) => {
                   const idx = filtered.findIndex((f) => f.id === cmd.id);
                   return renderItem(cmd, idx);
@@ -285,27 +277,25 @@ export function CommandPalette({
               </div>
             ))
           ) : !showRecent ? (
-            <div className="grid place-items-center gap-1.5 py-9 px-4 text-center">
-              <div className="size-11 inline-flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground mb-1" aria-hidden="true">
+            <div className="shCmdEmpty">
+              <div className="shCmdEmptyIcon" aria-hidden="true">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.3-4.3" />
                 </svg>
               </div>
-              <strong className="text-foreground text-sm font-semibold">No results for &ldquo;{query}&rdquo;</strong>
-              <span className="text-muted-foreground text-xs">Try a view, record name, scope, or shortcut.</span>
+              <strong className="shCmdEmptyTitle">No results for &ldquo;{query}&rdquo;</strong>
+              <span className="shCmdEmptyHint">Try a view, record name, scope, or shortcut.</span>
             </div>
           ) : null}
         </div>
 
         {/* ── Shortcut footer ─────────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-1 px-3.5 py-2.5 border-t border-border bg-muted/15">
+        <div className="shCmdFooter">
           {chords.map((row) => (
-            <div key={row.keys} className="flex items-center gap-2 px-2 py-1 rounded-md">
-              <kbd className="inline-flex items-center justify-center min-w-[30px] h-5 rounded-sm bg-muted/30 border border-border text-muted-foreground text-[10px] font-bold px-1 leading-none">
-                {row.keys}
-              </kbd>
-              <span className="text-xs text-muted-foreground">{row.label}</span>
+            <div key={row.keys} className="shCmdFooterCh cord">
+              <kbd className="shCmdFooterKey">{row.keys}</kbd>
+              <span className="shCmdFooterLabel">{row.label}</span>
             </div>
           ))}
         </div>

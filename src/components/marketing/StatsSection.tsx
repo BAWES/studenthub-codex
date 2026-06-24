@@ -113,8 +113,8 @@ function AnimatedStat({ stat, visible }: { stat: StatItem; visible: boolean }) {
 
       {/* Counter */}
       <div
-          className="text-[clamp(28px,3.5vw,44px)] font-black tracking-tight leading-none"
-          style={{ opacity: visible ? 1 : 0, transition: "opacity 300ms ease" }}
+        className="shLandingStatValue"
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 300ms ease" }}
       >
         <span style={{ color: accentColor }}>
           {visible ? `${displayValue(count)}${stat.suffix}` : "—"}
@@ -167,7 +167,7 @@ export default function StatsSection({ className }: StatsSectionProps) {
       aria-label="Platform statistics"
     >
       <div
-        className="relative rounded-xl p-[clamp(24px,4vw,48px)] overflow-hidden bg-card border border-border shadow-sm"
+        className="relative rounded-xl p-[clamp(24px,4vw,48px)] overflow-hidden shLandingCardStrong"
       >
         {/* Subtle ambient glow */}
         <div
