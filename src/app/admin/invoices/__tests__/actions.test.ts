@@ -21,7 +21,7 @@ vi.mock("@/lib/prisma", () => ({
 
 // Mock session
 vi.mock("@/modules/auth/session", () => ({
-  requireCapability: vi.fn().mockResolvedValue(undefined),
+  requireRoleCapability: vi.fn().mockResolvedValue(undefined),
 }));
 
 const {
