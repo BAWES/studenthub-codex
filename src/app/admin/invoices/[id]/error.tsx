@@ -1,6 +1,8 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { RefreshCw, ArrowLeft } from "lucide-react";
+import type { Route } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -16,28 +18,36 @@ export default function InvoiceDetailError({
   reset: () => void;
 }) {
   return (
-    <div className="flex min-h-[80vh] items-center justify-center bg-background p-8">
+    <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center bg-background">
       <Card className="max-w-[420px] w-full">
         <CardContent className="flex flex-col items-center gap-5 py-10">
-          <div className="flex size-14 items-center justify-center rounded-full bg-[#eb6651]/10">
-            <span className="text-3xl font-black leading-none text-[#eb6651]">!</span>
-          </div>
-          <div className="w-12 h-[3px] rounded-sm bg-[#eb6651]" aria-hidden="true" />
-          <h1 className="text-xl font-bold m-0 text-foreground">
-            Failed to load invoice details
+          <h1 className="text-5xl font-black leading-none m-0 bg-gradient-to-br from-[#eb6651] to-[#f59e0b] bg-clip-text text-transparent">
+            500
           </h1>
-          <p className="text-[15px] text-muted-foreground leading-relaxed m-0 text-center">
+          <div className="w-12 h-[3px] rounded-sm bg-[#eb6651]" aria-hidden="true" />
+          <h2 className="text-xl font-bold m-0 text-foreground">
+            Failed to load invoice details
+          </h2>
+          <p className="text-[15px] text-muted-foreground leading-relaxed m-0">
             {error.message ?? "An unexpected error occurred."}
           </p>
           {error.digest ? (
-            <code className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground font-mono">
-              Error ID: {error.digest}
-            </code>
+            <p className="text-xs text-muted-foreground/60">
+              Error ID: <code className="bg-muted px-1.5 py-0.5 rounded text-[11px]">{error.digest}</code>
+            </p>
           ) : null}
-          <Button onClick={() => reset()} className="mt-2">
-            <RefreshCw className="h-4 w-4" />
-            Try again
-          </Button>
+          <div className="flex gap-3 mt-2 flex-wrap justify-center">
+            <Button onClick={() => reset()}>
+              <RefreshCw className="h-4 w-4" />
+              Try again
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href={"/admin/invoices" as Route}>
+                <ArrowLeft className="h-4 w-4" />
+                Back to invoices
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

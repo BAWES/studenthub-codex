@@ -2,6 +2,9 @@
 
 import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -48,22 +51,23 @@ export function PaymentFilters({
 
   return (
     <>
-      <div className="rounded-lg border border-border bg-white p-4 mb-6">
+      <Card className="mb-6">
+      <CardContent className="p-4">
         <div className="flex flex-wrap items-end gap-4">
           {/* Status */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <Label className="text-xs font-bold uppercase tracking-wider">
               Status
-            </label>
+            </Label>
             <Select
               value={filters.status}
-              onValueChange={(v) => handleChange("status", v)}
+              onValueChange={(v) => handleChange("status", v === "all" ? "" : v)}
             >
               <SelectTrigger className="h-10 w-36" aria-label="Filter by status">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 {STATUS_OPTIONS.map((s) => (
                   <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
@@ -73,18 +77,18 @@ export function PaymentFilters({
 
           {/* Type */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <Label className="text-xs font-bold uppercase tracking-wider">
               Type
-            </label>
+            </Label>
             <Select
               value={filters.type}
-              onValueChange={(v) => handleChange("type", v)}
+              onValueChange={(v) => handleChange("type", v === "all" ? "" : v)}
             >
               <SelectTrigger className="h-10 w-36" aria-label="Filter by type">
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 {TYPE_OPTIONS.map((t) => (
                   <SelectItem key={t} value={t}>{t}</SelectItem>
                 ))}
@@ -94,13 +98,13 @@ export function PaymentFilters({
 
           {/* Date from */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="payment-date-from" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <Label htmlFor="payment-date-from" className="text-xs font-bold uppercase tracking-wider">
               From
-            </label>
-            <input
+            </Label>
+            <Input
               id="payment-date-from"
               type="date"
-              className="flex h-10 w-40 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-10 w-40"
               value={filters.dateFrom}
               onChange={(e) => handleChange("dateFrom", e.target.value)}
             />
@@ -108,13 +112,13 @@ export function PaymentFilters({
 
           {/* Date to */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="payment-date-to" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <Label htmlFor="payment-date-to" className="text-xs font-bold uppercase tracking-wider">
               To
-            </label>
-            <input
+            </Label>
+            <Input
               id="payment-date-to"
               type="date"
-              className="flex h-10 w-40 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-10 w-40"
               value={filters.dateTo}
               onChange={(e) => handleChange("dateTo", e.target.value)}
             />
@@ -130,18 +134,20 @@ export function PaymentFilters({
             </Button>
           </div>
         </div>
-      </div>
+      </CardContent>
+    </Card>
 
-      {emptyResult && (
-        <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
-          <span className="text-4xl" aria-hidden="true">🔍</span>
+    {emptyResult && (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-16 gap-4" role="status">
           <p className="text-lg font-semibold text-foreground">No payments match your filters</p>
           <p className="text-sm text-muted-foreground">Try adjusting your search or filter criteria</p>
           <Button onClick={onClear} variant="default">
             Clear Filters
           </Button>
-        </div>
-      )}
+        </CardContent>
+      </Card>
+    )}
     </>
   );
 }

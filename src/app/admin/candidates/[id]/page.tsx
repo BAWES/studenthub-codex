@@ -3,13 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { requireCapability } from "@/modules/auth/session";
-import { getCandidateDetail } from "@/modules/admin/candidates/[id]";
+import { getCandidateDetail, adminUploadCandidateDocument, adminDeleteCandidateDocument } from "@/modules/admin/candidates/[id]";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { AdminDocumentsUpload } from "./_components";
 import {
   Mail,
   Phone,
@@ -187,51 +188,26 @@ export default async function AdminCandidateDetailPage({
 
         {/* ── Tab: Documents ────────────────────────────────── */}
         <TabsContent value="documents" className="space-y-4">
-          {detail.documents.length > 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <FileText className="size-4" />
-                  Documents ({detail.documents.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {detail.documents.map((doc) => (
-                    <div
-                      key={doc.type}
-                      className="text-sm py-2 border-b border-border last:border-0 flex items-center justify-between"
-                    >
-                      <span className="font-medium">{doc.label}</span>
-                      {doc.url ? (
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline text-xs"
-                        >
-                          View
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">Missing</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base text-muted-foreground">No documents</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  No documents (resume, civil ID, or photos) on file.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <FileText className="size-4" />
+                Candidate Documents
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Upload, view, or remove candidate documents — CV/resume, personal
+                photo, video profile, and civil ID photos.
+              </p>
+              <AdminDocumentsUpload
+                candidateId={candidateId}
+                documents={detail.documents}
+                uploadAction={adminUploadCandidateDocument}
+                deleteAction={adminDeleteCandidateDocument}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
