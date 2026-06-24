@@ -70,9 +70,7 @@ function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-4 py-3" aria-hidden="true">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className="h-4 rounded bg-white/5 animate-pulse"
+        <div className="h-4 rounded bg-muted animate-pulse"
           style={{ width: `${80 + i * 25}px`, flex: i === 0 ? "1" : undefined }}
         />
       ))}
