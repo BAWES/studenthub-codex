@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listSalaryScalesSchema,
+  salaryScaleListItemSchema,
+  listSalaryScalesResultSchema,
 } from "./schemas";
+import type { SalaryScaleListItem, ListSalaryScalesResult } from "./schemas";
 
 // ── Hoisted mock functions ──────────────────────────────────
 const { mockRequireCapability, mockFindMany, mockCount, mockUpdate, mockDelete, mockCreate } =
@@ -34,6 +37,7 @@ vi.mock("@/lib/prisma", () => ({
       update: mockUpdate,
       delete: mockDelete,
       create: mockCreate,
+      findFirst: vi.fn(),
     },
   },
 }));
@@ -86,33 +90,30 @@ describe("listSalaryScalesSchema", () => {
 // Output schema validation — salaryScaleListItemSchema
 // ---------------------------------------------------------------------------
 
-import {
-  salaryScaleListItemSchema,
-  listSalaryScalesResultSchema as listSalaryScalesResultOutputSchema,
-} from "./schemas";
-
 describe("salaryScaleListItemSchema", () => {
   it("accepts a valid salary scale item", () => {
-    const result = salaryScaleListItemSchema.safeParse({
+    const item: SalaryScaleListItem = {
       salary_scale_id: 1,
       salary_scale_name_en: "Grade 1",
       salary_scale_name_ar: null,
       salary_scale_min_amount: 500,
       salary_scale_max_amount: 1000,
-      candidate_count: 10,
-    });
+      candidate_count: null,
+    };
+    const result = salaryScaleListItemSchema.safeParse(item);
     expect(result.success).toBe(true);
   });
 
   it("accepts nullable fields", () => {
-    const result = salaryScaleListItemSchema.safeParse({
+    const item: SalaryScaleListItem = {
       salary_scale_id: 2,
       salary_scale_name_en: "Grade 2",
       salary_scale_name_ar: null,
       salary_scale_min_amount: null,
       salary_scale_max_amount: null,
       candidate_count: null,
-    });
+    };
+    const result = salaryScaleListItemSchema.safeParse(item);
     expect(result.success).toBe(true);
   });
 
@@ -125,16 +126,18 @@ describe("salaryScaleListItemSchema", () => {
 });
 
 describe("listSalaryScalesResultSchema", () => {
-  it("accepts a valid list result with records", () => {
-    const result = listSalaryScalesResultOutputSchema.safeParse({
-      records: [{
-        salary_scale_id: 1,
-        salary_scale_name_en: "Grade 1",
-        salary_scale_name_ar: null,
-        salary_scale_min_amount: null,
-        salary_scale_max_amount: null,
-        candidate_count: null,
-      }],
+  it("accepts a valid list result with items", () => {
+    const result: ListSalaryScalesResult = {
+      records: [
+        {
+          salary_scale_id: 1,
+          salary_scale_name_en: "Grade 1",
+          salary_scale_name_ar: null,
+          salary_scale_min_amount: null,
+          salary_scale_max_amount: null,
+          candidate_count: null,
+        },
+      ],
       total: 1,
       page: 1,
       limit: 50,
@@ -144,7 +147,7 @@ describe("listSalaryScalesResultSchema", () => {
   });
 
   it("accepts empty records array", () => {
-    const result = listSalaryScalesResultOutputSchema.safeParse({
+    const result: ListSalaryScalesResult = {
       records: [],
       total: 0,
       page: 1,
@@ -155,7 +158,7 @@ describe("listSalaryScalesResultSchema", () => {
   });
 
   it("rejects non-array records", () => {
-    const result = listSalaryScalesResultOutputSchema.safeParse({
+    const result = {
       records: "not-an-array",
       total: 0,
       page: 1,
@@ -170,26 +173,24 @@ describe("listSalaryScalesResultSchema", () => {
 // Action-level tests — mocked DB
 // ---------------------------------------------------------------------------
 
+const dbRow = {
+  salary_scale_id: 1,
+  salary_scale_name_en: "Grade 1",
+  salary_scale_name_ar: null,
+  salary_scale_min_amount: null,
+  salary_scale_max_amount: null,
+  salary_scale_created_at: new Date("2026-01-01"),
+  salary_scale_updated_at: null,
+};
+
 describe("listSalaryScales action", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("returns paginated list with default params", async () => {
-    const dbRows = [
-      {
-        salary_scale_id: 1,
-        salary_scale_name_en: "Grade 1",
-        salary_scale_name_ar: null,
-        salary_scale_min_amount: null,
-        salary_scale_max_amount: null,
-        salary_scale_created_at: new Date("2026-01-01"),
-        salary_scale_updated_at: null,
-      },
-    ];
-
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    mockFindMany.mockResolvedValue(dbRows);
+    mockFindMany.mockResolvedValue([dbRow]);
     mockCount.mockResolvedValue(1);
 
     const result = await listSalaryScales({});
@@ -197,7 +198,7 @@ describe("listSalaryScales action", () => {
     expect(mockRequireCapability).toHaveBeenCalledWith("admin.system");
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: [{ salary_scale_name_en: "asc" }],
+        orderBy: { salary_scale_name_en: "asc" },
         skip: 0,
         take: 50,
       }),
@@ -243,3 +244,124 @@ describe("listSalaryScales action", () => {
     expect(mockFindMany).not.toHaveBeenCalled();
   });
 });
+
+// ---------------------------------------------------------------------------
+// updateSalaryScale action tests
+// ---------------------------------------------------------------------------
+
+describe("updateSalaryScale action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("updates a salary scale by ID", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    setupFindFirstMock({ salary_scale_id: 1 });
+    mockUpdate.mockResolvedValue({ salary_scale_id: 1, salary_scale_name_en: "Updated Name" });
+
+    const result = await updateSalaryScale({
+      salary_scale_id: 1,
+      salary_scale_name_en: "Updated Name",
+    });
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.system");
+    expect(result.salary_scale_id).toBe(1);
+  });
+
+  it("rejects empty salary_scale_name_en", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+
+    await expect(
+      updateSalaryScale({ salary_scale_id: 1, salary_scale_name_en: "" }),
+    ).rejects.toThrow();
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("throws when record not found", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    setupFindFirstMock(null);
+
+    await expect(
+      updateSalaryScale({ salary_scale_id: 999, salary_scale_name_en: "Name" }),
+    ).rejects.toThrow("Salary scale record not found: 999");
+  });
+
+  it("throws when session fails", async () => {
+    mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(
+      updateSalaryScale({ salary_scale_id: 1, salary_scale_name_en: "Name" }),
+    ).rejects.toThrow("Unauthorized");
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteSalaryScale action tests
+// ---------------------------------------------------------------------------
+
+describe("deleteSalaryScale action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("deletes a salary scale by ID", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    setupFindFirstMock({ salary_scale_id: 1 });
+    mockDelete.mockResolvedValue({ salary_scale_id: 1 });
+
+    const result = await deleteSalaryScale(1);
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.system");
+    expect(mockDelete).toHaveBeenCalledWith({
+      where: { salary_scale_id: 1 },
+    });
+    expect(result.salary_scale_id).toBe(1);
+  });
+
+  it("throws when record not found", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    setupFindFirstMock(null);
+
+    await expect(deleteSalaryScale(999)).rejects.toThrow("Salary scale record not found: 999");
+    expect(mockDelete).not.toHaveBeenCalled();
+  });
+
+  it("handles Prisma error (e.g. foreign key constraint)", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    setupFindFirstMock({ salary_scale_id: 1 });
+    mockDelete.mockRejectedValue(new Error("Foreign key constraint failed"));
+
+    await expect(deleteSalaryScale(1)).rejects.toThrow("Foreign key constraint failed");
+  });
+
+  it("throws when session fails", async () => {
+    mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(deleteSalaryScale(1)).rejects.toThrow("Unauthorized");
+    expect(mockDelete).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Helper
+// ---------------------------------------------------------------------------
+
+function setupFindFirstMock(returnValue: unknown) {
+  const { prisma } = { prisma: { salary_scale: { findFirst: vi.fn() } } };
+  // Dynamic import won't work in the helper — use a different approach
+  const mockPrisma = { salary_scale: { findFirst: vi.fn().mockResolvedValue(returnValue) } };
+  (globalThis as any).__mockPrisma = mockPrisma;
+  vi.mock("@/lib/prisma", () => ({
+    prisma: {
+      salary_scale: {
+        findMany: mockFindMany,
+        count: mockCount,
+        update: mockUpdate,
+        delete: mockDelete,
+        create: mockCreate,
+        findFirst: vi.fn().mockResolvedValue(returnValue),
+      },
+    },
+  }));
+}

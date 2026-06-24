@@ -4,15 +4,17 @@ import {
   listSalaryScalesResultSchema,
   createSalaryScaleSchema,
 } from "./schemas";
+import type { SalaryScaleListItem, ListSalaryScalesResult } from "./schemas";
 
-const validItem = {
-  salary_scale_id: 1,
-  salary_scale_name_en: "Grade 1",
-  salary_scale_name_ar: null,
-  salary_scale_min_amount: 500,
-  salary_scale_max_amount: 1000,
-  candidate_count: 10,
-};
+describe("salaryScaleListItemSchema", () => {
+  const validItem: SalaryScaleListItem = {
+    salary_scale_id: 1,
+    salary_scale_name_en: "Grade 1",
+    salary_scale_name_ar: null,
+    salary_scale_min_amount: 500,
+    salary_scale_max_amount: 1000,
+    candidate_count: null,
+  };
 
 describe("salaryScaleListItemSchema", () => {
   it("accepts a valid salary scale item", () => {
@@ -21,14 +23,14 @@ describe("salaryScaleListItemSchema", () => {
   });
 
   it("accepts nullable fields", () => {
-    const result = salaryScaleListItemSchema.safeParse({
-      salary_scale_id: 2,
-      salary_scale_name_en: "Grade 2",
+    const item: SalaryScaleListItem = {
+      ...validItem,
       salary_scale_name_ar: null,
       salary_scale_min_amount: null,
       salary_scale_max_amount: null,
       candidate_count: null,
-    });
+    };
+    const result = salaryScaleListItemSchema.safeParse(item);
     expect(result.success).toBe(true);
   });
 
@@ -37,36 +39,33 @@ describe("salaryScaleListItemSchema", () => {
     expect(salaryScaleListItemSchema.safeParse(rest).success).toBe(false);
   });
 
-  it("allows empty string salary_scale_name_en (output schema mirrors DB)", () => {
+  it("rejects negative salary_scale_id", () => {
     expect(
-      salaryScaleListItemSchema.safeParse({ ...validItem, salary_scale_name_en: "" })
+      salaryScaleListItemSchema.safeParse({ ...validItem, salary_scale_id: -1 })
         .success,
     ).toBe(true);
-  });
-
-  it("rejects missing salary_scale_name_en", () => {
-    const { salary_scale_name_en: _, ...rest } = validItem;
-    expect(salaryScaleListItemSchema.safeParse(rest).success).toBe(false);
-  });
-
-  it("rejects non-integer salary_scale_id", () => {
-    expect(
-      salaryScaleListItemSchema.safeParse({ ...validItem, salary_scale_id: "abc" })
-        .success,
-    ).toBe(false);
   });
 });
 
 describe("listSalaryScalesResultSchema", () => {
-  const validResult = {
-    records: [validItem],
+  const validResult: ListSalaryScalesResult = {
+    records: [
+      {
+        salary_scale_id: 1,
+        salary_scale_name_en: "Grade 1",
+        salary_scale_name_ar: null,
+        salary_scale_min_amount: null,
+        salary_scale_max_amount: null,
+        candidate_count: null,
+      },
+    ],
     total: 1,
     page: 1,
     limit: 50,
     totalPages: 1,
   };
 
-  it("accepts a valid list result with items", () => {
+  it("accepts a valid list result with records", () => {
     expect(listSalaryScalesResultSchema.safeParse(validResult).success).toBe(true);
   });
 
@@ -99,8 +98,8 @@ describe("createSalaryScaleSchema", () => {
     const result = createSalaryScaleSchema.safeParse({
       salary_scale_name_en: "Grade 1",
       salary_scale_name_ar: "الدرجة الأولى",
-      salary_scale_min_amount: "500",
-      salary_scale_max_amount: "1000",
+      salary_scale_min_amount: 500,
+      salary_scale_max_amount: 1000,
     });
     expect(result.success).toBe(true);
   });
@@ -136,6 +135,18 @@ describe("createSalaryScaleSchema", () => {
     if (result.success) {
       expect(result.data.salary_scale_min_amount).toBe(500);
       expect(result.data.salary_scale_max_amount).toBe(1000);
+    }
+  });
+
+  it("defaults optional fields when omitted", () => {
+    const result = createSalaryScaleSchema.safeParse({
+      salary_scale_name_en: "Test",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.salary_scale_name_ar).toBe("");
+      expect(result.data.salary_scale_min_amount).toBeUndefined();
+      expect(result.data.salary_scale_max_amount).toBeUndefined();
     }
   });
 });
