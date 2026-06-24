@@ -63,13 +63,13 @@ export default async function CandidateJobDetailPage({ params }: Props) {
           {/* Score breakdown */}
           {job.matchScore !== null && (
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="border-[#eb6651]/30 bg-[#fef1ef] text-[#eb6651]">
+              <Badge variant="outline" className="border-coral/30 bg-[#fef1ef] text-coral">
                 {breakdownLabel("Skills", job.skillScore)}
               </Badge>
-              <Badge variant="outline" className="border-[#eb6651]/30 bg-[#fef1ef] text-[#eb6651]">
+              <Badge variant="outline" className="border-coral/30 bg-[#fef1ef] text-coral">
                 {breakdownLabel("Education", job.educationScore)}
               </Badge>
-              <Badge variant="outline" className="border-[#eb6651]/30 bg-[#fef1ef] text-[#eb6651]">
+              <Badge variant="outline" className="border-coral/30 bg-[#fef1ef] text-coral">
                 {breakdownLabel("Location", job.locationScore)}
               </Badge>
             </div>

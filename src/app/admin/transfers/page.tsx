@@ -30,7 +30,7 @@ export default async function AdminTransfersPage() {
       <Card className="mb-6" aria-label="Finance workflow">
         <CardContent className="grid gap-6 p-5">
           <div className="grid gap-2">
-            <span className="text-xs font-bold uppercase tracking-wide text-[#eb6651]">Finance path</span>
+            <span className="text-xs font-bold uppercase tracking-wide text-coral">Finance path</span>
             <h2 className="text-xl font-semibold mb-0">
               Start with a transfer run. Everything else should hang off that.
             </h2>

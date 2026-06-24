@@ -44,7 +44,7 @@ describe("MobileNavBar", () => {
     const tabs = screen.getAllByRole("link");
     const overviewTab = tabs.find((t) => t.textContent?.includes("Overview"));
     expect(overviewTab).toBeDefined();
-    // Active tabs get the coral color (text-[#eb6651])
+    // Active tabs get the coral color (text-coral)
     expect(overviewTab!.className).toContain("eb6651");
   });
 

@@ -114,14 +114,14 @@ export default function InspectorLandingContent({
           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-background z-0" aria-hidden="true" />
 
           <div className="relative z-[2]">
-            <p className="text-[#eb6651] text-[11px] font-black uppercase tracking-wider mb-1">
+            <p className="text-coral text-[11px] font-black uppercase tracking-wider mb-1">
               The real compliance challenge
             </p>
             <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-foreground mb-8">
               You don&apos;t need more paperwork.
               <br />
               You need{" "}
-              <em className="text-[#eb6651]">instant</em>{" "}
+              <em className="text-coral">instant</em>{" "}
               on-site validation.
             </h2>
 
@@ -132,7 +132,7 @@ export default function InspectorLandingContent({
                   className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-white border border-border"
                 >
                   <div
-                    className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[#eb6651]/15 text-[#eb6651]"
+                    className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-coral/15 text-coral"
                   >
                     <span className="font-black text-sm">0{i + 1}</span>
                   </div>
@@ -193,7 +193,7 @@ export default function InspectorLandingContent({
           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-background z-0" aria-hidden="true" />
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
-            <p className="text-[#eb6651] text-[11px] font-black uppercase tracking-wider mb-2">
+            <p className="text-coral text-[11px] font-black uppercase tracking-wider mb-2">
               Validate workers instantly — on-site or remote
             </p>
             <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-foreground text-center">

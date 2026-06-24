@@ -71,7 +71,7 @@ export function MobileFAB({
         size="icon"
         className={cn(
           "fixed bottom-6 right-6 z-50 size-14 rounded-full shadow-xl",
-          "bg-[#eb6651] hover:bg-[#d45441] text-white",
+          "bg-coral hover:bg-coral-hover text-white",
           "transition-all duration-200 ease-in-out",
           "text-2xl font-light leading-none",
           hidden && "opacity-0 pointer-events-none scale-0",

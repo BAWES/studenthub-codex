@@ -56,7 +56,7 @@ export function CandidateAgenciesTable({ session, rows, total }: Props) {
               return email ? (
                 <a
                   href={`mailto:${email}`}
-                  className="text-[#eb6651] hover:underline"
+                  className="text-coral hover:underline"
                 >
                   {email}
                 </a>
