@@ -1,7 +1,22 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
 import { approveIdRequest, rejectIdRequest } from "@/modules/candidates/actions";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export function IdRequestActions({
   requestUuid,
@@ -10,68 +25,116 @@ export function IdRequestActions({
   requestUuid: string;
   currentStatus: string | null | undefined;
 }) {
+  const router = useRouter();
   const [showReject, setShowReject] = useState(false);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [approveState, approveAction, approvePending] = useActionState(approveIdRequest, { error: "" });
   const [rejectState, rejectAction, rejectPending] = useActionState(rejectIdRequest, { error: "" });
 
   if (currentStatus !== "pending") return null;
 
+  const handleApprove = async (formData: FormData) => {
+    formData.set("requestUuid", requestUuid);
+    const result = await approveIdRequest({ error: "" }, formData);
+    if (!result.error) {
+      toast.success("ID request approved");
+      router.refresh();
+    }
+    setApproveDialogOpen(false);
+    return result;
+  };
+
   return (
     <div className="flex flex-col gap-4 mt-4">
-      <form
-        action={approveAction}
-        onSubmit={(e) => {
-          if (!window.confirm("Approve this ID verification request? All candidates in the batch will be notified.")) {
-            e.preventDefault();
-          }
-        }}
-      >
+      {/* ── Approve with AlertDialog confirmation ── */}
+      <form action={approveAction} onSubmit={(e) => e.preventDefault()}>
         <input type="hidden" name="requestUuid" value={requestUuid} />
-        <div className="formActions">
-          <button type="submit" className="acceptButton" disabled={approvePending}>
-            {approvePending ? "Approving..." : "Approve request"}
-          </button>
-        </div>
-        {approveState.error && (
-          <p className="text-sm text-destructive mt-1">{approveState.error}</p>
-        )}
+        <AlertDialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
+          <AlertDialogTrigger asChild>
+            <Button type="button" disabled={approvePending}>
+              {approvePending ? "Approving..." : "Approve request"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Approve ID Verification Request?</AlertDialogTitle>
+              <AlertDialogDescription>
+                All candidates in this batch will be notified about their approved ID
+                verification. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  const form = document.querySelector<HTMLFormElement>("[data-approve-form]");
+                  if (form) {
+                    const fd = new FormData(form);
+                    await handleApprove(fd);
+                  }
+                }}
+              >
+                Approve
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </form>
+      {approveState.error && (
+        <p className="text-sm text-destructive mt-1">{approveState.error}</p>
+      )}
 
-      <form action={rejectAction}>
-        <input type="hidden" name="requestUuid" value={requestUuid} />
-        {!showReject ? (
-          <div className="formActions">
-            <button type="button" className="rejectButton" onClick={() => setShowReject(true)}>
-              Reject request
-            </button>
+      {/* ── Reject with inline reason form ── */}
+      {!showReject ? (
+        <Button variant="destructive" onClick={() => setShowReject(true)}>
+          Reject request
+        </Button>
+      ) : (
+        <form
+          action={rejectAction}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const fd = new FormData(form);
+            const result = await rejectIdRequest({ error: "" }, fd);
+            if (!result.error) {
+              toast.success("ID request rejected");
+              router.refresh();
+              setShowReject(false);
+            }
+          }}
+          className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
+        >
+          <input type="hidden" name="requestUuid" value={requestUuid} />
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-foreground">Rejection reason</span>
+            <Textarea
+              name="reason"
+              rows={3}
+              required
+              minLength={10}
+              maxLength={500}
+              placeholder="Explain why this ID verification request is being rejected (min 10 characters)..."
+            />
+          </label>
+          {rejectState.error && (
+            <p className="text-sm text-destructive">{rejectState.error}</p>
+          )}
+          <div className="flex items-center gap-2">
+            <Button type="submit" variant="destructive" disabled={rejectPending}>
+              {rejectPending ? "Rejecting..." : "Confirm rejection"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowReject(false)}
+              disabled={rejectPending}
+            >
+              Cancel
+            </Button>
           </div>
-        ) : (
-          <>
-            <label>
-              <span>Rejection reason</span>
-              <textarea
-                name="reason"
-                rows={3}
-                required
-                minLength={10}
-                maxLength={500}
-                placeholder="Explain why this ID verification request is being rejected (min 10 characters)..."
-              />
-            </label>
-            {rejectState.error && (
-              <p className="text-sm text-destructive mt-1">{rejectState.error}</p>
-            )}
-            <div className="formActions">
-              <button type="submit" className="rejectButton" disabled={rejectPending}>
-                {rejectPending ? "Rejecting..." : "Confirm rejection"}
-              </button>
-              <button type="button" onClick={() => setShowReject(false)} disabled={rejectPending}>
-                Cancel
-              </button>
-            </div>
-          </>
-        )}
-      </form>
+        </form>
+      )}
     </div>
   );
 }
