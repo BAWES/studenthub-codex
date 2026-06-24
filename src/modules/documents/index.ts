@@ -6,6 +6,7 @@ export {
   listDocuments,
   getDocument,
   uploadDocument,
+  deleteDocument,
   getDocumentDownloadUrl,
 } from "./actions";
 

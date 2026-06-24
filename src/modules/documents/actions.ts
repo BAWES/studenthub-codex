@@ -313,13 +313,13 @@ export async function getDocumentDownloadUrl(
 /**
  * Deletes a document record by file_uuid (soft-delete via Prisma update).
  */
-export async function deleteDocumentRecord(
-  file_uuid: string,
+export async function deleteDocument(
+  input: { file_uuid: string },
 ): Promise<{ success: boolean }> {
   await requireCapability("document.write");
 
   await prisma.file.update({
-    where: { file_uuid },
+    where: { file_uuid: input.file_uuid },
     data: { file_title: `[DELETED] ${new Date().toISOString()}` },
   });
 
