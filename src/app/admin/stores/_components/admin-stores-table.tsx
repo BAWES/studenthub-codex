@@ -57,13 +57,14 @@ export function AdminStoresTable({ session, stores }: Props) {
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <button
-                  type="button"
-                  className="text-sm hover:underline text-primary"
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-sm px-0 h-auto font-normal"
                   onClick={() => setEditingId(row.store_id)}
                 >
                   {row.store_name}
-                </button>
+                </Button>
               ),
           },
           {
