@@ -85,9 +85,10 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.degree_group_uuid ? (
-                <button
+                <Button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete degree group "${row.degree_group_name_en}"?`)) {
                       const result = await deleteDegreeGroup(row.degree_group_uuid);
@@ -99,7 +100,7 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
