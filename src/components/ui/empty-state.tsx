@@ -46,7 +46,7 @@ function SearchEmpty({ className }: { className?: string }) {
       height="100"
       viewBox="0 0 120 100"
       fill="none"
-      className={cn("shEmptyStateSvg", className)}
+      className={cn("size-[120px] shrink-0", className)}
       aria-hidden="true"
     >
       {/* Magnifying glass */}
@@ -69,7 +69,7 @@ function EmptyCanvas({ className }: { className?: string }) {
       height="100"
       viewBox="0 0 120 100"
       fill="none"
-      className={cn("shEmptyStateSvg", className)}
+      className={cn("size-[120px] shrink-0", className)}
       aria-hidden="true"
     >
       {/* Empty frame */}
@@ -90,7 +90,7 @@ function ErrorState({ className }: { className?: string }) {
       height="100"
       viewBox="0 0 120 100"
       fill="none"
-      className={cn("shEmptyStateSvg", className)}
+      className={cn("size-[120px] shrink-0", className)}
       aria-hidden="true"
     >
       {/* Alert circle */}
@@ -111,7 +111,7 @@ function SuccessState({ className }: { className?: string }) {
       height="100"
       viewBox="0 0 120 100"
       fill="none"
-      className={cn("shEmptyStateSvg", className)}
+      className={cn("size-[120px] shrink-0", className)}
       aria-hidden="true"
     >
       {/* Check circle */}
@@ -134,7 +134,7 @@ function LoadingState({ className }: { className?: string }) {
       height="100"
       viewBox="0 0 120 100"
       fill="none"
-      className={cn("shEmptyStateSvg", className)}
+      className={cn("size-[120px] shrink-0", className)}
       aria-hidden="true"
     >
       {/* Pulsing circle */}
@@ -153,7 +153,7 @@ function IdleState({ className }: { className?: string }) {
       height="100"
       viewBox="0 0 120 100"
       fill="none"
-      className={cn("shEmptyStateSvg", className)}
+      className={cn("size-[120px] shrink-0", className)}
       aria-hidden="true"
     >
       {/* Window frame */}
@@ -200,23 +200,23 @@ function EmptyState({
     <div
       data-slot="empty-state"
       className={cn(
-        "shEmptyState",
+        "flex flex-col items-center gap-4 py-16 px-6 text-center",
         className,
       )}
       style={{ animationDelay: `${delay}ms` } as React.CSSProperties}
       role="status"
     >
-      <div className="shEmptyStateIllustration">
+      <div className="flex items-center justify-center">
         <Illustration />
       </div>
-      <div className="shEmptyStateContent">
-        <h3 className="shEmptyStateTitle">{title}</h3>
+      <div className="max-w-md mx-auto">
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         {description && (
-          <p className="shEmptyStateDesc">{description}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed mt-1">{description}</p>
         )}
       </div>
       {actionLabel && (onAction || actionHref) && (
-        <div className="shEmptyStateAction">
+        <div className="mt-2">
           {actionHref ? (
             <Button asChild size="sm">
               <a href={actionHref}>{actionLabel}</a>
