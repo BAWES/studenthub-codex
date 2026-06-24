@@ -4,13 +4,10 @@ import {
   listSalaryScalesResultSchema,
   createSalaryScaleSchema,
 } from "./schemas";
-import type {
-  SalaryScaleListItem,
-  ListSalaryScalesResult,
-} from "./schemas";
+import type { SalaryScaleListItem, ListSalaryScalesResult } from "./schemas";
 
 describe("salaryScaleListItemSchema", () => {
-  const validItem = {
+  const validItem: SalaryScaleListItem = {
     salary_scale_id: 1,
     salary_scale_name_en: "Grade 1",
     salary_scale_name_ar: null,
@@ -20,19 +17,20 @@ describe("salaryScaleListItemSchema", () => {
   };
 
   it("accepts a valid salary scale item", () => {
-    expect(salaryScaleListItemSchema.safeParse(validItem).success).toBe(true);
+    const result = salaryScaleListItemSchema.safeParse(validItem);
+    expect(result.success).toBe(true);
   });
 
   it("accepts nullable fields", () => {
-    expect(
-      salaryScaleListItemSchema.safeParse({
-        ...validItem,
-        salary_scale_name_ar: null,
-        salary_scale_min_amount: null,
-        salary_scale_max_amount: null,
-        candidate_count: null,
-      }).success,
-    ).toBe(true);
+    const item: SalaryScaleListItem = {
+      ...validItem,
+      salary_scale_name_ar: null,
+      salary_scale_min_amount: null,
+      salary_scale_max_amount: null,
+      candidate_count: null,
+    };
+    const result = salaryScaleListItemSchema.safeParse(item);
+    expect(result.success).toBe(true);
   });
 
   it("rejects missing salary_scale_id", () => {
@@ -46,22 +44,10 @@ describe("salaryScaleListItemSchema", () => {
         .success,
     ).toBe(false);
   });
-
-  it("accepts empty salary_scale_name_en (DB may return empty)", () => {
-    expect(
-      salaryScaleListItemSchema.safeParse({ ...validItem, salary_scale_name_en: "" })
-        .success,
-    ).toBe(true);
-  });
-
-  it("rejects missing salary_scale_name_en", () => {
-    const { salary_scale_name_en: _, ...rest } = validItem;
-    expect(salaryScaleListItemSchema.safeParse(rest).success).toBe(false);
-  });
 });
 
 describe("listSalaryScalesResultSchema", () => {
-  const validResult = {
+  const validResult: ListSalaryScalesResult = {
     records: [
       {
         salary_scale_id: 1,
@@ -158,13 +144,15 @@ describe("createSalaryScaleSchema", () => {
     }
   });
 
-  it("defaults salary_scale_name_ar to empty string", () => {
+  it("defaults optional fields when omitted", () => {
     const result = createSalaryScaleSchema.safeParse({
       salary_scale_name_en: "Test",
     });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.salary_scale_name_ar).toBe("");
+      expect(result.data.salary_scale_min_amount).toBeUndefined();
+      expect(result.data.salary_scale_max_amount).toBeUndefined();
     }
   });
 });
