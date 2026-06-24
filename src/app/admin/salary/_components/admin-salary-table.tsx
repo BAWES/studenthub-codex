@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { SalaryItem } from "../schemas";
@@ -58,13 +65,14 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <button
+                <Button
                   type="button"
-                  className="text-sm hover:underline text-primary"
+                  variant="ghost"
+                  className="text-sm px-0 h-auto hover:underline"
                   onClick={() => setEditingId(row.staff_salary_uuid)}
                 >
                   {row.staff_name ?? `Staff #${row.staff_id}`}
-                </button>
+                </Button>
               ),
           },
           {
@@ -111,7 +119,8 @@ export function AdminSalaryTable({ session, salaries, total, staff }: Props) {
               editingId !== row.staff_salary_uuid ? (
                 <Button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete salary record for "${row.staff_name ?? "staff #" + row.staff_id}"?`)) {
                       const result = await deleteSalary(row.staff_salary_uuid);
@@ -161,17 +170,16 @@ function CreateSalaryForm({
     >
       <div className="grid gap-1.5">
         <Label htmlFor="staffId">Staff</Label>
-        <select
-          id="staffId"
-          name="staffId"
-          required
-          className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-w-[180px]"
-        >
-          <option value="">Select staff...</option>
-          {staff.map((s) => (
-            <option key={s.staff_id} value={s.staff_id}>{s.staff_name}</option>
-          ))}
-        </select>
+        <Select name="staffId">
+          <SelectTrigger className="min-w-[180px]" id="staffId">
+            <SelectValue placeholder="Select staff..." />
+          </SelectTrigger>
+          <SelectContent>
+            {staff.map((s) => (
+              <SelectItem key={s.staff_id} value={String(s.staff_id)}>{s.staff_name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="salary">Salary</Label>
@@ -188,15 +196,15 @@ function CreateSalaryForm({
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="salaryCurrency">Currency</Label>
-        <select
-          id="salaryCurrency"
-          name="salaryCurrency"
-          defaultValue="KWD"
-          className="flex h-9 w-20 rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="KWD">KWD</option>
-          <option value="USD">USD</option>
-        </select>
+        <Select name="salaryCurrency" defaultValue="KWD">
+          <SelectTrigger className="w-20" id="salaryCurrency">
+            <SelectValue placeholder="Currency" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="KWD">KWD</SelectItem>
+            <SelectItem value="USD">USD</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="salaryDate">Date</Label>
@@ -267,14 +275,15 @@ function EditSalaryForm({
         defaultValue={row.salary ?? ""}
         className="w-24 h-8"
       />
-      <select
-        name="salaryCurrency"
-        defaultValue={row.salary_currency ?? "KWD"}
-        className="flex h-8 w-16 rounded border border-input bg-transparent px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-      >
-        <option value="KWD">KWD</option>
-        <option value="USD">USD</option>
-      </select>
+      <Select name="salaryCurrency" defaultValue={row.salary_currency ?? "KWD"}>
+        <SelectTrigger className="w-16 h-8">
+          <SelectValue placeholder="Curr" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="KWD">KWD</SelectItem>
+          <SelectItem value="USD">USD</SelectItem>
+        </SelectContent>
+      </Select>
       <Input
         name="salaryDate"
         type="date"
