@@ -2548,3 +2548,43 @@ export async function getAdminSalaryRows() {
     updated: formatDate(row.updated_at),
   }));
 }
+
+export async function getAdminInvoiceRows() {
+  const rows = await prisma.invoice.findMany({
+    where: { deleted: 0 },
+    orderBy: { invoice_id: "desc" },
+    take: 60,
+    select: {
+      invoice_id: true,
+      invoice_date: true,
+      invoice_status: true,
+      transfer_id: true,
+      transfer: {
+        select: {
+          transfer_id: true,
+          total: true,
+          company_total: true,
+          currency_code: true,
+          transfer_status: true,
+          company: { select: { company_name: true } },
+        },
+      },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.invoice_id,
+    invoice_id: row.invoice_id,
+    company: row.transfer?.company?.company_name ?? "No company",
+    transfer_id: row.transfer_id,
+    date: row.invoice_date ? formatDate(row.invoice_date) : "—",
+    status: row.invoice_status ?? "unknown",
+    total: formatMoney(
+      row.transfer?.company_total ?? row.transfer?.total,
+      row.transfer?.currency_code ?? "KWD",
+    ),
+    transfer_status: row.transfer?.transfer_status
+      ? `Status ${row.transfer.transfer_status}`
+      : "—",
+  }));
+}
