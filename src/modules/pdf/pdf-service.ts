@@ -22,7 +22,7 @@ function headerRow(text: string): Record<string, unknown> {
   return {
     text,
     style: "tableHeader",
-    fillColor: "#1f73b7",
+    fillColor: "#eb6651",
     color: "#ffffff",
     bold: true,
     fontSize: 10,
@@ -35,19 +35,19 @@ function cell(text: string): Record<string, unknown> {
 }
 
 const defaultStyles: TDocumentDefinitions["styles"] = {
-  header: { fontSize: 18, bold: true, color: "#1f73b7", margin: [0, 0, 0, 8] },
+  header: { fontSize: 18, bold: true, color: "#eb6651", margin: [0, 0, 0, 8] },
   subheader: { fontSize: 13, bold: true, color: "#333333", margin: [0, 12, 0, 4] },
   body: { fontSize: 10, lineHeight: 1.4 },
   sectionLabel: { fontSize: 10, bold: true, color: "#555555" },
   sectionValue: { fontSize: 10, margin: [0, 0, 0, 4] },
-  tableHeader: { fontSize: 10, bold: true, fillColor: "#1f73b7", color: "#ffffff" },
+  tableHeader: { fontSize: 10, bold: true, fillColor: "#eb6651", color: "#ffffff" },
 };
 
 function branding(): Record<string, unknown>[] {
   return [
     {
       columns: [
-        { text: "StudentHub", fontSize: 12, bold: true, color: "#1f73b7" },
+        { text: "StudentHub", fontSize: 12, bold: true, color: "#eb6651" },
         {
           text: new Date().toISOString().split("T")[0],
           fontSize: 8,

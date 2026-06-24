@@ -53,13 +53,13 @@ export function CandidateProfile({
       {/* Hero header */}
       <CardHeader className="flex flex-row items-start gap-4">
         <div
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1f73b7]/10 text-[#1f73b7] text-lg font-bold"
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-sh-coral/10 text-sh-coral text-lg font-bold"
           aria-hidden="true"
         >
           {initials(candidate.candidate_name)}
         </div>
         <div className="min-w-0 flex-1">
-          <span className="text-[11px] font-bold uppercase text-[#1f73b7]">
+          <span className="text-[11px] font-bold uppercase text-sh-coral">
             {candidate.candidate_uid ?? `#${candidate.candidate_id}`}
           </span>
           <h2 className="text-2xl font-bold text-foreground mb-0.5 mt-0.5">{candidate.candidate_name}</h2>
@@ -103,7 +103,7 @@ export function CandidateProfile({
       <section className="border-b border-border px-6 py-4" aria-label="Candidate readiness">
         <div className="grid grid-cols-[1fr_auto] gap-4 items-center mb-3">
           <div>
-            <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Readiness</span>
+            <span className="text-[11px] font-bold uppercase text-sh-coral">Readiness</span>
             <strong className="block text-3xl font-bold text-foreground mt-0.5">{readiness.score}%</strong>
             <small className="text-sm text-muted-foreground">{readiness.summary}</small>
           </div>
@@ -126,7 +126,7 @@ export function CandidateProfile({
               {readiness.missing.map((item) => (
                 <li key={item.label}>
                   <Link
-                    className="text-xs text-[#1f73b7] hover:underline"
+                    className="text-xs text-sh-coral hover:underline"
                     href="/candidate/edit"
                   >
                     {item.label}
@@ -156,7 +156,7 @@ export function CandidateProfile({
 
       {!compact && candidate.candidate_intro ? (
         <section className="border-b border-border px-6 py-4">
-          <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Profile intro</span>
+          <span className="text-[11px] font-bold uppercase text-sh-coral">Profile intro</span>
           <p className="mt-1.5 text-sm text-foreground">{candidate.candidate_intro}</p>
         </section>
       ) : null}
@@ -229,7 +229,7 @@ function CivilIdPanel({ candidate, viewerRole }: { candidate: NonNullable<Candid
   return (
     <section className="border-b border-border px-6 py-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Civil ID</span>
+        <span className="text-[11px] font-bold uppercase text-sh-coral">Civil ID</span>
         <Badge variant="outline">{badges.length ? badges.join(" · ") : "On file"}</Badge>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
@@ -282,8 +282,8 @@ function CivilIdPanel({ candidate, viewerRole }: { candidate: NonNullable<Candid
 function PanelHeader({ title, count }: { title: string; count: number }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[11px] font-bold uppercase text-[#1f73b7]">{title}</span>
-      <Badge variant="outline" className="bg-[#1f73b7]/5 text-[#1f73b7] border-[#1f73b7]/20">
+      <span className="text-[11px] font-bold uppercase text-sh-coral">{title}</span>
+      <Badge variant="outline" className="bg-sh-coral/5 text-sh-coral border-sh-coral/20">
         {count.toLocaleString("en-US")}
       </Badge>
     </div>

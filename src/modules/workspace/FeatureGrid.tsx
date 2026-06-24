@@ -15,14 +15,14 @@ export function FeatureGrid({ items }: { items: NavItem[] }) {
         return (
           <Card
             key={item.href}
-            className="relative min-h-[112px] border-t-4 border-t-[#1f73b7] transition-all duration-160 hover:shadow-lg hover:-translate-y-0.5"
+            className="relative min-h-[112px] border-t-4 border-t-sh-coral transition-all duration-160 hover:shadow-lg hover:-translate-y-0.5"
           >
             <CardContent className="p-4 h-full grid content-between gap-2">
               <div className="flex items-center gap-3">
-                {Icon && <Icon size={20} className="text-[#1f73b7]" aria-hidden="true" />}
+                {Icon && <Icon size={20} className="text-sh-coral" aria-hidden="true" />}
                 <span className="text-lg font-bold text-foreground">{item.label}</span>
               </div>
-              <Button variant="ghost" size="sm" className="justify-start px-0 text-[#1f73b7] font-semibold text-xs hover:text-[#1f73b7]/80" asChild>
+              <Button variant="ghost" size="sm" className="justify-start px-0 text-sh-coral font-semibold text-xs hover:text-sh-coral/80" asChild>
                 <Link href={item.href}>
                   Open
                   <ArrowRight size={14} className="ml-1" />

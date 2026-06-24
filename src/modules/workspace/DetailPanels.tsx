@@ -48,7 +48,7 @@ export function CompactList({ title, rows }: { title: string; rows: Row[] }) {
     <Card className="h-fit">
       <div className="flex items-center justify-between gap-4 px-4 py-3.5 border-b border-border">
         <h2 className="text-base font-bold text-foreground m-0">{title}</h2>
-        <span className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-[#1f73b7] border border-blue-200 bg-blue-50 font-bold text-sm rounded">
+        <span className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-sh-coral border border-sh-coral/20 bg-sh-coral/5 font-bold text-sm rounded">
           {rows.length}
         </span>
       </div>
@@ -61,7 +61,7 @@ export function CompactList({ title, rows }: { title: string; rows: Row[] }) {
             >
               <div className="min-w-0 grid gap-1.5 content-center">
                 {row.href ? (
-                  <Link href={row.href as Route} className="text-foreground no-underline hover:text-[#1f73b7] hover:underline hover:underline-offset-[3px]">
+                  <Link href={row.href as Route} className="text-foreground no-underline hover:text-sh-coral hover:underline hover:underline-offset-[3px]">
                     <strong>{row.title}</strong>
                   </Link>
                 ) : (

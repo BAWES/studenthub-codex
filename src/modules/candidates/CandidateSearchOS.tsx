@@ -177,7 +177,7 @@ function CandidateSearchTab({
     <Card aria-label="Candidate search and filters">
       <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div>
-          <span className="text-[11px] font-bold uppercase text-[#1f73b7]">Search tab</span>
+          <span className="text-[11px] font-bold uppercase text-sh-coral">Search tab</span>
           <strong className="block text-lg text-foreground">
             {data.query ? `Results for ${data.query}` : "Candidate search"}
           </strong>
@@ -192,7 +192,7 @@ function CandidateSearchTab({
         <summary className="cursor-pointer text-sm font-semibold text-muted-foreground hover:text-foreground">
           <span>Filters</span>
           {activeFacetCount ? (
-            <Badge variant="outline" className="ml-2 bg-[#1f73b7]/10 text-[#1f73b7] border-[#1f73b7]/20">
+            <Badge variant="outline" className="ml-2 bg-sh-coral/10 text-sh-coral border-sh-coral/20">
               {activeFacetCount} active
             </Badge>
           ) : (
@@ -245,7 +245,7 @@ function CandidateSearchTab({
             key={row.id}
             className={cn(
               "flex items-stretch border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors",
-              row.id === data.selectedId && "bg-[#1f73b7]/5"
+              row.id === data.selectedId && "bg-sh-coral/5"
             )}
           >
             <Link
@@ -262,7 +262,7 @@ function CandidateSearchTab({
               className="flex flex-1 items-center gap-4 px-4 py-3 no-underline hover:bg-muted/30"
               href={candidateSearchHref(basePath, params, { candidate: String(row.id) })}
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1f73b7]/10 text-[#1f73b7] text-xs font-bold">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sh-coral/10 text-sh-coral text-xs font-bold">
                 {candidateInitials(row.name)}
               </div>
               <div className="min-w-0 flex-1">
@@ -450,7 +450,7 @@ function ActiveSearchContext({
   return (
     <section className="mx-4 flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-2">
       <div className="flex items-center gap-2">
-        <Badge variant="outline" className="bg-[#1f73b7]/5 text-[11px] uppercase font-bold text-[#1f73b7] border-[#1f73b7]/20">
+        <Badge variant="outline" className="bg-sh-coral/5 text-[11px] uppercase font-bold text-sh-coral border-sh-coral/20">
           {activeItems.length ? "Filtered view" : "Default view"}
         </Badge>
         <span className="text-sm text-muted-foreground">
@@ -526,7 +526,7 @@ function FacetGroup({ basePath, facet, params }: { basePath: "/admin/candidates"
   return (
     <Card>
       <CardContent className="p-3">
-        <h3 className="text-[11px] font-bold uppercase text-[#1f73b7] mb-2">{facet.label}</h3>
+        <h3 className="text-[11px] font-bold uppercase text-sh-coral mb-2">{facet.label}</h3>
         <div className="grid gap-0.5">
           {facet.options.map((option) => (
             <Link
