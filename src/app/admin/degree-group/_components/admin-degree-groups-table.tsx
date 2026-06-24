@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DegreeGroupItem } from "../schemas";
@@ -55,13 +56,13 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <button
-                  type="button"
-                  className="text-sm hover:underline text-primary"
+                <Button
+                  variant="link"
+                  className="h-auto p-0"
                   onClick={() => setEditingId(row.degree_group_uuid)}
                 >
                   {row.degree_group_name_en}
-                </button>
+                </Button>
               ),
           },
           {
@@ -84,9 +85,10 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
             label: "Actions",
             render: (row) =>
               editingId !== row.degree_group_uuid ? (
-                <button
-                  type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={async () => {
                     if (confirm(`Delete degree group "${row.degree_group_name_en}"?`)) {
                       const result = await deleteDegreeGroup(row.degree_group_uuid);
@@ -98,7 +100,7 @@ export function AdminDegreeGroupsTable({ session, degreeGroups }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
@@ -170,14 +172,15 @@ function CreateDegreeGroupForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="skipMajor">Skip major</Label>
-        <select
-          id="skipMajor"
-          name="skipMajor"
-          className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="0">No</option>
-          <option value="1">Yes</option>
-        </select>
+        <Select name="skipMajor" defaultValue="0">
+          <SelectTrigger className="w-20">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0">No</SelectItem>
+            <SelectItem value="1">Yes</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <Button type="submit" disabled={pending}>
         {pending ? "Adding..." : "Add"}
@@ -242,14 +245,18 @@ function EditDegreeGroupForm({
         type="number"
         className="w-16 h-8"
       />
-      <select
+      <Select
         name="skipMajor"
         defaultValue={row.skip_major ? "1" : "0"}
-        className="flex h-8 w-20 rounded border border-input bg-transparent px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       >
-        <option value="0">No</option>
-        <option value="1">Yes</option>
-      </select>
+        <SelectTrigger className="w-20 h-8">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="0">No</SelectItem>
+          <SelectItem value="1">Yes</SelectItem>
+        </SelectContent>
+      </Select>
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "..." : "Save"}
       </Button>

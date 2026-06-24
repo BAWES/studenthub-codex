@@ -18,7 +18,9 @@ const validUniversity = {
   university_name_en: "Kuwait University",
   university_name_ar: "جامعة الكويت",
   university_data_source: 1,
-  candidate_count: 42,
+  university_created_at: "2024-01-01T00:00:00.000Z",
+  university_updated_at: "2024-06-15T12:30:00.000Z",
+  deleted: 0,
 };
 
 describe("universityListItemSchema", () => {
@@ -33,7 +35,9 @@ describe("universityListItemSchema", () => {
       university_name_en: null,
       university_name_ar: null,
       university_data_source: null,
-      candidate_count: null,
+      university_created_at: null,
+      university_updated_at: null,
+      deleted: 0,
     };
     const result = universityListItemSchema.safeParse(minimal);
     expect(result.success).toBe(true);

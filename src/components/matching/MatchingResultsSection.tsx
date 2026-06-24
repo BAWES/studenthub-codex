@@ -26,7 +26,7 @@ export default function MatchingResultsSection({ jobs }: Props) {
 
   return (
     <section
-      className="rounded-xl border border-border bg-muted p-5 space-y-4"
+      className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 space-y-4"
       data-testid="matching-results-section"
     >
       {/* Header */}
@@ -44,7 +44,7 @@ export default function MatchingResultsSection({ jobs }: Props) {
           <Link
             key={job.jobListingId}
             href={`/candidate/jobs/${job.jobListingId}`}
-            className="block rounded-lg border border-border p-4 transition-colors hover:bg-accent/50"
+            className="block rounded-lg border border-[var(--border)] p-4 transition-colors hover:bg-accent/50"
             data-testid="matched-job-card"
           >
             <div className="flex items-start justify-between gap-4">

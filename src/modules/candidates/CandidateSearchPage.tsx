@@ -180,12 +180,7 @@ export function CandidateSearchPage({
           <div className="flex items-center gap-2 ml-2">
             <ThemeToggle />
             <form action={logoutAction}>
-              <button
-                type="submit"
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                Sign out
-              </button>
+              <Button type="submit" variant="ghost" size="sm">Sign out</Button>
             </form>
           </div>
         </div>
@@ -216,23 +211,21 @@ export function CandidateSearchPage({
         {data.totalPages && data.totalPages > 1 ? (
           <nav className="flex items-center justify-center gap-2 mt-6" aria-label="Pagination">
             {data.page && data.page > 1 ? (
-              <Link
-                href={candidateSearchHref(basePath, params, { page: String(data.page - 1) })}
-                className="px-3 py-1.5 rounded-md text-sm border border-border text-foreground hover:bg-accent"
-              >
-                Previous
-              </Link>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={candidateSearchHref(basePath, params, { page: String(data.page - 1) })}>
+                  Previous
+                </Link>
+              </Button>
             ) : null}
             <span className="text-sm text-muted-foreground">
               Page {data.page ?? 1} of {data.totalPages}
             </span>
             {data.page && data.page < data.totalPages ? (
-              <Link
-                href={candidateSearchHref(basePath, params, { page: String((data.page ?? 1) + 1) })}
-                className="px-3 py-1.5 rounded-md text-sm border border-border text-foreground hover:bg-accent"
-              >
-                Next
-              </Link>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={candidateSearchHref(basePath, params, { page: String((data.page ?? 1) + 1) })}>
+                  Next
+                </Link>
+              </Button>
             ) : null}
           </nav>
         ) : null}

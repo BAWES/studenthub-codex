@@ -63,7 +63,7 @@ export function CandidateEducationTable({ session, rows }: Props) {
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                   row.status === "Currently Studying"
                     ? "bg-[var(--accent)]/10 text-[var(--accent)]"
-                    : "bg-border/30 text-muted-foreground"
+                    : "bg-[var(--border)]/30 text-[var(--ink-muted)]"
                 }`}
               >
                 {row.status}

@@ -58,9 +58,9 @@ describe("discountCategoryItemSchema", () => {
 });
 
 describe("listDiscountCategoriesResultSchema", () => {
-  it("accepts a valid result with categories array", () => {
+  it("accepts a valid result with records array", () => {
     const result = listDiscountCategoriesResultSchema.safeParse({
-      categories: [validDiscountCategoryListItem],
+      records: [validDiscountCategoryListItem],
       total: 1,
       page: 1,
       limit: 50,
@@ -69,9 +69,9 @@ describe("listDiscountCategoriesResultSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("accepts empty categories array", () => {
+  it("accepts empty records array", () => {
     const result = listDiscountCategoriesResultSchema.safeParse({
-      categories: [],
+      records: [],
       total: 0,
       page: 1,
       limit: 50,
@@ -82,7 +82,7 @@ describe("listDiscountCategoriesResultSchema", () => {
 
   it("rejects missing total field", () => {
     const { total, ...incomplete } = {
-      categories: [],
+      records: [],
       total: 0,
       page: 1,
       limit: 50,

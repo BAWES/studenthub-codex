@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import type { SessionUser } from "@/modules/auth/types";
 import type { DiscountCategoryItem } from "../schemas";
@@ -55,14 +56,13 @@ export function AdminDiscountCategoriesTable({ session, categories }: Props) {
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  className="text-sm px-0 h-auto hover:underline"
+                  className="text-sm hover:underline text-primary"
                   onClick={() => setEditingId(row.category_id)}
                 >
                   {row.name_en}
-                </Button>
+                </button>
               ),
           },
           {
@@ -197,7 +197,9 @@ function CreateDiscountCategoryForm({ onSuccess }: { onSuccess: () => void }) {
         {pending ? "Adding..." : "Add"}
       </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
@@ -255,7 +257,9 @@ function EditDiscountCategoryForm({
         Cancel
       </Button>
       {state?.error ? (
-        <p className="text-xs w-full text-destructive">{state.error}</p>
+        <Alert variant="destructive" className="w-full mt-2">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       ) : null}
     </form>
   );
