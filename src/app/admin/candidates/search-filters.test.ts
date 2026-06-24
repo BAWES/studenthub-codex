@@ -87,10 +87,10 @@ describe("parseCandidateIds", () => {
     expect(parseCandidateIds("1,2,3,4,5,6,7,8,9,10", 3)).toEqual([1, 2, 3]);
   });
 
-  it("default limit is 8", () => {
+  it("default limit is not set — returns all IDs", () => {
     const ids = parseCandidateIds("1,2,3,4,5,6,7,8,9,10,11,12");
-    expect(ids.length).toBe(8);
-    expect(ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(ids.length).toBe(12);
+    expect(ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   });
 
   it("handles array value", () => {

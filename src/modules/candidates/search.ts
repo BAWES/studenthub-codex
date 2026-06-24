@@ -633,9 +633,10 @@ export function parseCandidateIds(value: unknown, maxCount?: number): number[] {
   return maxCount != null ? ids.slice(0, maxCount) : ids;
 }
 
-export function parseSearchPage(value: unknown): number {
-  const num = Number(value);
-  return Number.isInteger(num) && num > 0 ? num : 1;
+export function parseSearchPage(value: unknown): number | undefined {
+  const v = Array.isArray(value) ? value[0] : value;
+  const num = Number(v);
+  return Number.isInteger(num) && num > 0 ? num : undefined;
 }
 
 const VALID_VISIBILITY = ["assigned", "all"] as const;

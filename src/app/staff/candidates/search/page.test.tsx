@@ -139,9 +139,9 @@ describe("staff candidate search page — data contract", () => {
       expect(parseCandidateIds("")).toEqual([]);
     });
 
-    it("respects default limit of 8", () => {
+    it("returns all IDs when no maxCount is specified", () => {
       const ids = Array.from({ length: 20 }, (_, i) => i + 1).join(",");
-      expect(parseCandidateIds(ids)).toHaveLength(8);
+      expect(parseCandidateIds(ids)).toHaveLength(20);
     });
 
     it("accepts custom limit via second argument", () => {
