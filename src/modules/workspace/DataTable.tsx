@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useCallback, type KeyboardEvent, type ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import {
@@ -33,6 +33,7 @@ export function DataTable<T extends { id: string | number }>({
   rows,
   columns,
   rowHref,
+  onRowClick,
   loading,
   totalPages,
   page,
@@ -43,11 +44,21 @@ export function DataTable<T extends { id: string | number }>({
   rows: T[];
   columns: DataTableColumn<T>[];
   rowHref?: ((row: T) => Route) | string;
+  onRowClick?: (row: T) => void;
   loading?: boolean;
   totalPages?: number;
   page?: number;
   onPageChange?: (page: number) => void;
 }) {
+  const handleRowKeyDown = useCallback(
+    (e: KeyboardEvent, row: T) => {
+      if ((e.key === "Enter" || e.key === " ") && onRowClick && !rowHref) {
+        e.preventDefault();
+        onRowClick(row);
+      }
+    },
+    [onRowClick, rowHref],
+  );
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -69,7 +80,14 @@ export function DataTable<T extends { id: string | number }>({
         <TableBody>
           {rows.length ? (
             rows.map((row) => (
-              <TableRow key={row.id} data-os-navigable tabIndex={0}>
+              <TableRow
+                key={row.id}
+                data-os-navigable
+                tabIndex={0}
+                onClick={rowHref ? undefined : () => onRowClick?.(row)}
+                onKeyDown={(e) => handleRowKeyDown(e, row)}
+                className={!rowHref && onRowClick ? "cursor-pointer" : undefined}
+              >
                 {columns.map((column) => (
                   <TableCell key={column.key}>
                     {column.render(row)}

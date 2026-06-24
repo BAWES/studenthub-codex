@@ -22,10 +22,13 @@ describe("PaymentDataTable", () => {
 
   it("shows column headers", () => {
     render(<PaymentDataTable payments={samplePayments} total={samplePayments.length} page={1} totalPages={1} {...baseProps} />);
-    expect(screen.getByText("Date")).toBeDefined();
-    expect(screen.getByText("Reference")).toBeDefined();
-    expect(screen.getByText("Contact")).toBeDefined();
-    expect(screen.getByText("Status")).toBeDefined();
+    // The sort header and sr-only table header both render labels
+    expect(screen.getAllByText("Date").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Reference").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Contact").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Status").length).toBeGreaterThanOrEqual(1);
+    // Verify sort indicator is visible
+    expect(screen.getByText("▼")).toBeDefined();
   });
 
   it("shows loading skeleton when loading", () => {

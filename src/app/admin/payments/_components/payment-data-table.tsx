@@ -4,6 +4,14 @@ import { useState, useMemo, useCallback, type KeyboardEvent } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 import type { PaymentRow } from "../schemas";
 
 // ---------------------------------------------------------------------------
@@ -50,8 +58,6 @@ function formatAmount(total: number | null, currency: string | null): string {
   if (total === null) return "—";
   return `${total.toLocaleString("en-US", { maximumFractionDigits: 3 })} ${currency ?? "KWD"}`;
 }
-
-
 
 function ReconciledCheck({ reconciled }: { reconciled: boolean | null }) {
   return (
@@ -136,6 +142,7 @@ export function PaymentDataTable({
     [onRowClick],
   );
 
+  // ── Error state ────────────────────────────────────────────
   if (error && !loading) {
     return (
       <Card role="alert">
@@ -154,8 +161,41 @@ export function PaymentDataTable({
     );
   }
 
+  // ── Loading state ──────────────────────────────────────────
+  if (loading) {
+    return (
+      <Card className="overflow-hidden">
+        <div className="grid gap-0 text-xs font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10">
+          {COLUMNS.map((col) => (
+            <span key={col.key}>{col.label}</span>
+          ))}
+        </div>
+        <div>
+          {Array.from({ length: 10 }).map((_, i) => (<SkeletonRow key={i} />))}
+        </div>
+      </Card>
+    );
+  }
+
+  // ── Empty state ────────────────────────────────────────────
+  if (!sortedPayments.length) {
+    return (
+      <Card className="overflow-hidden">
+        <CardContent className="flex flex-col items-center justify-center py-16 gap-4" role="status">
+          <span className="text-4xl" aria-hidden="true">💳</span>
+          <p className="text-lg font-semibold text-foreground">No payments yet</p>
+          <p className="text-sm text-center max-w-md text-muted-foreground">
+            Payments will appear here once bank transactions are synced from Xero.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ── Data table (uses shadcn Table components with data-os-navigable) ──
   return (
     <Card className="overflow-hidden">
+      {/* Sortable column header bar */}
       <div
         className="grid gap-0 text-xs font-bold uppercase tracking-wider px-4 py-3 text-muted-foreground border-b border-border/10"
         style={{ gridTemplateColumns: COLUMNS.map((c) => c.width).join(" ") }}
@@ -163,8 +203,19 @@ export function PaymentDataTable({
         {COLUMNS.map((col) => (
           <div
             key={col.key}
-            className={`flex items-center gap-1 ${col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""} ${col.sortable ? "cursor-pointer" : "cursor-default"}`}
+            className={`flex items-center gap-1 ${
+              col.align === "right" ? "justify-end" : col.align === "center" ? "justify-center" : ""
+            } ${col.sortable ? "cursor-pointer select-none" : "cursor-default"}`}
             onClick={() => col.sortable && handleSort(col.key)}
+            role={col.sortable ? "button" : undefined}
+            tabIndex={col.sortable ? 0 : undefined}
+            onKeyDown={(e) => {
+              if ((e.key === "Enter" || e.key === " ") && col.sortable) {
+                e.preventDefault();
+                handleSort(col.key);
+              }
+            }}
+            aria-label={col.sortable ? `Sort by ${col.label}` : undefined}
           >
             {col.label}
             {sortKey === col.key && <span>{sortDir === "asc" ? "▲" : "▼"}</span>}
@@ -172,47 +223,41 @@ export function PaymentDataTable({
         ))}
       </div>
 
-      {loading ? (
-        <div>
-          {Array.from({ length: 10 }).map((_, i) => (<SkeletonRow key={i} />))}
-        </div>
-      ) : !sortedPayments.length ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-4" role="status">
-          <span className="text-4xl" aria-hidden="true">💳</span>
-          <p className="text-lg font-semibold text-foreground">No payments yet</p>
-          <p className="text-sm text-center max-w-md text-muted-foreground">
-            Payments will appear here once bank transactions are synced from Xero.
-          </p>
-        </div>
-      ) : (
-        <div>
-          {sortedPayments.map((payment, i) => (
-            <div
+      {/* Data rows — uses shadcn Table for consistent structure and data-os-navigable */}
+      <Table>
+        <TableHeader className="sr-only">
+          <TableRow>
+            {COLUMNS.map((col) => (
+              <TableHead key={col.key}>{col.label}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedPayments.map((payment) => (
+            <TableRow
               key={payment.bank_transaction_id}
-              className="grid gap-0 px-4 py-3 transition-all duration-150 cursor-pointer even:bg-transparent odd:bg-muted/5"
-              style={{
-                gridTemplateColumns: COLUMNS.map((c) => c.width).join(" "),
-              }}
-              role="button"
+              data-os-navigable
               tabIndex={0}
-              aria-label={`Payment ${payment.reference ?? payment.bank_transaction_id}`}
+              className="cursor-pointer"
               onClick={() => onRowClick(payment)}
               onKeyDown={(e) => handleKeyDown(e, payment)}
+              aria-label={`Payment ${payment.reference ?? payment.bank_transaction_id}`}
             >
-              <span className="text-sm text-foreground">{formatDate(payment.date)}</span>
-              <span className="text-sm font-medium text-foreground">{payment.reference ?? "—"}</span>
-              <span className="text-sm truncate text-foreground">{payment.contact_name ?? "—"}</span>
-              <span className="text-sm text-center text-muted-foreground">{payment.type ?? "—"}</span>
-              <span className="text-sm text-right font-medium text-foreground">{formatAmount(payment.total, payment.currency_code)}</span>
-              <span className="text-sm text-center text-muted-foreground">{payment.currency_code ?? "—"}</span>
-              <span className="flex justify-center"><StatusBadge status={payment.status} /></span>
-              <span className="flex justify-center"><ReconciledCheck reconciled={payment.is_reconciled} /></span>
-            </div>
+              <TableCell><span className="text-sm text-foreground">{formatDate(payment.date)}</span></TableCell>
+              <TableCell><span className="text-sm font-medium text-foreground">{payment.reference ?? "—"}</span></TableCell>
+              <TableCell><span className="text-sm truncate text-foreground">{payment.contact_name ?? "—"}</span></TableCell>
+              <TableCell><span className="text-sm text-center text-muted-foreground">{payment.type ?? "—"}</span></TableCell>
+              <TableCell><span className="text-sm text-right font-medium text-foreground">{formatAmount(payment.total, payment.currency_code)}</span></TableCell>
+              <TableCell><span className="text-sm text-center text-muted-foreground">{payment.currency_code ?? "—"}</span></TableCell>
+              <TableCell><span className="flex justify-center"><StatusBadge status={payment.status} /></span></TableCell>
+              <TableCell><span className="flex justify-center"><ReconciledCheck reconciled={payment.is_reconciled} /></span></TableCell>
+            </TableRow>
           ))}
-        </div>
-      )}
+        </TableBody>
+      </Table>
 
-      {!loading && !error && total > 0 && onPageChange && (
+      {/* Pagination controls */}
+      {total > 0 && onPageChange && (
         <div className="flex items-center justify-between px-4 py-3 text-sm border-t border-border/10 text-muted-foreground">
           <span>Showing {1 + (page - 1) * 20}-{Math.min(page * 20, total)} of {total}</span>
           <div className="flex items-center gap-2">
