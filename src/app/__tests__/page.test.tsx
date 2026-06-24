@@ -99,8 +99,8 @@ describe("Landing page (clean auth)", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders StudentHub text in nav", async () => {
-    const { container } = render(await Home());
+  it("renders StudentHub text in nav", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).toContain("StudentHub");
   });
 
@@ -124,33 +124,33 @@ describe("Landing page (clean auth)", () => {
 
   // ── No persona tabs (stripped) ───────────────────────────────
 
-  it("does NOT render persona tabs (Students/Companies)", async () => {
-    const { container } = render(await Home());
+  it("does NOT render persona tabs (Students/Companies)", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).not.toContain("Students");
     expect(container.textContent).not.toContain("Companies");
   });
 
   // ── No marketing sections (stripped) ─────────────────────────
 
-  it("does NOT render how it works section", async () => {
-    const { container } = render(await Home());
+  it("does NOT render how it works section", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).not.toContain("Create your profile");
   });
 
-  it("does NOT render testimonial carousel", async () => {
-    const { container } = render(await Home());
+  it("does NOT render testimonial carousel", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(
       container.textContent
     ).not.toContain("Real stories from real placements.");
   });
 
-  it("does NOT render comparison table", async () => {
-    const { container } = render(await Home());
+  it("does NOT render comparison table", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).not.toContain("Why students choose StudentHub.");
   });
 
-  it("does NOT render employer trust bar", async () => {
-    const { container } = render(await Home());
+  it("does NOT render employer trust bar", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(
       container.textContent
     ).not.toContain("Trusted by leading organizations");
@@ -158,8 +158,8 @@ describe("Landing page (clean auth)", () => {
 
   // ── Hero content ─────────────────────────────────────────────
 
-  it("renders placement feature badges", async () => {
-    const { container } = render(await Home());
+  it("renders placement feature badges", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).toContain("Staff-recruited matching");
     expect(container.textContent).toContain("End-to-end workflows");
     expect(container.textContent).toContain("Real-time pay and compliance");
