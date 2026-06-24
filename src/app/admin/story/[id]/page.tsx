@@ -1,8 +1,11 @@
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { getStory } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
 
@@ -39,7 +42,7 @@ export default async function AdminStoryDetailPage({
       <WorkspaceShell
         session={session}
         eyebrow="Admin / Stories"
-        title={story.story_uuid.slice(0, 16) + "..."}
+        title={story.story_uuid}
         metrics={[
           { label: "Status", value: statusLabel(story.story_status), note: "Current story status" },
           {
@@ -100,6 +103,11 @@ export default async function AdminStoryDetailPage({
             },
           ]}
         />
+        <section className="flex gap-2 p-4">
+          <Link href={"/admin/story" as Route}>
+            <Button variant="outline">Back to Stories</Button>
+          </Link>
+        </section>
       </WorkspaceShell>
     </ErrorBoundary>
   );

@@ -1,8 +1,11 @@
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { getDegreeGroup } from "../actions";
 import { formatDate } from "@/modules/workspace/format";
 
@@ -54,6 +57,11 @@ export default async function AdminDegreeGroupDetailPage({
             },
           ]}
         />
+        <section className="flex gap-2 p-4">
+          <Link href={"/admin/degree-group" as Route}>
+            <Button variant="outline">Back to Degree Groups</Button>
+          </Link>
+        </section>
       </WorkspaceShell>
     </ErrorBoundary>
   );

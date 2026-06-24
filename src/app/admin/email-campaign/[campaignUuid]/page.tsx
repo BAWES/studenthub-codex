@@ -1,8 +1,11 @@
 import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { DetailSection } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
 import { getEmailCampaign } from "./actions";
 import { formatDate } from "@/modules/workspace/format";
 
@@ -70,6 +73,11 @@ export default async function AdminEmailCampaignDetailPage({
             },
           ]}
         />
+        <section className="flex gap-2 p-4">
+          <Link href={"/admin/email-campaign" as Route}>
+            <Button variant="outline">Back to Email Campaigns</Button>
+          </Link>
+        </section>
       </WorkspaceShell>
     </ErrorBoundary>
   );

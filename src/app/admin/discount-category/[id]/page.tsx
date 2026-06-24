@@ -58,7 +58,7 @@ export default async function AdminDiscountCategoryDetailPage({
 
       <section className="flex gap-2 p-4">
         <Link href={"/admin/discount-category" as Route}>
-          <Button variant="outline">Back to Categories</Button>
+          <Button variant="outline">Back to Discount Categories</Button>
         </Link>
       </section>
     </WorkspaceShell>
