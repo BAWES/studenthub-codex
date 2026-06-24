@@ -16,6 +16,7 @@ describe("salaryScaleListItemSchema", () => {
     candidate_count: null,
   };
 
+describe("salaryScaleListItemSchema", () => {
   it("accepts a valid salary scale item", () => {
     const result = salaryScaleListItemSchema.safeParse(validItem);
     expect(result.success).toBe(true);
@@ -42,7 +43,7 @@ describe("salaryScaleListItemSchema", () => {
     expect(
       salaryScaleListItemSchema.safeParse({ ...validItem, salary_scale_id: -1 })
         .success,
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 

@@ -40,6 +40,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     salary_scale: {
       findMany: mockFindMany,
+      findFirst: vi.fn(),
       count: mockCount,
       update: mockUpdate,
       delete: mockDelete,
@@ -49,7 +50,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-import { listSalaryScales, updateSalaryScale, deleteSalaryScale, createSalaryScale } from "./actions";
+import { listSalaryScales } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Input schema validation
@@ -94,7 +95,7 @@ describe("listSalaryScalesSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Output schema validation
+// Output schema validation — salaryScaleListItemSchema
 // ---------------------------------------------------------------------------
 
 describe("salaryScaleListItemSchema", () => {
@@ -149,9 +150,8 @@ describe("listSalaryScalesResultSchema", () => {
       page: 1,
       limit: 50,
       totalPages: 1,
-    };
-    const parsed = listSalaryScalesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(true);
+    });
+    expect(result.success).toBe(true);
   });
 
   it("accepts empty records array", () => {
@@ -161,9 +161,8 @@ describe("listSalaryScalesResultSchema", () => {
       page: 1,
       limit: 50,
       totalPages: 0,
-    };
-    const parsed = listSalaryScalesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(true);
+    });
+    expect(result.success).toBe(true);
   });
 
   it("rejects non-array records", () => {
@@ -173,9 +172,8 @@ describe("listSalaryScalesResultSchema", () => {
       page: 1,
       limit: 50,
       totalPages: 0,
-    };
-    const parsed = listSalaryScalesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(false);
+    });
+    expect(result.success).toBe(false);
   });
 });
 
