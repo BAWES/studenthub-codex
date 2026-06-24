@@ -167,10 +167,10 @@ export function HubContent({
         ) : null}
 
         {/* Hero Section */}
-        <Card className="mb-6 border-l-4 border-l-[#eb6651]">
+        <Card className="mb-6 border-l-4 border-l-coral">
           <CardContent className="flex items-start justify-between p-6">
             <div className="space-y-3">
-              <span className="text-xs font-medium uppercase tracking-wider text-[#eb6651]">
+              <span className="text-xs font-medium uppercase tracking-wider text-coral">
                 Start here
               </span>
               <h1 className="text-2xl font-bold text-foreground">{guide.title}</h1>
@@ -197,7 +197,7 @@ export function HubContent({
           {guide.journeys.map((journey) => (
             <Card key={journey.title}>
               <CardHeader>
-                <span className="text-xs font-medium text-[#eb6651]">{journey.kicker}</span>
+                <span className="text-xs font-medium text-coral">{journey.kicker}</span>
                 <h3 className="font-semibold text-foreground">{journey.title}</h3>
                 <p className="text-sm text-muted-foreground">{journey.description}</p>
               </CardHeader>
@@ -212,7 +212,7 @@ export function HubContent({
                     </li>
                   ))}
                 </ol>
-                <Button variant="ghost" className="px-0 text-[#eb6651] hover:text-[#d45441]" asChild>
+                <Button variant="ghost" className="px-0 text-coral hover:text-[#d45441]" asChild>
                   <Link href={journey.href}>{journey.action} →</Link>
                 </Button>
               </CardContent>

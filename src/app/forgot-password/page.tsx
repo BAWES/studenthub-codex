@@ -26,7 +26,7 @@ export default async function ForgotPasswordPage() {
 
           <h1 className="m-0 text-[clamp(40px,5vw,72px)] leading-[0.92] font-extrabold tracking-[-0.03em] text-foreground max-md:text-[clamp(24px,6vw,32px)]">
             Forgot your password?<br />
-            <span className="bg-gradient-to-br from-foreground to-[#eb6651] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-foreground to-coral bg-clip-text text-transparent">
               Don&apos;t worry — it happens to the best of us.
             </span>
           </h1>
@@ -41,7 +41,7 @@ export default async function ForgotPasswordPage() {
               (item) => (
                 <span
                   key={item}
-                  className="min-h-[32px] inline-flex items-center px-3 rounded-full text-[11px] font-black uppercase tracking-[0.03em] bg-[#fef1ef] border border-[color-mix(in_srgb,#eb6651_20%,transparent)] text-[#eb6651]"
+                  className="min-h-[32px] inline-flex items-center px-3 rounded-full text-[11px] font-black uppercase tracking-[0.03em] bg-coral/5 border border-coral/20 text-coral"
                 >
                   {item}
                 </span>

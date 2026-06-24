@@ -51,7 +51,7 @@ export function MobileNavBar({
               "text-xs font-medium leading-none transition-colors",
               "active:scale-[0.94] transition-transform duration-150",
               active
-                ? "text-[#eb6651]"
+                ? "text-coral"
                 : "text-muted-foreground/70 hover:text-foreground hover:text-opacity-100",
             )}
             aria-current={active ? "page" : undefined}
@@ -61,7 +61,7 @@ export function MobileNavBar({
               <Icon size={20} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
               {active && (
                 <span
-                  className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#eb6651]"
+                  className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-coral"
                   aria-hidden="true"
                 />
               )}

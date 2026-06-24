@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 function AvatarCircle({ name }: { name?: string | null }) {
   const initial = name?.charAt(0)?.toUpperCase() || "?";
   return (
-    <div className="flex size-24 items-center justify-center rounded-full bg-[#fef1ef] text-[#eb6651] text-3xl font-bold shrink-0">
+    <div className="flex size-24 items-center justify-center rounded-full bg-coral/5 text-coral text-3xl font-bold shrink-0">
       {initial}
     </div>
   );
@@ -49,7 +49,7 @@ export default async function StudentProfilePage({ params }: Props) {
         <div className="mx-auto max-w-lg text-center">
           <Card>
             <CardContent className="flex flex-col items-center gap-4 py-12">
-              <div className="flex size-16 items-center justify-center rounded-full bg-[#fef1ef] text-[#eb6651] text-2xl">
+              <div className="flex size-16 items-center justify-center rounded-full bg-coral/5 text-coral text-2xl">
                 !
               </div>
               <CardTitle>Profile Not Found</CardTitle>
@@ -99,7 +99,7 @@ export default async function StudentProfilePage({ params }: Props) {
 
         {/* ── Skills Card ────────────────────────────────────────────── */}
         <Card>
-          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
+          <CardHeader className="border-l-[3px] border-l-coral px-7 pt-6 pb-0">
             <CardTitle className="text-xl font-bold text-foreground">Skills</CardTitle>
           </CardHeader>
           <CardContent className="p-5">
@@ -109,7 +109,7 @@ export default async function StudentProfilePage({ params }: Props) {
                   <Badge
                     key={skill.id}
                     variant="secondary"
-                    className="rounded-full bg-[#fef1ef] border border-[rgba(235,102,81,0.2)] text-[#eb6651] font-bold"
+                    className="rounded-full bg-coral/5 border border-coral/20 text-coral font-bold"
                   >
                     {skill.name}
                   </Badge>
@@ -125,7 +125,7 @@ export default async function StudentProfilePage({ params }: Props) {
 
         {/* ── Experience Card ─────────────────────────────────────────── */}
         <Card>
-          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
+          <CardHeader className="border-l-[3px] border-l-coral px-7 pt-6 pb-0">
             <CardTitle className="text-xl font-bold text-foreground">Experience</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 p-5">
@@ -162,13 +162,13 @@ export default async function StudentProfilePage({ params }: Props) {
 
         {/* ── Contact Info Card ───────────────────────────────────────── */}
         <Card>
-          <CardHeader className="border-l-[3px] border-l-[#eb6651] px-7 pt-6 pb-0">
+          <CardHeader className="border-l-[3px] border-l-coral px-7 pt-6 pb-0">
             <CardTitle className="text-xl font-bold text-foreground">Contact Info</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 px-7 pb-6 pt-4">
             {profile.email && (
               <div className="flex items-center gap-3">
-                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
+                <span className="w-[60px] shrink-0 text-sm font-semibold text-coral">
                   Email
                 </span>
                 <span className="text-sm text-foreground">
@@ -178,7 +178,7 @@ export default async function StudentProfilePage({ params }: Props) {
             )}
             {profile.phone && (
               <div className="flex items-center gap-3">
-                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
+                <span className="w-[60px] shrink-0 text-sm font-semibold text-coral">
                   Phone
                 </span>
                 <span className="text-sm text-foreground">
@@ -188,7 +188,7 @@ export default async function StudentProfilePage({ params }: Props) {
             )}
             {profile.address && (
               <div className="flex items-center gap-3">
-                <span className="w-[60px] shrink-0 text-sm font-semibold text-[#eb6651]">
+                <span className="w-[60px] shrink-0 text-sm font-semibold text-coral">
                   Address
                 </span>
                 <span className="text-sm text-foreground">

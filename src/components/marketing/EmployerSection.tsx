@@ -97,7 +97,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
       aria-label="For employers"
     >
       <div className="text-center mb-8 md:mb-10">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-[#eb6651] bg-[#eb6651]/10">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-coral bg-coral/10">
           For employers
         </span>
         <h2 className="shLandingSectionTitle mt-3">
@@ -153,7 +153,7 @@ export default function EmployerSection({ className }: EmployerSectionProps) {
       <div className="text-center mt-8">
         <Button
           asChild
-          className="shadow-lg bg-[#eb6651] hover:bg-[#d45441]"
+          className="shadow-lg bg-coral hover:bg-coral/90"
         >
           <a href="/signup?role=company">Start hiring today</a>
         </Button>

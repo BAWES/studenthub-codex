@@ -30,7 +30,7 @@ export default function Error({
           <button
             type="button"
             onClick={reset}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-[#eb6651] px-4 py-2 text-sm font-semibold text-white hover:bg-[#d45441] transition-colors"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-coral px-4 py-2 text-sm font-semibold text-white hover:bg-[#d45441] transition-colors"
           >
             Try again
           </button>
