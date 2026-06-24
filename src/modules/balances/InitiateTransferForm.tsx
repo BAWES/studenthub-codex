@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { initTransfer } from "@/modules/balances/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function InitiateTransferForm() {
   const [state, action, pending] = useActionState(initTransfer, {
@@ -10,9 +12,9 @@ export function InitiateTransferForm() {
 
   if (state.success) {
     return (
-      <section className="candidateEditForm">
-        <h2>Initiate Transfer</h2>
-        <p className="formNotice">
+      <section className="rounded-lg border border-border bg-card p-6">
+        <h2 className="mb-2 text-lg font-semibold">Initiate Transfer</h2>
+        <p className="text-sm text-muted-foreground">
           Transfer request submitted. Your payout will be processed.
         </p>
       </section>
@@ -20,13 +22,13 @@ export function InitiateTransferForm() {
   }
 
   return (
-    <form action={action} className="candidateEditForm">
-      <h2>Request Payout</h2>
-      {state.error ? <p className="formError">{state.error}</p> : null}
+    <form action={action} className="space-y-4 rounded-lg border border-border bg-card p-6">
+      <h2 className="text-lg font-semibold">Request Payout</h2>
+      {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
-      <label>
-        <span>Amount (KWD)</span>
-        <input
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium text-muted-foreground">Amount (KWD)</span>
+        <Input
           type="number"
           name="amount"
           min="0.001"
@@ -37,10 +39,10 @@ export function InitiateTransferForm() {
         />
       </label>
 
-      <div className="formActions">
-        <button type="submit" disabled={pending}>
+      <div className="flex gap-2 pt-1">
+        <Button type="submit" disabled={pending}>
           {pending ? "Processing..." : "Initiate Transfer"}
-        </button>
+        </Button>
       </div>
     </form>
   );
