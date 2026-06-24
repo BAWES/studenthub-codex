@@ -80,6 +80,14 @@ export const deleteDocumentRecordSchema = z.object({
     .min(1, "File UUID is required"),
 });
 
+/**
+ * Schema for the deleteDocumentRecord response.
+ */
+export const deleteDocumentRecordResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------

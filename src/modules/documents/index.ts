@@ -23,9 +23,10 @@ export {
   listDocumentsSchema,
   getDocumentSchema,
   uploadDocumentSchema,
+  deleteDocumentRecordSchema,
   documentItemSchema,
   documentDetailSchema,
   listDocumentsResultSchema,
   uploadDocumentResultSchema,
-  deleteDocumentRecordSchema,
+  deleteDocumentRecordResultSchema,
 } from "./schemas";
