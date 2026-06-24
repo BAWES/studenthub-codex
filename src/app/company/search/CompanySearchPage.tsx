@@ -331,6 +331,8 @@ export function CompanySearchPage({
                     key={`${row.type}-${row.id}-${idx}`}
                     href={row.href as any}
                     className="block rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:-translate-y-px"
+                    data-os-navigable
+                    tabIndex={0}
                     onClick={(e) => {
                       if (e.button === 1 || e.metaKey || e.ctrlKey) return;
                     }}

@@ -168,7 +168,7 @@ function NoteCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-lg border border-border bg-card p-4" data-os-navigable tabIndex={0}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           {/* Header */}
