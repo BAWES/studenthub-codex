@@ -36,7 +36,7 @@ function fileTypeDescription(documentType: string): string {
 }
 
 /** Returns the appropriate image for embedding in the page. */
-function DocumentPreview({ document }: { document: { type: string; filePath: string | null; label: string } }) {
+function DocumentPreview({ document }: { document: { type: string; filePath: string | null; fileUrl: string | null; label: string } }) {
   if (!document.filePath) {
     return (
       <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-card w-full h-[200px]">
@@ -50,7 +50,7 @@ function DocumentPreview({ document }: { document: { type: string; filePath: str
     return (
       <div className="flex items-center justify-center rounded-lg overflow-hidden w-full bg-card max-h-[400px]">
         <img
-          src={document.filePath}
+          src={document.fileUrl ?? document.filePath ?? ""}
           alt={document.label}
           className="max-h-[400px] object-contain"
         />
@@ -132,8 +132,8 @@ export default async function CandidateDocumentDetailPage({
           <Link href={"/candidate/documents" as Route}>
             <Button variant="outline">Back to Documents</Button>
           </Link>
-          {document.filePath && (
-            <a href={document.filePath} target="_blank" rel="noopener noreferrer">
+          {document.fileUrl && (
+            <a href={document.fileUrl} target="_blank" rel="noopener noreferrer">
               <Button variant="outline">Open File</Button>
             </a>
           )}
