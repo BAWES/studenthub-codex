@@ -61,9 +61,9 @@ describe("candidateKey", () => {
 
 describe("keyFromUrl", () => {
   it("extracts key from a candidate document URL", () => {
-    const url = "http://example.com/candidates/42/photo_uuid-123.jpg";
+    const url = "http://example.com/candidates/42/photo_a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg";
     const key = keyFromUrl(url);
-    expect(key).toBe("candidates/42/photo_uuid-123.jpg");
+    expect(key).toBe("candidates/42/photo_a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg");
   });
 
   it("returns null for non-matching URLs", () => {
