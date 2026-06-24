@@ -69,7 +69,7 @@ export function DataTable<T extends { id: string | number }>({
         <TableBody>
           {rows.length ? (
             rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow key={row.id} data-os-navigable tabIndex={0}>
                 {columns.map((column) => (
                   <TableCell key={column.key}>
                     {column.render(row)}
