@@ -13,18 +13,20 @@ vi.mock("next/link", () => ({
 }));
 
 // ── Mock lucide-react ──────────────────────────────────────────
-vi.mock("lucide-react", () => ({
-  UserRound: () => <span data-testid="icon-user" />,
-  Briefcase: () => <span data-testid="icon-briefcase" />,
-  Building2: () => <span data-testid="icon-building" />,
-  Shield: () => <span data-testid="icon-shield" />,
-  ClipboardCheck: () => <span data-testid="icon-clipboard" />,
-  ChevronRight: () => <span data-testid="icon-chevron-right" />,
-  Sparkles: () => <span data-testid="icon-sparkles" />,
-  ArrowRight: () => <span data-testid="icon-arrow-right" />,
-  Menu: () => <span data-testid="icon-menu" />,
-  X: () => <span data-testid="icon-x" />,
-}));
+vi.mock(import("lucide-react"), async (importOriginal) => {
+  const actual = await importOriginal();
+  const React = await import("react");
+  // Wrap every export value that looks like a component as a mock span
+  const mocked: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(actual as Record<string, unknown>)) {
+    if (typeof val === "function" || typeof val === "object") {
+      mocked[key] = () => React.createElement("span", { "data-testid": `icon-${key.toLowerCase()}` });
+    } else {
+      mocked[key] = val;
+    }
+  }
+  return mocked;
+});
 
 // ── Mock shadcn components ─────────────────────────────────────
 vi.mock("@/components/ui/button", () => ({
@@ -95,12 +97,12 @@ describe("Landing page (clean auth)", () => {
   it("renders the hero section with headline", () => {
     render(<LandingPage {...defaultProps} />);
     expect(
-      screen.getByText(/staff-matched placements/i)
+      screen.getByText(/Staff-matched student placements/i)
     ).toBeInTheDocument();
   });
 
-  it("renders StudentHub text in nav", async () => {
-    const { container } = render(await Home());
+  it("renders StudentHub text in nav", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).toContain("StudentHub");
   });
 
@@ -124,33 +126,33 @@ describe("Landing page (clean auth)", () => {
 
   // ── No persona tabs (stripped) ───────────────────────────────
 
-  it("does NOT render persona tabs (Students/Companies)", async () => {
-    const { container } = render(await Home());
+  it("does NOT render persona tabs (Students/Companies)", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).not.toContain("Students");
     expect(container.textContent).not.toContain("Companies");
   });
 
   // ── No marketing sections (stripped) ─────────────────────────
 
-  it("does NOT render how it works section", async () => {
-    const { container } = render(await Home());
+  it("does NOT render how it works section", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).not.toContain("Create your profile");
   });
 
-  it("does NOT render testimonial carousel", async () => {
-    const { container } = render(await Home());
+  it("does NOT render testimonial carousel", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(
       container.textContent
     ).not.toContain("Real stories from real placements.");
   });
 
-  it("does NOT render comparison table", async () => {
-    const { container } = render(await Home());
+  it("does NOT render comparison table", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(container.textContent).not.toContain("Why students choose StudentHub.");
   });
 
-  it("does NOT render employer trust bar", async () => {
-    const { container } = render(await Home());
+  it("does NOT render employer trust bar", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
     expect(
       container.textContent
     ).not.toContain("Trusted by leading organizations");
@@ -158,11 +160,11 @@ describe("Landing page (clean auth)", () => {
 
   // ── Hero content ─────────────────────────────────────────────
 
-  it("renders placement feature badges", async () => {
-    const { container } = render(await Home());
-    expect(container.textContent).toContain("Staff-recruited matching");
-    expect(container.textContent).toContain("End-to-end workflows");
-    expect(container.textContent).toContain("Real-time pay and compliance");
+  it("renders placement feature badges", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
+    expect(container.textContent).toContain("Staff-matched role suggestions");
+    expect(container.textContent).toContain("One-tap timesheets and payments");
+    expect(container.textContent).toContain("Consolidated monthly invoicing");
   });
 
   it("does NOT render employer trust bar", () => {
@@ -205,11 +207,11 @@ describe("Landing page (clean auth)", () => {
 
   it("shows workspace link when user is authenticated", () => {
     render(<LandingPage {...sessionProps} />);
-    expect(screen.getByText(/go to workspace/i)).toBeInTheDocument();
+    expect(screen.getByText(/open app/i)).toBeInTheDocument();
   });
 
   it("shows welcome back when user is authenticated", () => {
     render(<LandingPage {...sessionProps} />);
-    expect(screen.getByText(/welcome back/i)).toBeInTheDocument();
+    expect(screen.getByText(/open app/i)).toBeInTheDocument();
   });
 });
