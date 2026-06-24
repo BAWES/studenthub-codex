@@ -12,7 +12,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
     <section>
       {/* Section title with coral left border */}
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-1 h-6 rounded-full flex-shrink-0 bg-[#eb6651]" />
+        <div className="w-1 h-6 rounded-full flex-shrink-0 bg-coral" />
         <h2 className="text-xl font-semibold text-foreground">
           Skills
         </h2>

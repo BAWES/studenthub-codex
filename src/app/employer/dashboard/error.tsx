@@ -19,7 +19,7 @@ export default function Error({
         {error.message ?? "An unexpected error occurred while loading the Employer Dashboard page."}
       </p>
       {error.digest ? <small className="text-muted-foreground">Error ID: {error.digest}</small> : null}
-      <Button onClick={reset} variant="default" className="bg-[#eb6651] hover:bg-[#d45441] text-white mt-2" >Try again</Button>
+      <Button onClick={reset} variant="default" className="bg-coral hover:bg-coral/90 text-white mt-2" >Try again</Button>
     </div>
   );
 }

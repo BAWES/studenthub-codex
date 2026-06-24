@@ -1,5 +1,9 @@
 "use client";
 
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
 export default function Error({
   error,
   reset,
@@ -8,34 +12,28 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="shell shellEmbedded">
-      <section className="workspaceStage">
-        <section className="topbar">
-          <div>
-            <p className="eyebrow">Candidate</p>
-            <h1>Messages</h1>
+    <div className="flex min-h-[80vh] items-center justify-center bg-background p-8">
+      <Card className="max-w-[420px] w-full">
+        <CardContent className="flex flex-col items-center gap-5 py-10">
+          <div className="flex size-14 items-center justify-center rounded-full bg-coral/10">
+            <span className="text-3xl font-black leading-none text-coral">!</span>
           </div>
-        </section>
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <span className="text-4xl" aria-hidden="true">⚠️</span>
-          <h2 className="text-xl font-bold text-[#1d1c1a]">
+          <div className="w-12 h-[3px] rounded-sm bg-coral" aria-hidden="true" />
+          <h2 className="text-xl font-bold m-0 text-foreground">
             Something went wrong
           </h2>
-          <p className="text-sm max-w-md text-center text-[#6e6b66]">
+          <p className="text-sm max-w-md text-center text-muted-foreground">
             {error.message ?? "An unexpected error occurred while loading the Chat page."}
           </p>
           {error.digest ? (
-            <small className="text-[#a09d98]">Error ID: {error.digest}</small>
+            <small className="text-muted-foreground/60">Error ID: {error.digest}</small>
           ) : null}
-          <button
-            type="button"
-            onClick={reset}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-[#eb6651] px-4 py-2 text-sm font-semibold text-white hover:bg-[#d45441] transition-colors"
-          >
+          <Button onClick={reset} className="mt-2">
+            <RefreshCw className="h-4 w-4" />
             Try again
-          </button>
-        </div>
-      </section>
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

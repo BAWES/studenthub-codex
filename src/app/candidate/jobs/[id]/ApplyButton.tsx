@@ -30,12 +30,12 @@ export function ApplyButton({ jobListingId }: Props) {
       <Button
         onClick={handleApply}
         disabled={applying}
-        className="bg-[#eb6651] hover:bg-[#d45441] text-white"
+        className="bg-coral hover:bg-coral/90 text-white"
       >
         {applying ? "Applying..." : "Apply Now"}
       </Button>
       {result && (
-        <p className={`mt-2 text-sm ${result.success ? "text-[#2e7d32]" : "text-[#d32f2f]"}`}>
+        <p className={`mt-2 text-sm ${result.success ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>
           {result.message}
         </p>
       )}
