@@ -57,7 +57,7 @@ export function CompanyRequestPipeline({
             <Link
               key={req.id}
               href={`/company/requests/${req.id}`}
-              className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+              className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-muted"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium truncate text-foreground">

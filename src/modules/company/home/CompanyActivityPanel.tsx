@@ -44,7 +44,7 @@ export function CompanyActivityPanel({
             return (
               <div
                 key={activity.id}
-                className="flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                className="flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted"
               >
                 <div
                   className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30"

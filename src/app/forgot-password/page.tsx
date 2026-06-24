@@ -12,17 +12,7 @@ export default async function ForgotPasswordPage() {
     <main className="min-h-[100svh] grid grid-cols-[1fr_minmax(400px,520px)] bg-background max-md:grid-cols-1 max-md:grid-rows-[auto_1fr]">
       {/* ── Brand side ──────────────────────────────────────────── */}
       <div className="relative grid content-center gap-4 px-[clamp(32px,5vw,64px)] py-[clamp(32px,5vw,64px)] overflow-hidden max-md:p-5 max-md:pt-5 max-md:pb-2 max-md:min-h-auto">
-        <div
-          className="absolute inset-0 animate-[shLoginDrift_14s_ease-in-out_infinite_alternate]"
-          style={{
-            background: [
-              "radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, #eb6651 18%, transparent) 0%, transparent 70%)",
-              "radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, #eb6651 12%, transparent) 0%, transparent 60%)",
-              "radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 8%, transparent) 0%, transparent 60%)",
-            ].join(","),
-          }}
-          aria-hidden="true"
-        />
+        <div className="shLoginGradient" aria-hidden="true" />
 
         <div className="relative z-[1] animate-[shLoginBrandFadeIn_600ms_var(--sh-easing)_both] max-md:flex max-md:items-center max-md:gap-4 max-md:flex-wrap">
           <div className="inline-flex items-center gap-[10px] mb-3 max-md:mb-0">
