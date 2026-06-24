@@ -1,6 +1,11 @@
+import type { Route } from "next";
+import Link from "next/link";
 import { requireRoleCapability } from "@/modules/auth/session";
 import { getAdminTransferRows } from "@/modules/workspace/data";
-import { AdminTransfersTable } from "./_components";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { DataTable } from "@/modules/workspace/DataTable";
 
 export const dynamic = "force-dynamic";
 

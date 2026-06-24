@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   listSalaryScalesSchema,
-  salaryScaleItemSchema,
+  salaryScaleListItemSchema,
   listSalaryScalesResultSchema,
 } from "./schemas";
-import type { SalaryScaleItem, ListSalaryScalesResult } from "./schemas";
+import type { SalaryScaleListItem, ListSalaryScalesResult } from "./schemas";
 
 // ── Hoisted mock functions ──────────────────────────────────
 const { mockRequireCapability, mockFindMany, mockCount, mockUpdate, mockDelete, mockCreate } =
@@ -85,104 +85,6 @@ describe("listSalaryScalesSchema", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Output schema validation
-// ---------------------------------------------------------------------------
-
-describe("salaryScaleItemSchema", () => {
-  it("accepts a valid salary scale item", () => {
-    const item: SalaryScaleItem = {
-      salary_scale_uuid: "scale-001",
-      salary_scale_name_en: "Grade 1",
-      salary_scale_name_ar: null,
-      salary_scale_min_salary: 500,
-      salary_scale_mid_salary: 750,
-      salary_scale_max_salary: 1000,
-      salary_scale_currency: "KWD",
-      salary_scale_sort_order: 1,
-      salary_scale_created_at: new Date("2026-01-01"),
-      salary_scale_updated_at: null,
-    };
-    const result = salaryScaleItemSchema.safeParse(item);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts nullable fields", () => {
-    const item: SalaryScaleItem = {
-      salary_scale_uuid: "scale-002",
-      salary_scale_name_en: "Grade 2",
-      salary_scale_name_ar: null,
-      salary_scale_min_salary: null,
-      salary_scale_mid_salary: null,
-      salary_scale_max_salary: null,
-      salary_scale_currency: null,
-      salary_scale_sort_order: null,
-      salary_scale_created_at: null,
-      salary_scale_updated_at: null,
-    };
-    const result = salaryScaleItemSchema.safeParse(item);
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects missing salary_scale_uuid", () => {
-    const result = salaryScaleItemSchema.safeParse({
-      salary_scale_name_en: "Test",
-    });
-    expect(result.success).toBe(false);
-  });
-});
-
-describe("listSalaryScalesResultSchema", () => {
-  it("accepts a valid list result with items", () => {
-    const result: ListSalaryScalesResult = {
-      items: [
-        {
-          salary_scale_uuid: "scale-001",
-          salary_scale_name_en: "Grade 1",
-          salary_scale_name_ar: null,
-          salary_scale_min_salary: null,
-          salary_scale_mid_salary: null,
-          salary_scale_max_salary: null,
-          salary_scale_currency: null,
-          salary_scale_sort_order: 1,
-          salary_scale_created_at: new Date("2026-01-01"),
-          salary_scale_updated_at: null,
-        },
-      ],
-      total: 1,
-      page: 1,
-      limit: 50,
-      totalPages: 1,
-    };
-    const parsed = listSalaryScalesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(true);
-  });
-
-  it("accepts empty items array", () => {
-    const result: ListSalaryScalesResult = {
-      items: [],
-      total: 0,
-      page: 1,
-      limit: 50,
-      totalPages: 0,
-    };
-    const parsed = listSalaryScalesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(true);
-  });
-
-  it("rejects non-array items", () => {
-    const result = {
-      items: "not-an-array",
-      total: 0,
-      page: 1,
-      limit: 50,
-      totalPages: 0,
-    };
-    const parsed = listSalaryScalesResultSchema.safeParse(result);
-    expect(parsed.success).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Action-level tests — mocked DB
 // ---------------------------------------------------------------------------
 
@@ -194,14 +96,11 @@ describe("listSalaryScales action", () => {
   it("returns paginated list with default params", async () => {
     const dbRows = [
       {
-        salary_scale_uuid: "scale-001",
+        salary_scale_id: 1,
         salary_scale_name_en: "Grade 1",
         salary_scale_name_ar: null,
-        salary_scale_min_salary: null,
-        salary_scale_mid_salary: null,
-        salary_scale_max_salary: null,
-        salary_scale_currency: "KWD",
-        salary_scale_sort_order: 1,
+        salary_scale_min_amount: null,
+        salary_scale_max_amount: null,
         salary_scale_created_at: new Date("2026-01-01"),
         salary_scale_updated_at: null,
       },
@@ -213,15 +112,15 @@ describe("listSalaryScales action", () => {
 
     const result = await listSalaryScales({});
 
-    expect(mockRequireCapability).toHaveBeenCalledWith("admin.read");
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.system");
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: { salary_scale_sort_order: "asc" },
+        orderBy: [{ salary_scale_name_en: "asc" }],
         skip: 0,
         take: 50,
       }),
     );
-    expect(result.items).toHaveLength(1);
+    expect(result.records).toHaveLength(1);
     expect(result.total).toBe(1);
     expect(result.page).toBe(1);
     expect(result.limit).toBe(50);
@@ -250,7 +149,7 @@ describe("listSalaryScales action", () => {
 
     const result = await listSalaryScales({});
 
-    expect(result.items).toHaveLength(0);
+    expect(result.records).toHaveLength(0);
     expect(result.total).toBe(0);
     expect(result.totalPages).toBe(0);
   });
@@ -264,6 +163,47 @@ describe("listSalaryScales action", () => {
 });
 
 // ---------------------------------------------------------------------------
+// createSalaryScale action tests
+// ---------------------------------------------------------------------------
+
+describe("createSalaryScale action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("creates a salary scale", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockCreate.mockResolvedValue({ salary_scale_id: 42 });
+
+    const result = await createSalaryScale({
+      salary_scale_name_en: "Grade 1",
+    });
+
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.system");
+    expect(mockCreate).toHaveBeenCalled();
+    expect(result.salary_scale_id).toBe(42);
+  });
+
+  it("rejects empty name", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+
+    await expect(
+      createSalaryScale({ salary_scale_name_en: "" }),
+    ).rejects.toThrow();
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it("throws when session fails", async () => {
+    mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(
+      createSalaryScale({ salary_scale_name_en: "Grade 1" }),
+    ).rejects.toThrow("Unauthorized");
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // updateSalaryScale action tests
 // ---------------------------------------------------------------------------
 
@@ -272,70 +212,52 @@ describe("updateSalaryScale action", () => {
     vi.clearAllMocks();
   });
 
-  it("updates a salary scale by UUID", async () => {
+  it("updates a salary scale by ID", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    mockUpdate.mockResolvedValue({
-      salary_scale_uuid: "scale-001",
+    mockFindMany.mockResolvedValue([{ salary_scale_id: 1 }]);
+    mockUpdate.mockResolvedValue({ salary_scale_id: 1 });
+
+    const result = await updateSalaryScale({
+      salary_scale_id: 1,
       salary_scale_name_en: "Updated Name",
     });
 
-    const result = await updateSalaryScale("scale-001", {
-      salary_scale_name_en: "Updated Name",
-      salary_scale_name_ar: undefined,
-      salary_scale_min_salary: null,
-      salary_scale_mid_salary: null,
-      salary_scale_max_salary: null,
-      salary_scale_currency: null,
-      salary_scale_sort_order: null,
-    });
-
-    expect(mockRequireCapability).toHaveBeenCalledWith("admin.write");
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.system");
     expect(mockUpdate).toHaveBeenCalledWith({
-      where: { salary_scale_uuid: "scale-001" },
-      data: {
+      where: { salary_scale_id: 1 },
+      data: expect.objectContaining({
         salary_scale_name_en: "Updated Name",
-        salary_scale_name_ar: null,
-        salary_scale_min_salary: null,
-        salary_scale_mid_salary: null,
-        salary_scale_max_salary: null,
-        salary_scale_currency: null,
-        salary_scale_sort_order: null,
-      },
+        salary_scale_updated_at: expect.any(Date),
+      }),
     });
-    expect(result.success).toBe(true);
+    expect(result.salary_scale_id).toBe(1);
   });
 
   it("rejects empty salary_scale_name_en", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
 
-    const result = await updateSalaryScale("scale-003", {
-      salary_scale_name_en: "",
-      salary_scale_name_ar: undefined,
-      salary_scale_min_salary: null,
-      salary_scale_mid_salary: null,
-      salary_scale_max_salary: null,
-      salary_scale_currency: null,
-      salary_scale_sort_order: null,
-    });
+    await expect(
+      updateSalaryScale({ salary_scale_id: 1, salary_scale_name_en: "" }),
+    ).rejects.toThrow();
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
 
-    expect(result.error).toBeTruthy();
+  it("throws when record not found", async () => {
+    mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
+    mockFindMany.mockResolvedValue([]);
+
+    await expect(
+      updateSalaryScale({ salary_scale_id: 999, salary_scale_name_en: "Name" }),
+    ).rejects.toThrow("Salary scale record not found: 999");
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it("throws when session fails", async () => {
     mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
 
-    const result = await updateSalaryScale("scale-001", {
-      salary_scale_name_en: "Name",
-      salary_scale_name_ar: undefined,
-      salary_scale_min_salary: null,
-      salary_scale_mid_salary: null,
-      salary_scale_max_salary: null,
-      salary_scale_currency: null,
-      salary_scale_sort_order: null,
-    });
-
-    expect(result.error).toBe("Unauthorized");
+    await expect(
+      updateSalaryScale({ salary_scale_id: 1, salary_scale_name_en: "Name" }),
+    ).rejects.toThrow("Unauthorized");
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 });
@@ -349,38 +271,34 @@ describe("deleteSalaryScale action", () => {
     vi.clearAllMocks();
   });
 
-  it("deletes a salary scale by UUID", async () => {
+  it("deletes a salary scale by ID", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    mockDelete.mockResolvedValue({
-      salary_scale_uuid: "scale-001",
-      salary_scale_name_en: "Deleted",
-    });
+    mockFindMany.mockResolvedValue([{ salary_scale_id: 1 }]);
+    mockDelete.mockResolvedValue({ salary_scale_id: 1 });
 
-    const result = await deleteSalaryScale("scale-001");
+    const result = await deleteSalaryScale(1);
 
-    expect(mockRequireCapability).toHaveBeenCalledWith("admin.write");
+    expect(mockRequireCapability).toHaveBeenCalledWith("admin.system");
     expect(mockDelete).toHaveBeenCalledWith({
-      where: { salary_scale_uuid: "scale-001" },
+      where: { salary_scale_id: 1 },
     });
-    expect(result.success).toBe(true);
+    expect(result.salary_scale_id).toBe(1);
   });
 
-  it("handles Prisma error (e.g. foreign key constraint)", async () => {
+  it("throws when record not found", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    mockDelete.mockRejectedValue(new Error("Foreign key constraint failed"));
+    mockFindMany.mockResolvedValue([]);
 
-    const result = await deleteSalaryScale("scale-with-references");
-
-    expect(result.success).toBeUndefined();
-    expect(result.error).toBeTruthy();
+    await expect(deleteSalaryScale(999)).rejects.toThrow(
+      "Salary scale record not found: 999",
+    );
+    expect(mockDelete).not.toHaveBeenCalled();
   });
 
   it("throws when session fails", async () => {
     mockRequireCapability.mockRejectedValue(new Error("Unauthorized"));
 
-    const result = await deleteSalaryScale("scale-001");
-
-    expect(result.error).toBe("Unauthorized");
+    await expect(deleteSalaryScale(1)).rejects.toThrow("Unauthorized");
     expect(mockDelete).not.toHaveBeenCalled();
   });
 });
