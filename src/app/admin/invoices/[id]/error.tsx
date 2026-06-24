@@ -21,10 +21,10 @@ export default function InvoiceDetailError({
     <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center bg-background">
       <Card className="max-w-[420px] w-full">
         <CardContent className="flex flex-col items-center gap-5 py-10">
-          <h1 className="text-5xl font-black leading-none m-0 bg-gradient-to-br from-[#eb6651] to-[#f59e0b] bg-clip-text text-transparent">
+          <h1 className="text-5xl font-black leading-none m-0 bg-gradient-to-br from-coral to-amber-500 bg-clip-text text-transparent">
             500
           </h1>
-          <div className="w-12 h-[3px] rounded-sm bg-[#eb6651]" aria-hidden="true" />
+          <div className="w-12 h-[3px] rounded-sm bg-coral" aria-hidden="true" />
           <h2 className="text-xl font-bold m-0 text-foreground">
             Failed to load invoice details
           </h2>
