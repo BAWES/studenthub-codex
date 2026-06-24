@@ -72,8 +72,8 @@ export function AdminDocumentManager({ initialDocuments, initialTotal }: AdminDo
     if (!confirm("Delete this document?")) return;
     setError(null);
     try {
-      const { deleteDocumentRecord } = await import("@/modules/documents/actions");
-      // Soft delete via Prisma update
+      const { deleteDocument } = await import("@/modules/documents");
+      await deleteDocument({ file_uuid });
       setSuccess("Document deleted");
       fetchDocuments(page);
     } catch (err) {

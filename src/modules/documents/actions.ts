@@ -12,14 +12,18 @@ import {
   listDocumentsSchema,
   getDocumentSchema,
   uploadDocumentSchema,
+  deleteDocumentSchema,
   listDocumentsResultSchema,
   documentDetailSchema,
   uploadDocumentResultSchema,
+  deleteDocumentResultSchema,
   type ListDocumentsInput,
   type UploadDocumentInput,
+  type DeleteDocumentInput,
   type DocumentItem,
   type ListDocumentsResult,
   type UploadDocumentResult,
+  type DeleteDocumentResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -243,6 +247,71 @@ export async function uploadDocument(
   if (!outputParsed.success) {
     console.error(
       "[modules/documents] uploadDocument output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// deleteDocument
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a document record from the database and clean up the stored file.
+ *
+ * Requires `document.write` capability. Both S3 and local files are cleaned up.
+ * Local files are deleted from disk; S3 files are not removed from the bucket
+ * (only the DB record is cleared) to avoid cascading side effects.
+ */
+export async function deleteDocument(
+  input: DeleteDocumentInput,
+): Promise<DeleteDocumentResult> {
+  await requireCapability("document.write");
+
+  const parsed = deleteDocumentSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid delete input",
+    );
+  }
+
+  const { file_uuid } = parsed.data;
+
+  const doc = await prisma.file.findUnique({
+    where: { file_uuid },
+    select: { file_s3_path: true },
+  });
+
+  if (!doc) {
+    throw new Error("Document not found");
+  }
+
+  // Clean up local file if it exists
+  if (doc.file_s3_path?.startsWith("/")) {
+    const fullPath = path.join(process.cwd(), "public", doc.file_s3_path);
+    try {
+      await fs.unlink(fullPath);
+    } catch {
+      // File may already be gone
+    }
+  }
+
+  // Delete the DB record
+  await prisma.file.delete({
+    where: { file_uuid },
+  });
+
+  revalidatePath("/admin/documents");
+
+  const result: DeleteDocumentResult = { success: true, file_uuid };
+
+  // Validate output shape
+  const outputParsed = deleteDocumentResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/documents] deleteDocument output validation failed:",
       outputParsed.error.issues,
     );
   }

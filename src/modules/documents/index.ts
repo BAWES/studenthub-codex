@@ -6,16 +6,19 @@ export {
   listDocuments,
   getDocument,
   uploadDocument,
+  deleteDocument,
   getDocumentDownloadUrl,
 } from "./actions";
 
 export type {
   ListDocumentsInput,
   UploadDocumentInput,
+  DeleteDocumentInput,
   DocumentItem,
   DocumentDetail,
   ListDocumentsResult,
-  UploadDocumentResult
+  UploadDocumentResult,
+  DeleteDocumentResult,
 } from "./schemas";
 
 export {

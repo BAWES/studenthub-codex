@@ -71,13 +71,26 @@ export const uploadDocumentResultSchema = z.object({
   file_s3_path: z.string().nullable(),
 });
 
+export const deleteDocumentSchema = z.object({
+  file_uuid: z
+    .string({ required_error: "File UUID is required" })
+    .min(1, "File UUID is required"),
+});
+
+export const deleteDocumentResultSchema = z.object({
+  success: z.boolean(),
+  file_uuid: z.string(),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type ListDocumentsInput = z.input<typeof listDocumentsSchema>;
 export type UploadDocumentInput = z.input<typeof uploadDocumentSchema>;
+export type DeleteDocumentInput = z.input<typeof deleteDocumentSchema>;
 export type DocumentItem = z.output<typeof documentItemSchema>;
 export type DocumentDetail = z.output<typeof documentDetailSchema>;
 export type ListDocumentsResult = z.output<typeof listDocumentsResultSchema>;
 export type UploadDocumentResult = z.output<typeof uploadDocumentResultSchema>;
+export type DeleteDocumentResult = z.output<typeof deleteDocumentResultSchema>;
