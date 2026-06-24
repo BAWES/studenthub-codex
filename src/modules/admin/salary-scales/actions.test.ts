@@ -7,7 +7,7 @@ import {
 import type { SalaryScaleListItem, ListSalaryScalesResult } from "./schemas";
 
 // ── Hoisted mock functions ──────────────────────────────────
-const { mockRequireCapability, mockFindMany, mockCount, mockUpdate, mockDelete, mockCreate } =
+const { mockRequireCapability, mockFindMany, mockCount, mockUpdate, mockDelete, mockCreate, mockFindFirst } =
   vi.hoisted(() => ({
     mockRequireCapability: vi.fn(),
     mockFindMany: vi.fn(),
@@ -15,6 +15,7 @@ const { mockRequireCapability, mockFindMany, mockCount, mockUpdate, mockDelete, 
     mockUpdate: vi.fn(),
     mockDelete: vi.fn(),
     mockCreate: vi.fn(),
+    mockFindFirst: vi.fn(),
   }));
 
 // ── Mock next/cache revalidatePath ───────────────────────────
@@ -36,7 +37,7 @@ vi.mock("@/lib/prisma", () => ({
       update: mockUpdate,
       delete: mockDelete,
       create: mockCreate,
-      findFirst: vi.fn(),
+      findFirst: mockFindFirst,
     },
   },
 }));
@@ -200,7 +201,7 @@ describe("listSalaryScales action", () => {
     expect(mockRequireCapability).toHaveBeenCalledWith("admin.system");
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: { salary_scale_name_en: "asc" },
+        orderBy: [{ salary_scale_name_en: "asc" }],
         skip: 0,
         take: 50,
       }),
@@ -258,7 +259,7 @@ describe("updateSalaryScale action", () => {
 
   it("updates a salary scale by ID", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    setupFindFirstMock({ salary_scale_id: 1 });
+    mockFindFirst.mockResolvedValue({ salary_scale_id: 1 });
     mockUpdate.mockResolvedValue({ salary_scale_id: 1, salary_scale_name_en: "Updated Name" });
 
     const result = await updateSalaryScale({
@@ -281,7 +282,7 @@ describe("updateSalaryScale action", () => {
 
   it("throws when record not found", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    setupFindFirstMock(null);
+    mockFindFirst.mockResolvedValue(null);
 
     await expect(
       updateSalaryScale({ salary_scale_id: 999, salary_scale_name_en: "Name" }),
@@ -309,7 +310,7 @@ describe("deleteSalaryScale action", () => {
 
   it("deletes a salary scale by ID", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    setupFindFirstMock({ salary_scale_id: 1 });
+    mockFindFirst.mockResolvedValue({ salary_scale_id: 1 });
     mockDelete.mockResolvedValue({ salary_scale_id: 1 });
 
     const result = await deleteSalaryScale(1);
@@ -323,7 +324,7 @@ describe("deleteSalaryScale action", () => {
 
   it("throws when record not found", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    setupFindFirstMock(null);
+    mockFindFirst.mockResolvedValue(null);
 
     await expect(deleteSalaryScale(999)).rejects.toThrow("Salary scale record not found: 999");
     expect(mockDelete).not.toHaveBeenCalled();
@@ -331,7 +332,7 @@ describe("deleteSalaryScale action", () => {
 
   it("handles Prisma error (e.g. foreign key constraint)", async () => {
     mockRequireCapability.mockResolvedValue({ user: { id: 1 } });
-    setupFindFirstMock({ salary_scale_id: 1 });
+    mockFindFirst.mockResolvedValue({ salary_scale_id: 1 });
     mockDelete.mockRejectedValue(new Error("Foreign key constraint failed"));
 
     await expect(deleteSalaryScale(1)).rejects.toThrow("Foreign key constraint failed");
@@ -344,26 +345,3 @@ describe("deleteSalaryScale action", () => {
     expect(mockDelete).not.toHaveBeenCalled();
   });
 });
-
-// ---------------------------------------------------------------------------
-// Helper
-// ---------------------------------------------------------------------------
-
-function setupFindFirstMock(returnValue: unknown) {
-  const { prisma } = { prisma: { salary_scale: { findFirst: vi.fn() } } };
-  // Dynamic import won't work in the helper — use a different approach
-  const mockPrisma = { salary_scale: { findFirst: vi.fn().mockResolvedValue(returnValue) } };
-  (globalThis as any).__mockPrisma = mockPrisma;
-  vi.mock("@/lib/prisma", () => ({
-    prisma: {
-      salary_scale: {
-        findMany: mockFindMany,
-        count: mockCount,
-        update: mockUpdate,
-        delete: mockDelete,
-        create: mockCreate,
-        findFirst: vi.fn().mockResolvedValue(returnValue),
-      },
-    },
-  }));
-}

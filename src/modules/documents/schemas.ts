@@ -75,6 +75,14 @@ export const uploadDocumentResultSchema = z.object({
 // Types
 // ---------------------------------------------------------------------------
 
+export const deleteDocumentRecordSchema = z.object({
+  file_uuid: z
+    .string({ required_error: "File UUID is required" })
+    .min(1, "File UUID is required"),
+});
+
+export type DeleteDocumentRecordInput = z.input<typeof deleteDocumentRecordSchema>;
+
 export type ListDocumentsInput = z.input<typeof listDocumentsSchema>;
 export type UploadDocumentInput = z.input<typeof uploadDocumentSchema>;
 export type DocumentItem = z.output<typeof documentItemSchema>;

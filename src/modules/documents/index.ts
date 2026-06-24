@@ -6,6 +6,7 @@ export {
   listDocuments,
   getDocument,
   uploadDocument,
+  deleteDocumentRecord,
   getDocumentDownloadUrl,
 } from "./actions";
 
@@ -15,15 +16,17 @@ export type {
   DocumentItem,
   DocumentDetail,
   ListDocumentsResult,
-  UploadDocumentResult
+  UploadDocumentResult,
+  DeleteDocumentRecordInput,
 } from "./schemas";
 
 export {
   listDocumentsSchema,
   getDocumentSchema,
   uploadDocumentSchema,
+  deleteDocumentRecordSchema,
   documentItemSchema,
   documentDetailSchema,
   listDocumentsResultSchema,
-  uploadDocumentResultSchema
+  uploadDocumentResultSchema,
 } from "./schemas";

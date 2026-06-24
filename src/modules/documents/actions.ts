@@ -12,6 +12,7 @@ import {
   listDocumentsSchema,
   getDocumentSchema,
   uploadDocumentSchema,
+  deleteDocumentRecordSchema,
   listDocumentsResultSchema,
   documentDetailSchema,
   uploadDocumentResultSchema,
@@ -308,4 +309,33 @@ export async function getDocumentDownloadUrl(
   } catch {
     return null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// deleteDocumentRecord
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft-delete a document record by file_uuid.
+ * Requires `document.write` capability.
+ */
+export async function deleteDocumentRecord(
+  file_uuid: string,
+): Promise<{ success: boolean }> {
+  await requireCapability("document.write");
+
+  const parsed = deleteDocumentRecordSchema.safeParse({ file_uuid });
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid document identifier",
+    );
+  }
+
+  await prisma.file.delete({
+    where: { file_uuid: parsed.data.file_uuid },
+  });
+
+  revalidatePath("/admin/documents");
+
+  return { success: true };
 }

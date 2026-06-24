@@ -61,7 +61,7 @@ export default async function AdminInvoicePage() {
             key: "status",
             label: "Status",
             render: (row) => (
-              <Badge variant={row.status === "paid" ? "default" : row.status === "unpaid" ? "destructive" : "secondary"}>
+              <Badge variant={row.status === "paid" ? "success" : row.status === "unpaid" ? "warning" : "secondary"}>
                 {statusBadgeLabel(row.status)}
               </Badge>
             ),
