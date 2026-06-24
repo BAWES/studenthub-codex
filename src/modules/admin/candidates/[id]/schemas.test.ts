@@ -4,6 +4,8 @@ import {
   updateCandidateStatusSchema,
   updateCandidateSchema,
   deleteCandidateSchema,
+  adminUploadDocumentSchema,
+  adminDeleteDocumentSchema,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -212,5 +214,126 @@ describe("deleteCandidateSchema", () => {
     expect(deleteCandidateSchema.safeParse({ candidateId: -5 }).success).toBe(
       false,
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// adminUploadDocumentSchema tests
+// ---------------------------------------------------------------------------
+
+describe("adminUploadDocumentSchema", () => {
+  it("accepts valid input with photo type", () => {
+    expect(
+      adminUploadDocumentSchema.safeParse({
+        candidateId: 1,
+        documentType: "photo",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts all document types", () => {
+    const types = ["photo", "cv", "video", "civilFront", "civilBack"];
+    for (const documentType of types) {
+      expect(
+        adminUploadDocumentSchema.safeParse({ candidateId: 1, documentType })
+          .success,
+      ).toBe(true);
+    }
+  });
+
+  it("coerces string candidateId to number", () => {
+    expect(
+      adminUploadDocumentSchema.safeParse({
+        candidateId: "42",
+        documentType: "cv",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects invalid document type", () => {
+    expect(
+      adminUploadDocumentSchema.safeParse({
+        candidateId: 1,
+        documentType: "invalid",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing candidateId", () => {
+    expect(
+      adminUploadDocumentSchema.safeParse({ documentType: "photo" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing documentType", () => {
+    expect(
+      adminUploadDocumentSchema.safeParse({ candidateId: 1 }).success,
+    ).toBe(false);
+  });
+
+  it("rejects zero candidateId", () => {
+    expect(
+      adminUploadDocumentSchema.safeParse({
+        candidateId: 0,
+        documentType: "photo",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects negative candidateId", () => {
+    expect(
+      adminUploadDocumentSchema.safeParse({
+        candidateId: -1,
+        documentType: "photo",
+      }).success,
+    ).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// adminDeleteDocumentSchema tests
+// ---------------------------------------------------------------------------
+
+describe("adminDeleteDocumentSchema", () => {
+  it("accepts valid input", () => {
+    expect(
+      adminDeleteDocumentSchema.safeParse({
+        candidateId: 1,
+        documentType: "cv",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts all document types", () => {
+    const types = ["photo", "cv", "video", "civilFront", "civilBack"];
+    for (const documentType of types) {
+      expect(
+        adminDeleteDocumentSchema.safeParse({
+          candidateId: 1,
+          documentType,
+        }).success,
+      ).toBe(true);
+    }
+  });
+
+  it("rejects invalid document type", () => {
+    expect(
+      adminDeleteDocumentSchema.safeParse({
+        candidateId: 1,
+        documentType: "invalid",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing candidateId", () => {
+    expect(
+      adminDeleteDocumentSchema.safeParse({ documentType: "photo" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects missing documentType", () => {
+    expect(
+      adminDeleteDocumentSchema.safeParse({ candidateId: 1 }).success,
+    ).toBe(false);
   });
 });
