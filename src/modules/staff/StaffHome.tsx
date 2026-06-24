@@ -48,7 +48,7 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
       {/* Hero section */}
       <section className="grid grid-cols-[minmax(0,1fr)_minmax(240px,340px)] gap-3.5 items-stretch border border-border rounded-lg bg-card p-4">
         <div className="grid content-center gap-2">
-          <span className="text-[#1f73b7] text-[11px] font-black uppercase tracking-normal">
+          <span className="text-blue-zendesk text-[11px] font-black uppercase tracking-normal">
             Staff operating home
           </span>
           <h2 className="max-w-[760px] mb-0 text-[clamp(30px,4vw,56px)] leading-[0.98]">
@@ -60,7 +60,7 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
           </p>
           <div className="flex flex-wrap gap-2 mt-2.5">
             <Link
-              className={cn(buttonVariants({ variant: "default" }), "gap-2 bg-[#1f73b7] hover:bg-[#1a5e96]")}
+              className={cn(buttonVariants({ variant: "default" }), "gap-2 bg-blue-zendesk hover:bg-blue-zendesk/80")}
               href="/staff/candidates"
             >
               <Users aria-hidden="true" size={16} />
@@ -75,8 +75,8 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
             </Link>
           </div>
         </div>
-        <aside className="grid content-end gap-1.5 border border-border rounded-lg bg-[#1f73b7]/[0.07] p-3.5">
-          <span className="text-[#1f73b7] text-[11px] font-black uppercase">Production data loaded</span>
+        <aside className="grid content-end gap-1.5 border border-border rounded-lg bg-blue-zendesk/[0.07] p-3.5">
+          <span className="text-blue-zendesk text-[11px] font-black uppercase">Production data loaded</span>
           <strong className="text-[42px] leading-[1]">
             {Number(productionCandidates).toLocaleString("en-US")}
           </strong>
@@ -95,19 +95,19 @@ export function StaffHome({ data }: { data: StaffWorkspaceData }) {
           const Icon = workflow.icon;
           return (
             <Link
-              className="min-w-0 grid gap-2.5 p-3 border border-border rounded-lg bg-card no-underline text-foreground transition-colors hover:border-[#1f73b7] hover:bg-[#1f73b7]/[0.07]"
+              className="min-w-0 grid gap-2.5 p-3 border border-border rounded-lg bg-card no-underline text-foreground transition-colors hover:border-blue-zendesk hover:bg-blue-zendesk/[0.07]"
               href={workflow.href}
               key={workflow.title}
             >
               <div className="flex items-center justify-between">
-                <Icon aria-hidden="true" size={18} className="text-[#1f73b7]" />
-                <span className="text-[#1f73b7] text-[11px] font-black uppercase">
+                <Icon aria-hidden="true" size={18} className="text-blue-zendesk" />
+                <span className="text-blue-zendesk text-[11px] font-black uppercase">
                   {typeof workflow.metric === "number" ? workflow.metric.toLocaleString("en-US") : workflow.metric}
                 </span>
               </div>
               <strong className="text-lg">{workflow.title}</strong>
               <small className="text-muted-foreground leading-[1.45]">{workflow.subtitle}</small>
-              <em className="flex items-center gap-1 not-italic text-[#1f73b7] text-xs font-black">
+              <em className="flex items-center gap-1 not-italic text-blue-zendesk text-xs font-black">
                 Open <ArrowRight aria-hidden="true" size={14} />
               </em>
             </Link>
@@ -136,8 +136,8 @@ function StaffRows({
   return (
     <Card className="min-h-[240px] overflow-hidden">
       <div className="flex items-center justify-between gap-2.5 border-b border-border px-3 py-2.5">
-        <span className="text-[#1f73b7] text-[11px] font-black uppercase">{title}</span>
-        <span className="inline-flex items-center justify-center min-w-[30px] min-h-[30px] text-[#1f73b7] border border-[#1f73b7]/20 bg-[#1f73b7]/[0.07] font-bold text-sm rounded">
+        <span className="text-blue-zendesk text-[11px] font-black uppercase">{title}</span>
+        <span className="inline-flex items-center justify-center min-w-[30px] min-h-[30px] text-blue-zendesk border border-blue-zendesk/20 bg-blue-zendesk/[0.07] font-bold text-sm rounded">
           {rows.length}
         </span>
       </div>

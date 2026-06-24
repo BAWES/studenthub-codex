@@ -12,7 +12,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
     <section>
       {/* Section title with coral left border */}
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-1 h-6 rounded-full flex-shrink-0 bg-[#eb6651]" />
+        <div className="w-1 h-6 rounded-full flex-shrink-0 bg-coral" />
         <h2 className="text-xl font-semibold text-foreground">
           Skills
         </h2>
@@ -24,7 +24,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
             <Badge
               key={skill.id}
               variant="outline"
-              className="text-[11px] font-black uppercase tracking-[0.03em] bg-[#fef1ef] text-[#eb6651] border-[#eb6651]"
+              className="text-[11px] font-black uppercase tracking-[0.03em] bg-[#fef1ef] text-coral border-coral"
             >
               {skill.name}
             </Badge>

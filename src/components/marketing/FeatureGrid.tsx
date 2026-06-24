@@ -255,7 +255,7 @@ export default function FeatureGrid({
   return (
     <section className={cn(className)} aria-label="Key features">
       <div className="text-center mb-8 md:mb-10">
-        <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
+        <p className="text-blue-zendesk text-[11px] font-black uppercase tracking-wider mb-2">
           Everything you need
         </p>
         <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-foreground text-center">
@@ -305,7 +305,7 @@ export default function FeatureGrid({
                 className="size-10 rounded-lg flex items-center justify-center mb-4 transition-colors duration-200"
                 style={{
                   background: "rgba(31,115,183,0.08)",
-                  color: "#1f73b7",
+                  color: "var(--blue-zendesk)",
                 }}
               >
                 <Icon className="size-5" aria-hidden="true" />

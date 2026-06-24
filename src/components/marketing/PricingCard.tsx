@@ -200,7 +200,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
     <section className={cn(className)} aria-label="Pricing plans">
       {/* Header */}
       <div className="text-center mb-8 md:mb-10">
-        <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
+        <p className="text-blue-zendesk text-[11px] font-black uppercase tracking-wider mb-2">
           Simple pricing
         </p>
         <h2 className="text-[clamp(22px,3.4vw,38px)] font-black leading-[1.08] tracking-tight text-foreground text-center">
@@ -260,7 +260,7 @@ export default function PricingCard({ persona = "candidate", className }: Pricin
             >
               {/* Popular badge */}
               {tier.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-[#1f73b7] text-white">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-blue-zendesk text-white">
                   <Sparkles className="size-3" />
                   Most popular
                 </div>

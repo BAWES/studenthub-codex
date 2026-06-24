@@ -86,7 +86,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
     return (
       <div className="grid gap-7 p-7 sm:p-9 w-full max-w-[480px] mx-auto text-center">
         <div className="grid gap-2">
-          <span className="text-[#eb6651] text-[11px] font-black uppercase tracking-[0.04em]">
+          <span className="text-coral text-[11px] font-black uppercase tracking-[0.04em]">
             {defaultRole} access
           </span>
           <strong className="text-foreground text-[22px] leading-[1.15] font-bold tracking-[-0.02em]">
@@ -98,7 +98,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
         </div>
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 min-h-[50px] px-6 rounded-xl text-[15px] font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-[#eb6651] text-white"
+          className="inline-flex items-center justify-center gap-2 min-h-[50px] px-6 rounded-xl text-[15px] font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-coral text-white"
         >
           {msg.cta} <ArrowRight className="size-4" />
         </Link>
@@ -111,7 +111,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
     return (
       <div className="grid gap-7 p-7 sm:p-9 w-full max-w-[640px] mx-auto">
         <div className="grid gap-1.5 text-center">
-          <span className="text-[#eb6651] text-[11px] font-black uppercase tracking-[0.04em]">
+          <span className="text-coral text-[11px] font-black uppercase tracking-[0.04em]">
             Get started
           </span>
           <strong className="text-foreground text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
@@ -136,14 +136,14 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
                   <div
                     className="shrink-0 size-12 rounded-xl flex items-center justify-center bg-card border border-border"
                   >
-                    <Icon className="size-5 text-[#eb6651]" />
+                    <Icon className="size-5 text-coral" />
                   </div>
                   <div className="grid gap-1.5 min-w-0 flex-1">
                     <strong className="text-foreground text-[16px] font-bold">{role.title}</strong>
                     <p className="text-muted-foreground text-[13px] leading-relaxed m-0">{role.description}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                       {role.features.map((f) => (
-                        <span key={f} className="text-[12px] text-[#eb6651]">
+                        <span key={f} className="text-[12px] text-coral">
                           {f}
                         </span>
                       ))}
@@ -157,7 +157,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
 
         <p className="text-center text-[13px] text-muted-foreground m-0">
           Already have an account?{" "}
-          <a href="/login" className="text-[#eb6651] font-semibold no-underline hover:underline">
+          <a href="/login" className="text-coral font-semibold no-underline hover:underline">
             Sign in
           </a>
         </p>
@@ -173,12 +173,12 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1.5 text-[13px] text-[#eb6651] font-semibold cursor-pointer bg-transparent border-none p-0 w-fit hover:opacity-80 transition-opacity"
+            className="inline-flex items-center gap-1.5 text-[13px] text-coral font-semibold cursor-pointer bg-transparent border-none p-0 w-fit hover:opacity-80 transition-opacity"
           >
             <ArrowLeft className="size-3.5" />
             Back to role selection
           </button>
-          <span className="text-[#eb6651] text-[11px] font-black uppercase tracking-[0.04em] mt-2">
+          <span className="text-coral text-[11px] font-black uppercase tracking-[0.04em] mt-2">
             {selectedRole === "candidate" ? "Worker account" : "Employer account"}
           </span>
           <strong className="text-foreground text-[24px] leading-[1.15] font-bold tracking-[-0.02em]">
@@ -207,7 +207,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="name"
             placeholder={selectedRole === "candidate" ? "Your full name" : "Contact name"}
             required
-            className="min-h-[48px] bg-card border border-border focus:border-[#eb6651] focus:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] transition-all duration-200"
+            className="min-h-[48px] bg-card border border-border focus:border-coral focus:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] transition-all duration-200"
           />
           {state.fieldErrors?.name ? (
             <p className="text-destructive font-bold m-0 text-xs">{state.fieldErrors.name[0]}</p>
@@ -225,7 +225,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="email"
             placeholder="name@example.com"
             required
-            className="min-h-[48px] bg-card border border-border focus:border-[#eb6651] focus:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] transition-all duration-200"
+            className="min-h-[48px] bg-card border border-border focus:border-coral focus:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] transition-all duration-200"
           />
           {state.fieldErrors?.email ? (
             <p className="text-destructive font-bold m-0 text-xs">{state.fieldErrors.email[0]}</p>
@@ -244,7 +244,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             placeholder="At least 5 characters"
             required
             minLength={5}
-            className="min-h-[48px] bg-card border border-border focus:border-[#eb6651] focus:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] transition-all duration-200"
+            className="min-h-[48px] bg-card border border-border focus:border-coral focus:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] transition-all duration-200"
           />
           {state.fieldErrors?.password ? (
             <p className="text-destructive font-bold m-0 text-xs">{state.fieldErrors.password[0]}</p>
@@ -262,7 +262,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
             autoComplete="new-password"
             placeholder="Re-enter your password"
             required
-            className="min-h-[48px] bg-card border border-border focus:border-[#eb6651] focus:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] transition-all duration-200"
+            className="min-h-[48px] bg-card border border-border focus:border-coral focus:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] transition-all duration-200"
           />
           {state.fieldErrors?.confirmPassword ? (
             <p className="text-destructive font-bold m-0 text-xs">{state.fieldErrors.confirmPassword[0]}</p>
@@ -277,7 +277,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
           type="submit"
           disabled={pending}
           size="lg"
-          className="min-h-[52px] w-full text-[15px] font-semibold transition-all duration-200 cursor-pointer bg-[#eb6651] text-white hover:bg-[#d45441] hover:translate-y-[-1px] hover:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] disabled:opacity-56 disabled:pointer-events-none"
+          className="min-h-[52px] w-full text-[15px] font-semibold transition-all duration-200 cursor-pointer bg-coral text-white hover:bg-coral-hover hover:translate-y-[-1px] hover:shadow-[0_0_0_3px_rgba(235,102,81,0.3)] disabled:opacity-56 disabled:pointer-events-none"
         >
           <UserPlus className="size-4" />
           {pending ? "Creating account..." : `Create ${selectedRole === "candidate" ? "worker" : "employer"} account`}
@@ -286,7 +286,7 @@ export function SignupForm({ defaultRole }: { defaultRole?: Role }) {
 
       <p className="text-center text-[13px] text-muted-foreground m-0 pb-7 sm:pb-9">
         Already have an account?{" "}
-        <a href="/login" className="text-[#eb6651] font-semibold no-underline hover:underline">
+        <a href="/login" className="text-coral font-semibold no-underline hover:underline">
           Sign in
         </a>
       </p>

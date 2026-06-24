@@ -77,12 +77,12 @@ export default function HowItWorks({ className }: HowItWorksProps) {
               style={cardAnimationDelay(i)}
             >
               {/* Step number */}
-              <div className="size-9 rounded-full flex items-center justify-center text-xs font-black mb-4 bg-[#1f73b7]/10 text-[#1f73b7]">
+              <div className="size-9 rounded-full flex items-center justify-center text-xs font-black mb-4 bg-blue-zendesk/10 text-blue-zendesk">
                 {step.number}
               </div>
 
               {/* Icon */}
-              <div className="size-12 rounded-xl flex items-center justify-center mb-3 bg-[#1f73b7]/5 text-[#1f73b7]">
+              <div className="size-12 rounded-xl flex items-center justify-center mb-3 bg-blue-zendesk/5 text-blue-zendesk">
                 <Icon className="size-6" aria-hidden="true" />
               </div>
 

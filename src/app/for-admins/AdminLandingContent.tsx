@@ -114,14 +114,14 @@ export default function AdminLandingContent({
           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
 
           <div className="relative z-[2]">
-            <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-1">
+            <p className="text-blue-zendesk text-[11px] font-black uppercase tracking-wider mb-1">
               The real admin headache
             </p>
             <h2 className="text-[clamp(22px,3vw,28px)] font-bold leading-tight tracking-tight text-gray-900 mb-8">
               You don&apos;t need another login.
               <br />
               You need a{" "}
-              <em className="text-[#1f73b7] not-italic">single</em>{" "}
+              <em className="text-blue-zendesk not-italic">single</em>{" "}
               source of truth.
             </h2>
 
@@ -131,7 +131,7 @@ export default function AdminLandingContent({
                   key={i}
                   className="rounded-xl p-5 flex flex-col gap-3 transition-transform duration-300 hover:-translate-y-[3px] bg-gray-50 border border-gray-200"
                 >
-                  <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-[#1f73b7]/10 text-[#1f73b7]">
+                  <div className="size-10 rounded-lg flex items-center justify-center shrink-0 bg-blue-zendesk/10 text-blue-zendesk">
                     <span className="font-black text-sm">0{i + 1}</span>
                   </div>
                   <div>
@@ -185,7 +185,7 @@ export default function AdminLandingContent({
           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#fef1ef] via-white to-gray-50 z-0" aria-hidden="true" />
 
           <div className="relative z-[2] max-w-[640px] mx-auto">
-            <p className="text-[#1f73b7] text-[11px] font-black uppercase tracking-wider mb-2">
+            <p className="text-blue-zendesk text-[11px] font-black uppercase tracking-wider mb-2">
               Take control of operations
             </p>
             <h2 className="text-[clamp(24px,4vw,36px)] font-bold leading-tight tracking-tight text-gray-900 text-center">
