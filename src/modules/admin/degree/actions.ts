@@ -130,3 +130,75 @@ export async function listDegrees(
 
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// createDegree
+// ---------------------------------------------------------------------------
+
+export async function createDegree(
+  data: {
+    degree_name_en: string;
+    degree_name_ar?: string;
+    degree_sort_order?: number;
+    degree_group_uuid?: string;
+  },
+): Promise<{ success?: boolean; error?: string }> {
+  return createDegreeImpl(data);
+}
+
+async function createDegreeImpl(
+  data: {
+    degree_name_en: string;
+    degree_name_ar?: string;
+    degree_sort_order?: number;
+    degree_group_uuid?: string;
+  },
+): Promise<{ success?: boolean; error?: string }> {
+  try {
+    await requireCapability("admin.write");
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Unauthorized" };
+  }
+
+  if (!data.degree_name_en || data.degree_name_en.trim().length === 0) {
+    return { error: "Degree name (English) is required" };
+  }
+
+  try {
+    await prisma.degree.create({
+      data: {
+        degree_name_en: data.degree_name_en,
+        degree_name_ar: data.degree_name_ar || null,
+        degree_sort_order: data.degree_sort_order ?? null,
+        degree_group_uuid: data.degree_group_uuid || null,
+      } as any,
+    });
+
+    revalidatePath("/admin/degree");
+    return { success: true };
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Failed to create degree",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// getDegreeGroupOptions
+// ---------------------------------------------------------------------------
+
+export async function getDegreeGroupOptions(): Promise<
+  { degree_group_uuid: string; degree_group_name_en: string }[]
+> {
+  const groups = await prisma.degree_group.findMany({
+    orderBy: { degree_group_name_en: "asc" },
+    select: {
+      degree_group_uuid: true,
+      degree_group_name_en: true,
+    },
+  });
+  return groups.map((g) => ({
+    degree_group_uuid: g.degree_group_uuid,
+    degree_group_name_en: g.degree_group_name_en ?? "",
+  }));
+}
