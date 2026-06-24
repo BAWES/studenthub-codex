@@ -24,7 +24,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
             <Badge
               key={skill.id}
               variant="outline"
-              className="text-[11px] font-black uppercase tracking-[0.03em] bg-[#fef1ef] text-[#eb6651] border-[#eb6651]"
+              className="text-[11px] font-black uppercase tracking-[0.03em] bg-coral/5 text-coral border-coral"
             >
               {skill.name}
             </Badge>
