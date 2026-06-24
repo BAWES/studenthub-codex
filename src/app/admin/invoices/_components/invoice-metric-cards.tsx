@@ -33,7 +33,7 @@ export function InvoiceMetricCards({
           <p className="text-[11px] font-bold uppercase tracking-wider mb-1 text-muted-foreground">
             {card.label}
           </p>
-          <p className="text-2xl font-bold text-[var(--accent)]">
+          <p className="text-2xl font-bold text-accent-foreground">
             {card.value.toLocaleString()}
           </p>
           <p className="text-xs mt-0.5 text-muted-foreground">

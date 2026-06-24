@@ -37,7 +37,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
     >
       {error ? (
         <div
-          className="mb-4 rounded-lg border px-4 py-3 text-sm border-[var(--sh-error)] text-[var(--sh-error)] bg-[var(--surface)]"
+          className="mb-4 rounded-lg border px-4 py-3 text-sm border-destructive text-destructive bg-destructive/10"
         >
           {error}
         </div>
@@ -47,10 +47,10 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <button
           type="button"
           onClick={() => setTab("issues")}
-          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-[var(--border)] ${
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-border ${
             tab === "issues"
-              ? "bg-[var(--accent)] text-white"
-              : "bg-[var(--surface)] text-[var(--ink)]"
+              ? "bg-accent text-accent-foreground"
+              : "bg-card text-foreground"
           }`}
         >
           Issues
@@ -58,10 +58,10 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <button
           type="button"
           onClick={() => setTab("users")}
-          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-[var(--border)] ${
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-border ${
             tab === "users"
-              ? "bg-[var(--accent)] text-white"
-              : "bg-[var(--surface)] text-[var(--ink)]"
+              ? "bg-accent text-accent-foreground"
+              : "bg-card text-foreground"
           }`}
         >
           Users
@@ -80,7 +80,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               label: "Key",
               render: (row) => (
                 <code
-                  className="text-sm font-mono text-[var(--accent)]"
+                  className="text-sm font-mono text-primary"
                 >
                   {row.key}
                 </code>

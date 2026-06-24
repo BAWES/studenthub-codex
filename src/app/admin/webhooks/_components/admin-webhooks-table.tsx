@@ -81,13 +81,7 @@ export function AdminWebhooksTable({ session, webhooks }: Props) {
             render: (row) => {
               if (editingId === row.webhook_id) return null;
               return row.method ? (
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white ${
-                  row.method === "POST"
-                    ? "bg-[var(--sh-primary)]"
-                    : row.method === "GET"
-                      ? "bg-[var(--sh-info)]"
-                      : "bg-[var(--sh-warning)]"
-                }`}
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white ${row.method === "POST" ? "bg-primary" : row.method === "GET" ? "bg-blue-500" : "bg-amber-500"}`}
                 >
                   {row.method}
                 </span>
