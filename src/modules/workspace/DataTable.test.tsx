@@ -94,4 +94,15 @@ describe("DataTable", () => {
     renderTable();
     expect(screen.queryByRole("link", { name: "Open" })).toBeNull();
   });
+
+  it("adds data-os-navigable and tabIndex to table rows for keyboard nav", () => {
+    renderTable();
+    const table = document.querySelector("table");
+    const rows = table?.querySelectorAll("tbody tr") ?? [];
+    expect(rows.length).toBe(3);
+    rows.forEach((row) => {
+      expect(row.getAttribute("data-os-navigable")).toBe("true");
+      expect(row.getAttribute("tabindex")).toBe("0");
+    });
+  });
 });
