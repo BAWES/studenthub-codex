@@ -46,10 +46,10 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <button
           type="button"
           onClick={() => setTab("issues")}
-          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-[var(--border)] ${
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-border ${
             tab === "issues"
-              ? "bg-[var(--accent)] text-white"
-              : "bg-[var(--surface)] text-[var(--ink)]"
+              ? "bg-primary text-primary-foreground"
+              : "bg-card text-foreground"
           }`}
         >
           Issues
@@ -57,10 +57,10 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
         <button
           type="button"
           onClick={() => setTab("users")}
-          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-[var(--border)] ${
+          className={`text-xs px-3 py-1.5 rounded-md transition-all duration-200 border border-border ${
             tab === "users"
-              ? "bg-[var(--accent)] text-white"
-              : "bg-[var(--surface)] text-[var(--ink)]"
+              ? "bg-primary text-primary-foreground"
+              : "bg-card text-foreground"
           }`}
         >
           Users
@@ -78,9 +78,7 @@ export function AdminJiraPage({ session, issues, users, error }: Props) {
               key: "key",
               label: "Key",
               render: (row) => (
-                <code
-                  className="text-sm font-mono text-[var(--accent)]"
-                >
+                <code className="text-sm font-mono text-primary">
                   {row.key}
                 </code>
               ),
