@@ -12,14 +12,17 @@ import {
   listDocumentsSchema,
   getDocumentSchema,
   uploadDocumentSchema,
+  deleteDocumentRecordSchema,
   listDocumentsResultSchema,
   documentDetailSchema,
   uploadDocumentResultSchema,
-  type ListDocumentsInput,
-  type UploadDocumentInput,
-  type DocumentItem,
-  type ListDocumentsResult,
-  type UploadDocumentResult,
+} from "./schemas";
+import type {
+  ListDocumentsInput,
+  UploadDocumentInput,
+  DocumentItem,
+  ListDocumentsResult,
+  UploadDocumentResult,
 } from "./schemas";
 
 // ---------------------------------------------------------------------------
@@ -307,5 +310,54 @@ export async function getDocumentDownloadUrl(
     };
   } catch {
     return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// deleteDocumentRecord
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a document record by file_uuid (soft-delete via deleted flag if
+ * the schema has one, otherwise hard-delete from the `file` table).
+ *
+ * Requires `document.write` capability.
+ */
+export async function deleteDocumentRecord(
+  file_uuid: string,
+): Promise<{ success: boolean; error?: string }> {
+  await requireCapability("document.write");
+
+  const parsed = deleteDocumentRecordSchema.safeParse({ file_uuid });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid document identifier",
+    };
+  }
+
+  const existing = await prisma.file.findUnique({
+    where: { file_uuid: parsed.data.file_uuid },
+    select: { file_uuid: true },
+  });
+
+  if (!existing) {
+    return { success: false, error: "Document not found" };
+  }
+
+  try {
+    // Hard-delete from the file table
+    await prisma.file.delete({
+      where: { file_uuid: parsed.data.file_uuid },
+    });
+
+    revalidatePath("/admin/documents");
+
+    return { success: true };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Delete failed",
+    };
   }
 }

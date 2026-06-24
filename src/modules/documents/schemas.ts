@@ -71,6 +71,15 @@ export const uploadDocumentResultSchema = z.object({
   file_s3_path: z.string().nullable(),
 });
 
+/**
+ * Schema for deleteDocumentRecord input.
+ */
+export const deleteDocumentRecordSchema = z.object({
+  file_uuid: z
+    .string({ required_error: "File UUID is required" })
+    .min(1, "File UUID is required"),
+});
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
