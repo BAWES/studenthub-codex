@@ -2,6 +2,19 @@
 
 import { useActionState, useState } from "react";
 import type { ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +40,7 @@ export function SettingDetailForm({
 }: {
   setting: SettingDetail;
 }) {
+  const router = useRouter();
   const [code, setCode] = useState(setting.code);
   const [key, setKey] = useState(setting.key);
   const [value, setValue] = useState(setting.value ?? "");
@@ -133,15 +147,40 @@ export function SettingDetailForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            action={async () => {
-              await deleteSettingAction({ settingUuid: setting.setting_uuid });
-            }}
-          >
-            <Button type="submit" variant="destructive">
-              Delete Setting
-            </Button>
-          </form>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">Delete Setting</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete setting</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete &ldquo;{setting.code}/{setting.key}&rdquo;? This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    const result = await deleteSettingAction({
+                      settingUuid: setting.setting_uuid,
+                    });
+                    if (result.operation === "success") {
+                      toast.success("Setting deleted");
+                      router.push("/admin/setting");
+                    } else {
+                      toast.error("Failed to delete", {
+                        description: result.message,
+                      });
+                    }
+                  }}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </div>

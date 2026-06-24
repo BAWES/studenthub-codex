@@ -3,6 +3,18 @@
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -164,27 +176,44 @@ export function AdminSettingsTable({ session, initialSettings, initialTotal }: P
         header: "",
         cell: (row: SettingItem) =>
           editingId !== row.setting_uuid ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={async () => {
-                if (
-                  confirm(
-                    `Delete setting "${row.code}/${row.key}"?`,
-                  )
-                ) {
-                  const result = await deleteSettingAction({
-                    settingUuid: row.setting_uuid,
-                  });
-                  if (result.operation === "error") {
-                    alert(result.message);
-                  }
-                  fetchSettings(searchQuery, page);
-                }
-              }}
-            >
-              Delete
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete setting</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete &ldquo;{row.code}/{row.key}&rdquo;? This
+                    action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      const result = await deleteSettingAction({
+                        settingUuid: row.setting_uuid,
+                      });
+                      if (result.operation === "success") {
+                        toast.success("Setting deleted", {
+                          description: `"${row.code}/${row.key}" has been removed.`,
+                        });
+                      } else {
+                        toast.error("Failed to delete", {
+                          description: result.message,
+                        });
+                      }
+                      fetchSettings(searchQuery, page);
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           ) : null,
       },
     ],
