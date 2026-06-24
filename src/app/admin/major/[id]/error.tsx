@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 "use client";
 
 export default function Error({
@@ -11,12 +12,9 @@ export default function Error({
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       <h2 className="text-lg font-semibold text-destructive">Something went wrong</h2>
       <p className="text-sm text-muted-foreground">Failed to load major details.</p>
-      <button
-        onClick={reset}
-        className="h-9 rounded-lg px-4 text-sm font-semibold bg-primary text-primary-foreground"
-      >
-        Try again
-      </button>
+      <Button onClick={reset} size="sm">
+          Try again
+        </Button>
     </div>
   );
 }

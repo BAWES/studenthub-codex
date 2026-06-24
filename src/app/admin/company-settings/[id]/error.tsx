@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 import { useEffect } from "react";
 
 export default function Error({
@@ -18,12 +20,9 @@ export default function Error({
       <div className="text-center">
         <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
         <p className="text-sm mb-4">Failed to load company settings.</p>
-        <button
-          onClick={() => reset()}
-          className="rounded-lg px-4 py-2 text-sm font-semibold text-white bg-primary text-primary-foreground"
-        >
+        <Button onClick={() => reset()} size="sm">
           Try again
-        </button>
+        </Button>
       </div>
     </div>
   );
