@@ -14,7 +14,7 @@ export default function Loading() {
       <div className="rounded-xl bg-white/5 animate-pulse overflow-hidden">
         <div className="h-10 bg-white/5" />
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="h-12 border-t border-white/5" style={{ opacity: 1 - i * 0.08 }} />
+          <div key={i} className={`h-12 border-t border-white/5 ${i === 0 ? 'opacity-100' : i === 1 ? 'opacity-90' : i === 2 ? 'opacity-80' : i === 3 ? 'opacity-70' : i === 4 ? 'opacity-60' : i === 5 ? 'opacity-50' : i === 6 ? 'opacity-40' : i === 7 ? 'opacity-30' : i === 8 ? 'opacity-20' : 'opacity-10'}`} />
         ))}
       </div>
     </div>
