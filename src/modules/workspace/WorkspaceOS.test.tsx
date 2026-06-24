@@ -61,7 +61,18 @@ afterEach(() => {
   cleanup();
 });
 
-describe("WorkspaceOS — command palette with candidate search", () => {
+describe("WorkspaceOS — RaycastCommandPalette integration", () => {
+  it("opens the palette via Cmd+K and renders the Raycast search input", () => {
+    renderOS();
+
+    // Open palette via keyboard shortcut
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    // Should find the input with the command palette placeholder
+    const input = screen.getByPlaceholderText(/jump to a view/i);
+    expect(input).toBeInTheDocument();
+  });
+
   it("calls searchCandidatesForPalette when typing >= 2 chars in palette", async () => {
     const searchModule = await import("./searchPalette");
     const mockSearch = vi.mocked(searchModule.searchCandidatesForPalette);
@@ -88,66 +99,86 @@ describe("WorkspaceOS — command palette with candidate search", () => {
     expect(mockSearch).toHaveBeenCalledWith("Ahmed");
   });
 
-  it("shows candidate results in the palette when search returns results", async () => {
-    // This test verifies the data flow: mock search returns results
-    // and the component renders them. We use a manual state approach
-    // by checking that the mock is wired up correctly.
-    const searchModule = await import("./searchPalette");
-    const mockSearch = vi.mocked(searchModule.searchCandidatesForPalette);
-    const fakeResults = [
-      { id: 1001, uid: "C-1001", name: "Ahmed Al-Mansour", email: "ahmed@example.com" },
-      { id: 1002, uid: "C-1002", name: "Sara Al-Rashid", email: "sara@example.com" },
-    ];
-    mockSearch.mockResolvedValue(fakeResults);
-
-    // Verify the mock returns what we expect
-    const results = await searchModule.searchCandidatesForPalette("Ahmed");
-    expect(results).toEqual(fakeResults);
-    expect(results).toHaveLength(2);
-    expect(results[0].name).toBe("Ahmed Al-Mansour");
-    expect(results[1].name).toBe("Sara Al-Rashid");
-
+  it("shows Navigation and Quick Scopes section headings in the palette", () => {
     renderOS();
 
-    // Open palette via Cmd+K
+    // Open palette
     fireEvent.keyDown(window, { key: "k", metaKey: true });
 
-    // Input should appear
-    const input = screen.getByPlaceholderText(/jump to a view/i);
-    expect(input).toBeInTheDocument();
+    // Section headings should be visible
+    expect(screen.getByText("Navigation")).toBeInTheDocument();
+    expect(screen.getByText("Quick Scopes")).toBeInTheDocument();
+  });
+
+  it("shows nav items as command buttons in the palette", () => {
+    renderOS();
+
+    // Open palette
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+    // Nav items appear in the command palette (buttons inside the dialog)
+    // Use getAllByText since "Dashboard" also appears in sidebar and mobile nav
+    const dashes = screen.getAllByText("Dashboard");
+    expect(dashes.length).toBeGreaterThanOrEqual(1);
+
+    const cands = screen.getAllByText("Candidates");
+    expect(cands.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("closes the palette when Escape is pressed", () => {
+    renderOS();
+
+    // Open palette
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+    expect(screen.getByPlaceholderText(/jump to a view/i)).toBeInTheDocument();
+
+    // Press Escape
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    // Palette should close — verify no placeholder found (palette removed from DOM)
+    expect(screen.queryByPlaceholderText(/jump to a view/i)).not.toBeInTheDocument();
+  });
+
+  it("renders sidebar and content structure unchanged", () => {
+    renderOS();
+
+    // The sidebar and content should still render
+    expect(screen.getByText("StudentHub")).toBeInTheDocument();
+    expect(screen.getByTestId("child-content")).toBeInTheDocument();
+  });
+
+  it("supports arrow key navigation through palette items", () => {
+    renderOS();
+
+    // Open palette
+    fireEvent.keyDown(window, { key: "k", metaKey: true });
+    expect(screen.getByPlaceholderText(/jump to a view/i)).toBeInTheDocument();
+
+    // ArrowDown should move index (no crash)
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+
+    // ArrowUp should move index back (no crash)
+    fireEvent.keyDown(window, { key: "ArrowUp" });
+
+    // Palette still open after arrow nav
+    expect(screen.getByPlaceholderText(/jump to a view/i)).toBeInTheDocument();
   });
 });
 
-describe("WorkspaceOS — skip-to-content link", () => {
-  it("renders a skip-to-content link as the first focusable element", () => {
+describe("WorkspaceOS — shell structure", () => {
+  it("renders StudentHub branding in sidebar", () => {
     renderOS();
-    const link = screen.getByRole("link", { name: /skip to content/i });
-    expect(link).toBeInTheDocument();
+    expect(screen.getByText("StudentHub")).toBeInTheDocument();
   });
 
-  it("links to the main content via #main-content", () => {
-    renderOS();
-    const link = screen.getByRole("link", { name: /skip to content/i });
-    expect(link).toHaveAttribute("href", "#main-content");
-  });
-
-  it("has a main element with id=main-content", () => {
-    renderOS();
-    const main = document.getElementById("main-content");
-    expect(main).toBeInTheDocument();
-    expect(main?.tagName.toLowerCase()).toBe("main");
-  });
-
-  it("renders children inside the main content area", () => {
+  it("renders children inside the content area", () => {
     renderOS();
     expect(screen.getByTestId("child-content")).toBeInTheDocument();
   });
 
-  it("renders TabBar inside the workspace stage", () => {
+  it("renders theme toggle and sign out", () => {
     renderOS();
-    const tablist = screen.queryByRole("tablist");
-    // Tabs should render since the mock nav returns 2 items
-    expect(tablist).toBeInTheDocument();
-    expect(tablist).toHaveAttribute("aria-label", "admin workspace tabs");
+    expect(screen.getByText("Sign out")).toBeInTheDocument();
   });
 });

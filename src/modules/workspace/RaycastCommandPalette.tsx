@@ -9,7 +9,6 @@ import {
   Shield,
   ClipboardCheck,
   Search,
-  History,
   ArrowUpRight,
 } from "lucide-react";
 
@@ -186,33 +185,42 @@ export function RaycastCommandPalette({
 
   return (
     <div
-      className={`rcpOverlay ${mounted ? "rcpVisible" : ""}`}
+      className={`fixed inset-0 z-50 flex items-start justify-center pt-[15vh] transition-opacity duration-200 ${mounted ? "opacity-100" : "opacity-0"}`}
       role="dialog"
       aria-modal="true"
       aria-label="Command palette"
     >
-      <button className="rcpScrim" aria-label="Close" type="button" onClick={onClose} />
-      <div className="rcpPanel">
+      <button
+        className="fixed inset-0 bg-black/50"
+        aria-label="Close"
+        type="button"
+        onClick={onClose}
+      />
+      <div className="w-[640px] max-w-[90vw] rounded-lg border bg-popover shadow-xl overflow-hidden">
         {/* ── Search input ─────────────────────────────────── */}
-        <div className="rcpInputWrap">
-          <Search className="rcpSearchIcon" size={18} aria-hidden="true" />
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+          <Search className="ml-1 shrink-0 text-muted-foreground" size={18} aria-hidden="true" />
           <input
             ref={inputRef}
             autoFocus
             placeholder="Jump to a view, search records, or run an action..."
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            className="rcpInput"
+            className="flex-1 border-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
-          <kbd className="rcpEscKey">Esc</kbd>
+          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+            Esc
+          </kbd>
         </div>
 
         {/* ── Results ──────────────────────────────────────── */}
-        <div className="rcpList" ref={listRef}>
+        <div className="max-h-[360px] overflow-y-auto px-1 py-2" ref={listRef}>
           {hasResults ? (
             displayGroups.map(([section, items]) => (
-              <div className="rcpGroup" key={section}>
-                <h3 className="rcpGroupTitle">{section}</h3>
+              <div className="mb-1" key={section}>
+                <h3 className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {section}
+                </h3>
                 {items.map((cmd) => {
                   const idx = flatCommands.findIndex((f) => f.id === cmd.id);
                   const isActive = idx === index;
@@ -221,22 +229,27 @@ export function RaycastCommandPalette({
                   const subSpans = query ? fuzzyHighlight(cmd.subtitle, query) : null;
                   return (
                     <button
-                      className={`rcpItem ${isActive ? "rcpItemActive" : ""}`}
+                      className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${
+                        isActive ? "bg-accent text-accent-foreground" : ""
+                      }`}
                       key={cmd.id}
                       type="button"
                       data-active={isActive}
                       onMouseEnter={() => onIndexChange(idx)}
                       onClick={() => handleVisit(cmd)}
                     >
-                      <span className="rcpItemIcon">
+                      <span className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">
                         <Icon size={16} aria-hidden="true" />
                       </span>
-                      <span className="rcpItemLabel">
-                        <span className="rcpItemTitle">
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="text-sm font-medium">
                           {titleSpans
                             ? titleSpans.map((s, i) =>
                                 s.matched ? (
-                                  <mark key={i} className="rcpHit">
+                                  <mark
+                                    key={i}
+                                    className="rounded-sm bg-primary/20 font-medium text-primary"
+                                  >
                                     {s.text}
                                   </mark>
                                 ) : (
@@ -245,11 +258,14 @@ export function RaycastCommandPalette({
                               )
                             : cmd.title}
                         </span>
-                        <span className="rcpItemSub">
+                        <span className="truncate text-xs text-muted-foreground">
                           {subSpans
                             ? subSpans.map((s, i) =>
                                 s.matched ? (
-                                  <mark key={i} className="rcpHit">
+                                  <mark
+                                    key={i}
+                                    className="rounded-sm bg-primary/20 font-medium text-primary"
+                                  >
                                     {s.text}
                                   </mark>
                                 ) : (
@@ -259,11 +275,13 @@ export function RaycastCommandPalette({
                             : cmd.subtitle}
                         </span>
                       </span>
-                      <span className="rcpItemRight">
+                      <span className="flex shrink-0 items-center gap-1">
                         {cmd.shortcut ? (
-                          <kbd className="rcpShortcut">{cmd.shortcut}</kbd>
+                          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+                            {cmd.shortcut}
+                          </kbd>
                         ) : (
-                          <ArrowUpRight size={14} className="rcpArrow" aria-hidden="true" />
+                          <ArrowUpRight size={14} className="text-muted-foreground" aria-hidden="true" />
                         )}
                       </span>
                     </button>
@@ -272,8 +290,8 @@ export function RaycastCommandPalette({
               </div>
             ))
           ) : (
-            <div className="rcpEmpty">
-              <Search size={28} className="rcpEmptyIcon" aria-hidden="true" />
+            <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+              <Search size={28} className="text-muted-foreground/50" aria-hidden="true" />
               <strong>No command found</strong>
               <span>Try a view, record name, scope, or shortcut.</span>
             </div>
@@ -281,18 +299,21 @@ export function RaycastCommandPalette({
         </div>
 
         {/* ── Footer shortcuts ─────────────────────────────── */}
-        <div className="rcpFooter">
-          <span className="rcpFooterItem">
-            <kbd>↑↓</kbd> Navigate
+        <div className="flex items-center gap-4 border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">↑↓</kbd>
+            Navigate
           </span>
-          <span className="rcpFooterItem">
-            <kbd>↵</kbd> Open
+          <span className="flex items-center gap-1.5">
+            <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">↵</kbd>
+            Open
           </span>
-          <span className="rcpFooterItem">
-            <kbd>Esc</kbd> Close
+          <span className="flex items-center gap-1.5">
+            <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">Esc</kbd>
+            Close
           </span>
           {role && (
-            <span className="rcpFooterRole">
+            <span className="ml-auto flex items-center gap-1 capitalize opacity-60">
               <ArrowUpRight size={12} aria-hidden="true" />
               {role}
             </span>
