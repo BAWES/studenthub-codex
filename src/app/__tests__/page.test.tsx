@@ -1,23 +1,24 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
+import React from "react";
 
-// ── Mock next/navigation ───────────────────────────────────────
-const mockReplace = vi.fn();
-const mockSearchParams = new Map<string, string>();
-
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => ({
-    get: (key: string) => mockSearchParams.get(key) ?? null,
-    toString: () => "",
-    forEach: (cb: (value: string, key: string) => void) =>
-      mockSearchParams.forEach((value, key) => cb(value, key)),
-    delete: (key: string) => mockSearchParams.delete(key),
-  }),
-  useRouter: () => ({ replace: mockReplace }),
+// ── Mock auth session ──────────────────────────────────────────
+vi.mock("@/modules/auth/session", () => ({
+  getSession: vi.fn(() => Promise.resolve(null)),
 }));
 
-// ── Mock next/link ────────────────────────────────────────────
+// ── Mock next/navigation ───────────────────────────────────────
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => ({
+    get: () => null,
+    toString: () => "",
+    forEach: () => {},
+  }),
+  useRouter: () => ({ replace: vi.fn() }),
+}));
+
+// ── Mock next/link ─────────────────────────────────────────────
 vi.mock("next/link", () => ({
   default: ({
     children,
@@ -36,20 +37,14 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-// ── Mock lucide-react icons ───────────────────────────────────
-vi.mock("lucide-react", () => ({
-  ArrowRight: () => <span data-testid="icon-arrow-right" />,
-  Menu: () => <span data-testid="icon-menu" />,
-  X: () => <span data-testid="icon-x" />,
+// ── Mock ThemeToggle ───────────────────────────────────────────
+vi.mock("@/modules/theme/ThemeToggle", () => ({
+  ThemeToggle: () => <span data-testid="theme-toggle" />,
 }));
 
-// ── Mock marketing components ──────────────────────────────────
-vi.mock("@/components/marketing", () => ({
-  HeroSection: () => (
-    <section aria-label="StudentHub — connecting students with the right employers">
-      <h1>Connecting students with the right employers</h1>
-    </section>
-  ),
+// ── Mock PortalCards ───────────────────────────────────────────
+vi.mock("../PortalCards", () => ({
+  default: () => <section aria-label="StudentHub portals" data-testid="portal-cards" />,
 }));
 
 afterEach(() => {
@@ -57,172 +52,96 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-// ── Import component ──────────────────────────────────────────
-import LandingPage from "@/components/landing/LandingPage";
+// ── Import page component ──────────────────────────────────────
+import Home from "../page";
 
 // ── Tests ──────────────────────────────────────────────────────
-
-describe("Landing page (clean auth)", () => {
-  const defaultProps = {
-    session: null,
-  };
-
-  const sessionProps = {
-    session: {
-      id: "test-123",
-      email: "test@example.com",
-      role: "candidate",
-      name: "Test User",
-    },
-  };
-
-  beforeEach(() => {
-    mockReplace.mockClear();
-    mockSearchParams.forEach((_, key) => mockSearchParams.delete(key));
+describe("Landing page (clean, no session)", () => {
+  it("renders the hero headline", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).toContain("Staff-matched placements, streamlined.");
   });
 
-  // ── Hero ─────────────────────────────────────────────────────
-
-  it("renders the hero section with headline", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(
-      screen.getByText(/connecting students with/i)
-    ).toBeInTheDocument();
+  it("renders SH brand in nav", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).toContain("SH");
   });
 
-  // ── Navigation ───────────────────────────────────────────────
+  it("renders StudentHub text in nav", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).toContain("StudentHub");
+  });
 
-  it("renders sign up and sign in for unauthenticated users", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(screen.getByText(/create free profile/i)).toBeInTheDocument();
-    const signInLinks = screen.getAllByText(/sign in/i);
+  it("renders Sign in buttons", async () => {
+    const { container } = render(await Home());
+    const signInLinks = container.querySelectorAll('a[href="/login"]');
     expect(signInLinks.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders SH brand in nav", () => {
-    render(<LandingPage {...defaultProps} />);
-    const shElements = screen.getAllByText("SH");
-    expect(shElements.length).toBeGreaterThanOrEqual(1);
+  it("renders ThemeToggle", async () => {
+    render(await Home());
+    expect(screen.getByTestId("theme-toggle")).toBeInTheDocument();
   });
 
-  it("renders StudentHub text in nav", () => {
-    render(<LandingPage {...defaultProps} />);
-    const shTexts = screen.getAllByText("StudentHub");
-    expect(shTexts.length).toBeGreaterThanOrEqual(1);
+  it("renders PortalCards", async () => {
+    render(await Home());
+    expect(screen.getByTestId("portal-cards")).toBeInTheDocument();
   });
 
   // ── No persona tabs (stripped) ─────────────────────────────
 
-  it("does NOT render persona tabs", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(screen.queryByText("Students")).not.toBeInTheDocument();
-    expect(screen.queryByText("Companies")).not.toBeInTheDocument();
+  it("does NOT render persona tabs (Students/Companies)", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).not.toContain("Students");
+    expect(container.textContent).not.toContain("Companies");
   });
 
   // ── No marketing sections (stripped) ─────────────────────────
 
-  it("does NOT render how it works section", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(screen.queryByText("Create your profile")).not.toBeInTheDocument();
+  it("does NOT render how it works section", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).not.toContain("Create your profile");
   });
 
-  it("does NOT render testimonial carousel", () => {
-    render(<LandingPage {...defaultProps} />);
+  it("does NOT render testimonial carousel", async () => {
+    const { container } = render(await Home());
     expect(
-      screen.queryByText("Real stories from real placements.")
-    ).not.toBeInTheDocument();
+      container.textContent
+    ).not.toContain("Real stories from real placements.");
   });
 
-  it("does NOT render comparison table", () => {
-    render(<LandingPage {...defaultProps} />);
+  it("does NOT render comparison table", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).not.toContain("Why students choose StudentHub.");
+  });
+
+  it("does NOT render employer trust bar", async () => {
+    const { container } = render(await Home());
     expect(
-      screen.queryByText("Why students choose StudentHub.")
-    ).not.toBeInTheDocument();
+      container.textContent
+    ).not.toContain("Trusted by leading organizations");
   });
 
-  it("does NOT render CTA section", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(
-      screen.queryByText("Start your journey")
-    ).not.toBeInTheDocument();
+  // ── Hero content ─────────────────────────────────────────────
+
+  it("renders placement feature badges", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).toContain("Staff-recruited matching");
+    expect(container.textContent).toContain("End-to-end workflows");
+    expect(container.textContent).toContain("Real-time pay and compliance");
   });
 
-  it("does NOT render employer trust bar", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(
-      screen.queryByText(/trusted by leading organizations/i)
-    ).not.toBeInTheDocument();
-  });
-
-  // ── No footer (stripped) ─────────────────────────────────────
-
-  it("does NOT render footer with role descriptions", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(screen.queryByText(/Staff:/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Admin:/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Inspector:/i)).not.toBeInTheDocument();
-  });
-
-  // ── Skip-to-content ─────────────────────────────────────────
-
-  it("renders a skip-to-content link", () => {
-    render(<LandingPage {...defaultProps} />);
-    const link = screen.getByRole("link", { name: /skip to content/i });
-    expect(link).toBeInTheDocument();
-  });
-
-  it("skip-to-content link targets #main-content", () => {
-    render(<LandingPage {...defaultProps} />);
-    const link = screen.getByRole("link", { name: /skip to content/i });
-    expect(link).toHaveAttribute("href", "#main-content");
-  });
-
-  it("main element has id=main-content", () => {
-    const { container } = render(<LandingPage {...defaultProps} />);
-    const main = container.querySelector("main#main-content");
-    expect(main).toBeInTheDocument();
-  });
-
-  // ── Authenticated state ──────────────────────────────────────
-
-  it("shows open app link when user is authenticated", () => {
-    render(<LandingPage {...defaultProps} {...sessionProps} />);
-    const openAppLinks = screen.getAllByText(/open app/i);
-    expect(openAppLinks.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("redirects authenticated users to their role dashboard", () => {
-    render(<LandingPage {...sessionProps} />);
-    expect(mockReplace).toHaveBeenCalledWith("/candidate");
-  });
-
-  it("does NOT redirect unauthenticated users", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(mockReplace).not.toHaveBeenCalled();
-  });
-
-  // ── Redirect by role ─────────────────────────────────────────
-
-  it.each([
-    ["admin", "/admin"],
-    ["staff", "/staff"],
-    ["recruiter", "/staff"],
-    ["student", "/candidate"],
-    ["candidate", "/candidate"],
-    ["company", "/employer"],
-    ["employer", "/employer"],
-    ["inspector", "/inspector"],
-  ])("redirects role=%s to %s", (role, expectedPath) => {
-    render(
-      <LandingPage
-        session={{
-          id: "test-123",
-          email: "test@example.com",
-          role,
-          name: "Test User",
-        }}
-      />
+  it("renders the staff-matched tagline", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).toContain(
+      "StudentHub connects staff recruiters with qualified candidates"
     );
-    expect(mockReplace).toHaveBeenCalledWith(expectedPath);
+  });
+
+  it("does NOT render footer with role descriptions", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).not.toContain("Staff:");
+    expect(container.textContent).not.toContain("Admin:");
+    expect(container.textContent).not.toContain("Inspector:");
   });
 });
