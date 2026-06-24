@@ -1,0 +1,15 @@
+node_modules
+.next
+.next-stale-*
+*.tsbuildinfo
+.env
+.env.local
+data/*.sql
+data/*.json
+data/*.log
+!.gitkeep
+
+# Test artifacts
+playwright-report/
+test-results/
+.worktrees/

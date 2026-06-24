@@ -3,48 +3,67 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import React from "react";
 
-// ── Mock auth session ──────────────────────────────────────────
-vi.mock("@/modules/auth/session", () => ({
-  getSession: vi.fn(() => Promise.resolve(null)),
-}));
-
-// ── Mock next/navigation ───────────────────────────────────────
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => ({
-    get: () => null,
-    toString: () => "",
-    forEach: () => {},
-  }),
-  useRouter: () => ({ replace: vi.fn() }),
-}));
-
-// ── Mock next/link ─────────────────────────────────────────────
+// ── Mock next/link ──────────────────────────────────────────────
 vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-    className,
-    ...rest
-  }: {
-    children: React.ReactNode;
-    href: string;
-    className?: string;
-    [key: string]: unknown;
-  }) => (
+  default: ({ children, href, className, ...rest }: any) => (
     <a href={href} className={className} {...rest}>
       {children}
     </a>
   ),
 }));
 
-// ── Mock ThemeToggle ───────────────────────────────────────────
-vi.mock("@/modules/theme/ThemeToggle", () => ({
-  ThemeToggle: () => <span data-testid="theme-toggle" />,
+// ── Mock lucide-react ──────────────────────────────────────────
+vi.mock("lucide-react", () => ({
+  UserRound: () => <span data-testid="icon-user" />,
+  Briefcase: () => <span data-testid="icon-briefcase" />,
+  Building2: () => <span data-testid="icon-building" />,
+  Shield: () => <span data-testid="icon-shield" />,
+  ClipboardCheck: () => <span data-testid="icon-clipboard" />,
+  ChevronRight: () => <span data-testid="icon-chevron-right" />,
+  Sparkles: () => <span data-testid="icon-sparkles" />,
+  ArrowRight: () => <span data-testid="icon-arrow-right" />,
+  Menu: () => <span data-testid="icon-menu" />,
+  X: () => <span data-testid="icon-x" />,
 }));
 
-// ── Mock PortalCards ───────────────────────────────────────────
-vi.mock("../PortalCards", () => ({
-  default: () => <section aria-label="StudentHub portals" data-testid="portal-cards" />,
+// ── Mock shadcn components ─────────────────────────────────────
+vi.mock("@/components/ui/button", () => ({
+  Button: ({ children, variant, size, asChild, ...rest }: any) => (
+    <button data-variant={variant} data-size={size} {...rest}>
+      {children}
+    </button>
+  ),
+}));
+
+vi.mock("@/components/ui/card", () => ({
+  Card: ({ children, className }: any) => (
+    <div className={className} data-testid="card">
+      {children}
+    </div>
+  ),
+  CardContent: ({ children, className }: any) => (
+    <div className={className} data-testid="card-content">
+      {children}
+    </div>
+  ),
+}));
+
+vi.mock("@/components/ui/badge", () => ({
+  Badge: ({ children, variant, className }: any) => (
+    <span data-variant={variant} className={className}>
+      {children}
+    </span>
+  ),
+}));
+
+// ── Mock ThemeToggle ────────────────────────────────────────────
+vi.mock("@/modules/theme/ThemeToggle", () => ({
+  ThemeToggle: () => <button aria-label="Toggle theme">🌓</button>,
+}));
+
+// ── Mock PortalCards ────────────────────────────────────────────
+vi.mock("@/app/PortalCards", () => ({
+  default: () => <section aria-label="StudentHub portals">PortalCards</section>,
 }));
 
 afterEach(() => {
@@ -52,19 +71,32 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-// ── Import page component ──────────────────────────────────────
-import Home from "../page";
+// ── Import component ────────────────────────────────────────────
+import LandingPage from "@/components/landing/LandingPage";
 
-// ── Tests ──────────────────────────────────────────────────────
-describe("Landing page (clean, no session)", () => {
-  it("renders the hero headline", async () => {
-    const { container } = render(await Home());
-    expect(container.textContent).toContain("Staff-matched placements, streamlined.");
-  });
+// ── Tests ────────────────────────────────────────────────────────
 
-  it("renders SH brand in nav", async () => {
-    const { container } = render(await Home());
-    expect(container.textContent).toContain("SH");
+describe("Landing page (clean auth)", () => {
+  const defaultProps = {
+    session: null,
+  };
+
+  const sessionProps = {
+    session: {
+      id: "test-123",
+      email: "test@example.com",
+      role: "candidate",
+      name: "Test User",
+    },
+  };
+
+  // ── Hero ─────────────────────────────────────────────────────
+
+  it("renders the hero section with headline", () => {
+    render(<LandingPage {...defaultProps} />);
+    expect(
+      screen.getByText(/staff-matched placements/i)
+    ).toBeInTheDocument();
   });
 
   it("renders StudentHub text in nav", async () => {
@@ -72,23 +104,25 @@ describe("Landing page (clean, no session)", () => {
     expect(container.textContent).toContain("StudentHub");
   });
 
-  it("renders Sign in buttons", async () => {
-    const { container } = render(await Home());
-    const signInLinks = container.querySelectorAll('a[href="/login"]');
+  it("renders sign in for unauthenticated users", () => {
+    render(<LandingPage {...defaultProps} />);
+    const signInLinks = screen.getAllByText(/sign in/i);
     expect(signInLinks.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders ThemeToggle", async () => {
-    render(await Home());
-    expect(screen.getByTestId("theme-toggle")).toBeInTheDocument();
+  it("renders SH brand", () => {
+    render(<LandingPage {...defaultProps} />);
+    const shElements = screen.getAllByText("SH");
+    expect(shElements.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders PortalCards", async () => {
-    render(await Home());
-    expect(screen.getByTestId("portal-cards")).toBeInTheDocument();
+  it("renders StudentHub text", () => {
+    render(<LandingPage {...defaultProps} />);
+    const shTexts = screen.getAllByText("StudentHub");
+    expect(shTexts.length).toBeGreaterThanOrEqual(1);
   });
 
-  // ── No persona tabs (stripped) ─────────────────────────────
+  // ── No persona tabs (stripped) ───────────────────────────────
 
   it("does NOT render persona tabs (Students/Companies)", async () => {
     const { container } = render(await Home());
@@ -131,17 +165,51 @@ describe("Landing page (clean, no session)", () => {
     expect(container.textContent).toContain("Real-time pay and compliance");
   });
 
-  it("renders the staff-matched tagline", async () => {
-    const { container } = render(await Home());
-    expect(container.textContent).toContain(
-      "StudentHub connects staff recruiters with qualified candidates"
-    );
+  it("does NOT render employer trust bar", () => {
+    render(<LandingPage {...defaultProps} />);
+    expect(
+      screen.queryByText(/trusted by leading organizations/i)
+    ).not.toBeInTheDocument();
   });
 
-  it("does NOT render footer with role descriptions", async () => {
-    const { container } = render(await Home());
-    expect(container.textContent).not.toContain("Staff:");
-    expect(container.textContent).not.toContain("Admin:");
-    expect(container.textContent).not.toContain("Inspector:");
+  // ── No footer (stripped) ─────────────────────────────────────
+
+  it("does NOT render footer with role descriptions", () => {
+    render(<LandingPage {...defaultProps} />);
+    expect(screen.queryByText(/Staff:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Admin:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Inspector:/i)).not.toBeInTheDocument();
+  });
+
+  // ── Skip-to-content ─────────────────────────────────────────
+
+  it("renders a skip-to-content link", () => {
+    render(<LandingPage {...defaultProps} />);
+    const link = screen.getByRole("link", { name: /skip to content/i });
+    expect(link).toBeInTheDocument();
+  });
+
+  it("skip-to-content link targets #main-content", () => {
+    render(<LandingPage {...defaultProps} />);
+    const link = screen.getByRole("link", { name: /skip to content/i });
+    expect(link).toHaveAttribute("href", "#main-content");
+  });
+
+  it("main element has id=main-content", () => {
+    const { container } = render(<LandingPage {...defaultProps} />);
+    const main = container.querySelector("main#main-content");
+    expect(main).toBeInTheDocument();
+  });
+
+  // ── Authenticated state ──────────────────────────────────────
+
+  it("shows workspace link when user is authenticated", () => {
+    render(<LandingPage {...sessionProps} />);
+    expect(screen.getByText(/go to workspace/i)).toBeInTheDocument();
+  });
+
+  it("shows welcome back when user is authenticated", () => {
+    render(<LandingPage {...sessionProps} />);
+    expect(screen.getByText(/welcome back/i)).toBeInTheDocument();
   });
 });

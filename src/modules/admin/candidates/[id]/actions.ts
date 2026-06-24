@@ -6,11 +6,13 @@
 // Extended detail and mutation actions for a single candidate.
 //
 // Actions:
-//   - getCandidateDetail    — single candidate detail with full profile,
-//                             placements, and documents
-//   - updateCandidateStatus — update candidate status code
-//   - updateCandidate       — update candidate profile fields
-//
+//   - getCandidateDetail              — single candidate detail with full profile,
+//                                       placements, and documents
+//   - updateCandidateStatus           — update candidate status code
+//   - updateCandidate                 — update candidate profile fields
+//   - deleteCandidate                 — soft-delete a candidate
+//   - adminUploadCandidateDocument    — upload a document (explicit candidateId, admin)
+//   - adminDeleteCandidateDocument    — delete a document (explicit candidateId, admin)
 // Candidate status convention (from Yii2):
 //   10 = active, 20 = inactive, 30 = banned
 // ---------------------------------------------------------------------------
@@ -23,6 +25,8 @@ import {
   updateCandidateStatusSchema,
   updateCandidateSchema,
   deleteCandidateSchema,
+  adminUploadDocumentSchema,
+  adminDeleteDocumentSchema,
 } from "./schemas";
 import type {
   UpdateCandidateStatusInput,
@@ -30,7 +34,13 @@ import type {
   DeleteCandidateInput,
   CandidateFullDetail,
   CandidateActionResponse,
+  AdminDocumentActionResult,
 } from "./schemas";
+
+import crypto from "node:crypto";
+import path from "node:path";
+import fs from "node:fs/promises";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 // ---------------------------------------------------------------------------
 // getCandidateDetail
@@ -328,5 +338,309 @@ function statusLabel(status: number): string {
     case 20: return "Inactive";
     case 30: return "Banned";
     default: return `Unknown (${status})`;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// S3 client (lazy-initialized, supports MinIO via AWS_ENDPOINT_URL)
+// ---------------------------------------------------------------------------
+
+let s3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!s3Client) {
+    const config: ConstructorParameters<typeof S3Client>[0] = {
+      region: process.env.AWS_TEMP_BUCKET_REGION ?? "",
+      credentials: {
+        accessKeyId: process.env.AWS_TEMP_ACCESS_KEY_ID ?? "",
+        secretAccessKey: process.env.AWS_TEMP_SECRET_ACCESS_KEY ?? "",
+      },
+    };
+
+    if (process.env.AWS_ENDPOINT_URL) {
+      config.endpoint = process.env.AWS_ENDPOINT_URL;
+    }
+
+    if (process.env.AWS_S3_FORCE_PATH_STYLE === "true") {
+      config.forcePathStyle = true;
+    }
+
+    s3Client = new S3Client(config);
+  }
+  return s3Client;
+}
+
+function s3ConfigAvailable(): boolean {
+  return !!(
+    process.env.AWS_TEMP_BUCKET_REGION &&
+    process.env.AWS_TEMP_ACCESS_KEY_ID &&
+    process.env.AWS_TEMP_SECRET_ACCESS_KEY &&
+    process.env.AWS_TEMP_BUCKET_NAME
+  );
+}
+
+function getBucketName(): string {
+  return process.env.AWS_TEMP_BUCKET_NAME ?? "";
+}
+
+function isS3Key(filePath: string | null): boolean {
+  return !!filePath && !filePath.startsWith("/");
+}
+
+// Document field map on the candidate model
+const DOCUMENT_FIELD_MAP: Record<string, string> = {
+  photo: "candidate_personal_photo",
+  cv: "candidate_resume",
+  video: "candidate_video",
+  civilFront: "candidate_civil_photo_front",
+  civilBack: "candidate_civil_photo_back",
+};
+
+// Document type labels
+const DOCUMENT_LABELS: Record<string, string> = {
+  photo: "Personal Photo",
+  cv: "CV / Resume",
+  video: "Video Profile",
+  civilFront: "Civil ID (Front)",
+  civilBack: "Civil ID (Back)",
+};
+
+// Allowed file types and sizes
+const ALLOWED_TYPES: Record<string, { mime: string[]; ext: string[]; maxSize: number }> = {
+  photo: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+  cv: {
+    mime: [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    ext: [".pdf", ".doc", ".docx"],
+    maxSize: 10 * 1024 * 1024,
+  },
+  video: {
+    mime: ["video/mp4", "video/webm", "video/ogg", "video/quicktime"],
+    ext: [".mp4", ".webm", ".ogv", ".mov"],
+    maxSize: 50 * 1024 * 1024,
+  },
+  civilFront: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+  civilBack: {
+    mime: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    ext: [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    maxSize: 5 * 1024 * 1024,
+  },
+};
+
+const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "candidates");
+
+// ---------------------------------------------------------------------------
+// adminUploadCandidateDocument
+// ---------------------------------------------------------------------------
+
+/**
+ * Upload a document for a candidate (admin version with explicit candidateId).
+ *
+ * Accepts a FormData containing:
+ *   - candidateId (hidden field)
+ *   - documentType (hidden field) — one of: photo, cv, video, civilFront, civilBack
+ *   - file (the actual file to upload)
+ */
+export async function adminUploadCandidateDocument(
+  _prevState: AdminDocumentActionResult,
+  formData: FormData,
+): Promise<AdminDocumentActionResult> {
+  await requireCapability("candidate.write");
+
+  const rawCandidateId = formData.get("candidateId");
+  const rawDocumentType = formData.get("documentType");
+  const file = formData.get("file");
+
+  if (!rawCandidateId || !rawDocumentType) {
+    return { success: false, error: "candidateId and documentType are required." };
+  }
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { success: false, error: "No file provided. Use 'file' field." };
+  }
+
+  const parsed = adminUploadDocumentSchema.safeParse({
+    candidateId: rawCandidateId,
+    documentType: rawDocumentType,
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors.map((e) => e.message).join("; "),
+    };
+  }
+
+  const { candidateId, documentType } = parsed.data;
+  const typeConfig = ALLOWED_TYPES[documentType];
+
+  // Validate file extension
+  const ext = path.extname(file.name).toLowerCase();
+  if (!typeConfig.ext.includes(ext)) {
+    return {
+      success: false,
+      error: `File type "${ext}" is not allowed for ${documentType}. Accepted: ${typeConfig.ext.join(", ")}.`,
+    };
+  }
+
+  // Validate MIME type
+  if (file.type && !typeConfig.mime.includes(file.type)) {
+    return {
+      success: false,
+      error: `Invalid MIME type "${file.type}" for ${documentType}.`,
+    };
+  }
+
+  // Validate file size
+  if (file.size > typeConfig.maxSize) {
+    const sizeMB = typeConfig.maxSize / 1024 / 1024;
+    return {
+      success: false,
+      error: `File is too large. Maximum size for ${documentType} is ${sizeMB} MB.`,
+    };
+  }
+
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const filename = `${documentType}_${crypto.randomUUID()}${ext}`;
+    let publicPath: string;
+    let s3Key: string | undefined;
+
+    if (s3ConfigAvailable()) {
+      const s3ObjectKey = `candidates/${candidateId}/${filename}`;
+      const command = new PutObjectCommand({
+        Bucket: getBucketName(),
+        Key: s3ObjectKey,
+        Body: buffer,
+        ContentType: file.type || undefined,
+      });
+      await getS3Client().send(command);
+
+      s3Key = s3ObjectKey;
+      publicPath = s3ObjectKey;
+    } else {
+      const dir = path.join(UPLOAD_DIR, String(candidateId));
+      await fs.mkdir(dir, { recursive: true });
+      const filepath = path.join(dir, filename);
+      await fs.writeFile(filepath, buffer);
+      publicPath = `/uploads/candidates/${candidateId}/${filename}`;
+    }
+
+    const field = DOCUMENT_FIELD_MAP[documentType];
+    await prisma.candidate.update({
+      where: { candidate_id: candidateId },
+      data: { [field]: publicPath },
+    });
+
+    revalidatePath(`/admin/candidates/${candidateId}`);
+
+    return {
+      success: true,
+      filePath: publicPath,
+      s3Key,
+    };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Upload failed due to an unknown error.",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// adminDeleteCandidateDocument
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete a document for a candidate (admin version with explicit candidateId).
+ *
+ * Accepts a FormData containing:
+ *   - candidateId (hidden field)
+ *   - documentType (hidden field)
+ */
+export async function adminDeleteCandidateDocument(
+  _prevState: AdminDocumentActionResult,
+  formData: FormData,
+): Promise<AdminDocumentActionResult> {
+  await requireCapability("candidate.write");
+
+  const rawCandidateId = formData.get("candidateId");
+  const rawDocumentType = formData.get("documentType");
+
+  if (!rawCandidateId || !rawDocumentType) {
+    return { success: false, error: "candidateId and documentType are required." };
+  }
+
+  const parsed = adminDeleteDocumentSchema.safeParse({
+    candidateId: rawCandidateId,
+    documentType: rawDocumentType,
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors.map((e) => e.message).join("; "),
+    };
+  }
+
+  const { candidateId, documentType } = parsed.data;
+  const field = DOCUMENT_FIELD_MAP[documentType];
+
+  try {
+    const candidate = await prisma.candidate.findUnique({
+      where: { candidate_id: candidateId },
+      select: { [field]: true },
+    });
+
+    if (!candidate) {
+      return { success: false, error: "Candidate not found." };
+    }
+
+    const currentPath = (candidate as Record<string, unknown>)[field] as string | null;
+
+    await prisma.candidate.update({
+      where: { candidate_id: candidateId },
+      data: { [field]: null },
+    });
+
+    // Clean up the stored file
+    if (currentPath && isS3Key(currentPath) && s3ConfigAvailable()) {
+      try {
+        const deleteCommand = new DeleteObjectCommand({
+          Bucket: getBucketName(),
+          Key: currentPath,
+        });
+        await getS3Client().send(deleteCommand);
+      } catch {
+        // Object may already be gone
+      }
+    } else if (currentPath && currentPath.startsWith("/uploads/")) {
+      const filePath = path.join(process.cwd(), "public", currentPath);
+      try {
+        await fs.unlink(filePath);
+      } catch {
+        // File may already be gone
+      }
+    }
+
+    revalidatePath(`/admin/candidates/${candidateId}`);
+
+    return { success: true };
+  } catch (e) {
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Delete failed due to an unknown error.",
+    };
   }
 }

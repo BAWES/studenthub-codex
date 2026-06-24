@@ -1,13 +1,12 @@
-import { ErrorBoundary } from "@/modules/workspace/ErrorBoundary";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { requireRoleCapability } from "@/modules/auth/session";
-import { DetailSection } from "@/modules/workspace/DetailPanels";
+import { FactPanel } from "@/modules/workspace/DetailPanels";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { Button } from "@/components/ui/button";
-import { getInvoice } from "./actions";
-import { formatDate } from "@/modules/workspace/format";
+import { formatDate, formatMoney } from "@/modules/workspace/format";
+import { getInvoiceDetail } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +15,7 @@ export default async function AdminInvoiceDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await requireRoleCapability("admin", "finance.read");
+  const session = await requireRoleCapability("admin", "admin.system");
   const { id } = await params;
   const invoiceId = Number(id);
 
@@ -24,62 +23,79 @@ export default async function AdminInvoiceDetailPage({
     notFound();
   }
 
-  const data = await getInvoice(invoiceId);
+  const invoice = await getInvoiceDetail(invoiceId);
 
-  if (!data.invoice) {
+  if (!invoice) {
     notFound();
   }
 
-  const { invoice, candidate_payouts, metrics } = data;
-
   return (
-    <ErrorBoundary>
-      <WorkspaceShell
-        session={session}
-        eyebrow="Admin / Invoices"
-        title={`Invoice #${invoice.invoice_id}`}
-        metrics={metrics}
-      >
-        <DetailSection
-          title="Invoice Details"
-          facts={[
-            { label: "Invoice ID", value: String(invoice.invoice_id) },
-            { label: "Transfer ID", value: invoice.transfer_id ? String(invoice.transfer_id) : "—" },
-            { label: "Status", value: invoice.invoice_status ?? "—" },
-            { label: "Total", value: invoice.total ?? "—" },
-            { label: "Company Total", value: invoice.company_total ?? "—" },
-            { label: "Currency", value: invoice.currency_code ?? "—" },
-            { label: "Invoice Date", value: invoice.invoice_date ? formatDate(new Date(invoice.invoice_date)) : "—" },
-            { label: "Payment Received", value: invoice.payment_received_on ? formatDate(new Date(invoice.payment_received_on)) : "—" },
-          ]}
-        />
+    <WorkspaceShell
+      session={session}
+      eyebrow="Admin / Invoices"
+      title={`Invoice #${invoice.invoice_id}`}
+      metrics={[
+        {
+          label: "Status",
+          value: invoice.invoice_status ?? "unknown",
+          note: "Payment status",
+        },
+        {
+          label: "Company",
+          value: invoice.transfer?.company?.company_name ?? "—",
+          note: "Billed company",
+        },
+      ]}
+    >
+      <FactPanel
+        title="Invoice Details"
+        facts={[
+          { label: "Invoice ID", value: String(invoice.invoice_id) },
+          {
+            label: "Date",
+            value: invoice.invoice_date ? formatDate(invoice.invoice_date) : "—",
+          },
+          {
+            label: "Status",
+            value: invoice.invoice_status ?? "—",
+          },
+          {
+            label: "Transfer ID",
+            value: invoice.transfer_id ? String(invoice.transfer_id) : "—",
+          },
+          {
+            label: "Transfer Period",
+            value:
+              invoice.transfer?.start_date && invoice.transfer?.end_date
+                ? `${formatDate(invoice.transfer.start_date)} to ${formatDate(invoice.transfer.end_date)}`
+                : "—",
+          },
+          {
+            label: "Total",
+            value: formatMoney(
+              invoice.transfer?.company_total ?? invoice.transfer?.total,
+              invoice.transfer?.currency_code ?? "KWD",
+            ),
+          },
+          {
+            label: "Transfer Status",
+            value: invoice.transfer?.transfer_status
+              ? `Status ${invoice.transfer.transfer_status}`
+              : "—",
+          },
+        ]}
+      />
 
-        {invoice.company && (
-          <DetailSection
-            title="Company"
-            facts={[
-              { label: "Name", value: invoice.company.company_name ?? "—" },
-              { label: "Email", value: invoice.company.company_email ?? "—" },
-            ]}
-          />
-        )}
-
-        {candidate_payouts.length > 0 && (
-          <DetailSection
-            title={`Candidate Payouts (${candidate_payouts.length})`}
-            facts={candidate_payouts.map((cp, i) => ({
-              label: `${i + 1}. ${cp.candidate_name ?? "Candidate #" + cp.tc_id}`,
-              value: `${cp.amount ?? "—"}${cp.paid ? " ✓ Paid" : ""}`,
-            }))}
-          />
-        )}
-
-        <section className="flex gap-2 p-4">
-          <Link href={"/admin/invoices" as Route}>
-            <Button variant="outline">Back to Invoices</Button>
+      <section className="flex gap-2 p-4">
+        <Link href={"/admin/invoices" as Route}>
+          <Button variant="outline">Back to Invoices</Button>
+        </Link>
+        {invoice.transfer_id && (
+          <Link href={`/admin/transfers/${invoice.transfer_id}` as Route}>
+            <Button variant="ghost">View Transfer</Button>
           </Link>
-        </section>
-      </WorkspaceShell>
-    </ErrorBoundary>
+        )}
+      </section>
+    </WorkspaceShell>
   );
 }

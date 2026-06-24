@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { prisma } from "@/lib/prisma";
 
 // Mock revalidatePath
@@ -11,6 +11,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     candidate: {
       findFirst: vi.fn(),
+      findUnique: vi.fn(),
       update: vi.fn(),
     },
   },
@@ -19,6 +20,31 @@ vi.mock("@/lib/prisma", () => ({
 // Mock session
 vi.mock("@/modules/auth/session", () => ({
   requireCapability: vi.fn().mockResolvedValue(undefined),
+}));
+
+// Mock S3
+const mockS3Send = vi.fn();
+vi.mock("@aws-sdk/client-s3", () => ({
+  S3Client: class {
+    send = mockS3Send;
+  },
+  PutObjectCommand: vi.fn(),
+  DeleteObjectCommand: vi.fn(),
+}));
+
+// Mock fs/promises
+const mockMkdir = vi.fn();
+const mockWriteFile = vi.fn();
+const mockUnlink = vi.fn();
+vi.mock("node:fs/promises", () => ({
+  default: {
+    mkdir: mockMkdir,
+    writeFile: mockWriteFile,
+    unlink: mockUnlink,
+  },
+  mkdir: mockMkdir,
+  writeFile: mockWriteFile,
+  unlink: mockUnlink,
 }));
 
 const {
@@ -465,5 +491,374 @@ describe("admin/candidates/[id] actions", () => {
       const data = vi.mocked(prisma.candidate.update).mock.calls[0][0]?.data as any;
       expect(data.candidate_updated_at).toBeInstanceOf(Date);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// adminUploadCandidateDocument
+// ---------------------------------------------------------------------------
+
+function validUploadFormData(candidateId: number = 1, documentType: string = "cv"): FormData {
+  const fd = new FormData();
+  fd.set("candidateId", String(candidateId));
+  fd.set("documentType", documentType);
+  // Use appropriate filename and MIME type per document type
+  let fileName = "resume.pdf";
+  let mimeType = "application/pdf";
+  if (documentType === "photo" || documentType === "civilFront" || documentType === "civilBack") {
+    fileName = "photo.jpeg";
+    mimeType = "image/jpeg";
+  } else if (documentType === "video") {
+    fileName = "video.mp4";
+    mimeType = "video/mp4";
+  }
+  const blob = new Blob(["fake content"], { type: mimeType });
+  fd.set("file", blob, fileName);
+  return fd;
+}
+
+describe("adminUploadCandidateDocument", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Default mock: S3 env vars set
+    process.env.AWS_TEMP_BUCKET_REGION = "us-east-1";
+    process.env.AWS_TEMP_ACCESS_KEY_ID = "AKIA...";
+    process.env.AWS_TEMP_SECRET_ACCESS_KEY = "secret";
+    process.env.AWS_TEMP_BUCKET_NAME = "test-bucket";
+    mockS3Send.mockResolvedValue({ ETag: '"abc123"' });
+    vi.mocked(prisma.candidate.update).mockResolvedValue({} as any);
+  });
+
+  afterEach(() => {
+    delete process.env.AWS_TEMP_BUCKET_REGION;
+    delete process.env.AWS_TEMP_ACCESS_KEY_ID;
+    delete process.env.AWS_TEMP_SECRET_ACCESS_KEY;
+    delete process.env.AWS_TEMP_BUCKET_NAME;
+  });
+
+  it("uploads a file to S3 when S3 is configured", async () => {
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const result = await adminUploadCandidateDocument(
+      { success: false } as any,
+      validUploadFormData(1, "cv"),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.filePath).toMatch(/^candidates\/1\/cv_.+\.pdf$/);
+    expect(result.s3Key).toBeDefined();
+    expect(mockS3Send).toHaveBeenCalledTimes(1);
+  });
+
+  it("falls back to local disk when S3 is not configured", async () => {
+    delete process.env.AWS_TEMP_BUCKET_REGION;
+    delete process.env.AWS_TEMP_ACCESS_KEY_ID;
+    delete process.env.AWS_TEMP_SECRET_ACCESS_KEY;
+    delete process.env.AWS_TEMP_BUCKET_NAME;
+
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const result = await adminUploadCandidateDocument(
+      { success: false } as any,
+      validUploadFormData(1, "photo"),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.filePath).toMatch(/^\/uploads\/candidates\/1\/photo_.+\.jpe?g$/);
+    expect(mockMkdir).toHaveBeenCalled();
+    expect(mockWriteFile).toHaveBeenCalled();
+  });
+
+  it("updates the candidate document field in DB", async () => {
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    await adminUploadCandidateDocument(
+      { success: false } as any,
+      validUploadFormData(1, "photo"),
+    );
+
+    const updateCall = vi.mocked(prisma.candidate.update).mock.calls[0][0] as any;
+    expect(updateCall.where.candidate_id).toBe(1);
+    expect(updateCall.data.candidate_personal_photo).toMatch(
+      /^candidates\/1\/photo_/,
+    );
+  });
+
+  it("rejects unsupported file extension", async () => {
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("candidateId", "1");
+    fd.set("documentType", "photo");
+    const blob = new Blob(["not a video"], { type: "video/mp4" });
+    fd.set("file", blob, "photo.exe");
+
+    const result = await adminUploadCandidateDocument(
+      { success: false } as any,
+      fd,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain(".exe");
+  });
+
+  it("rejects oversized file", async () => {
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("candidateId", "1");
+    fd.set("documentType", "cv");
+    // 11 MB blob
+    const largeBlob = new Blob(["x".repeat(11 * 1024 * 1024)], {
+      type: "application/pdf",
+    });
+    fd.set("file", largeBlob, "large.pdf");
+
+    const result = await adminUploadCandidateDocument(
+      { success: false } as any,
+      fd,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("too large");
+  });
+
+  it("rejects missing candidateId", async () => {
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("documentType", "cv");
+    fd.set("file", new Blob(["x"], { type: "application/pdf" }), "doc.pdf");
+
+    const result = await adminUploadCandidateDocument(
+      { success: false } as any,
+      fd,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("candidateId");
+  });
+
+  it("rejects missing file", async () => {
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("candidateId", "1");
+    fd.set("documentType", "cv");
+
+    const result = await adminUploadCandidateDocument(
+      { success: false } as any,
+      fd,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("No file");
+  });
+
+  it("requires candidate.write capability", async () => {
+    const { requireCapability } = await import("@/modules/auth/session");
+    vi.mocked(requireCapability).mockRejectedValueOnce(
+      new Error("Unauthorized"),
+    );
+
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    await expect(
+      adminUploadCandidateDocument(
+        { success: false } as any,
+        validUploadFormData(),
+      ),
+    ).rejects.toThrow("Unauthorized");
+  });
+
+  it("calls revalidatePath after upload", async () => {
+    const { revalidatePath } = await import("next/cache");
+    const { adminUploadCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    await adminUploadCandidateDocument(
+      { success: false } as any,
+      validUploadFormData(42, "cv"),
+    );
+
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/candidates/42");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// adminDeleteCandidateDocument
+// ---------------------------------------------------------------------------
+
+describe("adminDeleteCandidateDocument", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.AWS_TEMP_BUCKET_REGION = "us-east-1";
+    process.env.AWS_TEMP_ACCESS_KEY_ID = "AKIA...";
+    process.env.AWS_TEMP_SECRET_ACCESS_KEY = "secret";
+    process.env.AWS_TEMP_BUCKET_NAME = "test-bucket";
+    vi.mocked(prisma.candidate.findUnique).mockResolvedValue({
+      candidate_id: 1,
+      candidate_resume: "candidates/1/cv_abc123.pdf",
+    } as any);
+    vi.mocked(prisma.candidate.update).mockResolvedValue({} as any);
+    mockS3Send.mockResolvedValue({});
+  });
+
+  afterEach(() => {
+    delete process.env.AWS_TEMP_BUCKET_REGION;
+    delete process.env.AWS_TEMP_ACCESS_KEY_ID;
+    delete process.env.AWS_TEMP_SECRET_ACCESS_KEY;
+    delete process.env.AWS_TEMP_BUCKET_NAME;
+  });
+
+  it("deletes a document and clears DB field", async () => {
+    const { adminDeleteCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("candidateId", "1");
+    fd.set("documentType", "cv");
+
+    const result = await adminDeleteCandidateDocument(
+      { success: false } as any,
+      fd,
+    );
+
+    expect(result.success).toBe(true);
+    expect(vi.mocked(prisma.candidate.update).mock.calls[0][0]?.data).toMatchObject({
+      candidate_resume: null,
+    });
+  });
+
+  it("deletes file from S3 when it has an S3 key", async () => {
+    vi.mocked(prisma.candidate.findUnique).mockResolvedValue({
+      candidate_id: 1,
+      candidate_resume: "candidates/1/cv_abc.pdf",
+    } as any);
+
+    const { adminDeleteCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("candidateId", "1");
+    fd.set("documentType", "cv");
+
+    await adminDeleteCandidateDocument({ success: false } as any, fd);
+
+    // S3 DeleteObjectCommand should have been sent
+    expect(mockS3Send).toHaveBeenCalled();
+  });
+
+  it("deletes file from local disk when it has a local path", async () => {
+    delete process.env.AWS_TEMP_BUCKET_REGION;
+    delete process.env.AWS_TEMP_ACCESS_KEY_ID;
+    delete process.env.AWS_TEMP_SECRET_ACCESS_KEY;
+    delete process.env.AWS_TEMP_BUCKET_NAME;
+
+    vi.mocked(prisma.candidate.findUnique).mockResolvedValue({
+      candidate_id: 1,
+      candidate_resume: "/uploads/candidates/1/cv_abc.pdf",
+    } as any);
+
+    const { adminDeleteCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("candidateId", "1");
+    fd.set("documentType", "cv");
+
+    await adminDeleteCandidateDocument({ success: false } as any, fd);
+
+    expect(mockUnlink).toHaveBeenCalled();
+  });
+
+  it("returns error when candidate not found", async () => {
+    vi.mocked(prisma.candidate.findUnique).mockResolvedValue(null);
+
+    const { adminDeleteCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("candidateId", "999");
+    fd.set("documentType", "cv");
+
+    const result = await adminDeleteCandidateDocument(
+      { success: false } as any,
+      fd,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Candidate not found");
+  });
+
+  it("rejects missing candidateId", async () => {
+    const { adminDeleteCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("documentType", "cv");
+
+    const result = await adminDeleteCandidateDocument(
+      { success: false } as any,
+      fd,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("candidateId");
+  });
+
+  it("requires candidate.write capability", async () => {
+    const { requireCapability } = await import("@/modules/auth/session");
+    vi.mocked(requireCapability).mockRejectedValueOnce(
+      new Error("Unauthorized"),
+    );
+
+    const { adminDeleteCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    await expect(
+      adminDeleteCandidateDocument(
+        { success: false } as any,
+        new FormData(),
+      ),
+    ).rejects.toThrow("Unauthorized");
+  });
+
+  it("calls revalidatePath after delete", async () => {
+    const { revalidatePath } = await import("next/cache");
+    const { adminDeleteCandidateDocument } = await import(
+      "@/modules/admin/candidates/[id]/actions"
+    );
+
+    const fd = new FormData();
+    fd.set("candidateId", "7");
+    fd.set("documentType", "cv");
+
+    await adminDeleteCandidateDocument({ success: false } as any, fd);
+
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/candidates/7");
   });
 });
