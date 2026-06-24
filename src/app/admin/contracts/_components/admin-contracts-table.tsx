@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/modules/workspace/DataTable";
 import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
@@ -43,12 +44,12 @@ export function AdminContractsTable({ session, contracts }: Props) {
         { label: "Total contracts", value: contracts.length, note: "Active agreements in the system" },
       ]}
     >
-      <section className="mb-6">
-        <div className="rounded-lg border border-border bg-card p-5">
+      <Card className="mb-6">
+        <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 text-foreground">Add contract</h3>
           <CreateContractForm onSuccess={() => router.refresh()} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       <DataTable
         title="Contracts"
@@ -283,6 +284,7 @@ function DeleteContractButton({
   const [pending, setPending] = useState(false);
 
   async function handleDelete() {
+    if (!confirm("Delete this contract? This action cannot be undone.")) return;
     setPending(true);
     const result = await deleteContract({ contractUuid });
     setPending(false);
