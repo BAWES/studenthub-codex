@@ -49,20 +49,14 @@ export default async function HubPage({
 
         <nav className="flex flex-col gap-0.5 p-2" aria-label="Workspace navigation">
           {data.navigation.map((item) => (
-            <Link
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start gap-0.5 no-underline",
-                (item.href === hubContext || item.href === "/app") && "bg-coral/10 text-coral hover:bg-coral/15"
-              )}
-              href={item.href}
-              key={item.href}
+            <Button
               variant="ghost"
               className={cn(
                 "w-full justify-start font-normal",
                 (item.href === hubContext || item.href === "/app") && "bg-primary/10 text-primary hover:bg-primary/15"
               )}
               asChild
+              key={item.href}
             >
               <Link href={item.href} title={`${item.label}: ${item.description}`}>
                 <strong>{item.label}</strong>

@@ -76,6 +76,60 @@ export async function deleteDegree(
   }
 }
 
+export async function createDegree(
+  data: {
+    degree_name_en: string;
+    degree_name_ar?: string;
+    degree_sort_order?: number;
+    degree_group_uuid?: string;
+  },
+): Promise<{ success?: boolean; error?: string }> {
+  try {
+    await requireCapability("admin.write");
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Unauthorized" };
+  }
+
+  if (!data.degree_name_en || data.degree_name_en.trim().length === 0) {
+    return { error: "Degree name (English) is required" };
+  }
+
+  try {
+    await prisma.degree.create({
+      data: {
+        degree_name_en: data.degree_name_en,
+        degree_name_ar: data.degree_name_ar || null,
+        degree_sort_order: data.degree_sort_order ?? 0,
+        degree_group_uuid: data.degree_group_uuid || null,
+        degree_created_at: new Date(),
+      } as any,
+    });
+
+    revalidatePath("/admin/degree");
+    return { success: true };
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Failed to create degree",
+    };
+  }
+}
+
+type GroupOption = { degree_group_uuid: string; degree_group_name_en: string };
+
+export async function getDegreeGroupOptions(): Promise<GroupOption[]> {
+  await requireCapability("admin.read");
+
+  const groups = await prisma.degree_group.findMany({
+    orderBy: { degree_group_name_en: "asc" },
+    select: {
+      degree_group_uuid: true,
+      degree_group_name_en: true,
+    },
+  });
+
+  return groups;
+}
+
 export async function listDegrees(
   input: ListDegreesInput = {},
 ): Promise<ListDegreesResult> {
