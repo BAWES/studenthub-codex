@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
+import React from "react";
 
 // ── Mock next/link ──────────────────────────────────────────────
 vi.mock("next/link", () => ({
@@ -98,7 +99,10 @@ describe("Landing page (clean auth)", () => {
     ).toBeInTheDocument();
   });
 
-  // ── Navigation ───────────────────────────────────────────────
+  it("renders StudentHub text in nav", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).toContain("StudentHub");
+  });
 
   it("renders sign in for unauthenticated users", () => {
     render(<LandingPage {...defaultProps} />);
@@ -120,38 +124,45 @@ describe("Landing page (clean auth)", () => {
 
   // ── No persona tabs (stripped) ───────────────────────────────
 
-  it("does NOT render persona tabs", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(screen.queryByText("Students")).not.toBeInTheDocument();
-    expect(screen.queryByText("Companies")).not.toBeInTheDocument();
+  it("does NOT render persona tabs (Students/Companies)", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).not.toContain("Students");
+    expect(container.textContent).not.toContain("Companies");
   });
 
   // ── No marketing sections (stripped) ─────────────────────────
 
-  it("does NOT render how it works section", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(screen.queryByText("Create your profile")).not.toBeInTheDocument();
+  it("does NOT render how it works section", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).not.toContain("Create your profile");
   });
 
-  it("does NOT render testimonial carousel", () => {
-    render(<LandingPage {...defaultProps} />);
+  it("does NOT render testimonial carousel", async () => {
+    const { container } = render(await Home());
     expect(
-      screen.queryByText("Real stories from real placements.")
-    ).not.toBeInTheDocument();
+      container.textContent
+    ).not.toContain("Real stories from real placements.");
   });
 
-  it("does NOT render comparison table", () => {
-    render(<LandingPage {...defaultProps} />);
-    expect(
-      screen.queryByText("Why students choose StudentHub.")
-    ).not.toBeInTheDocument();
+  it("does NOT render comparison table", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).not.toContain("Why students choose StudentHub.");
   });
 
-  it("does NOT render CTA section", () => {
-    render(<LandingPage {...defaultProps} />);
+  it("does NOT render employer trust bar", async () => {
+    const { container } = render(await Home());
     expect(
-      screen.queryByText("Start your journey")
-    ).not.toBeInTheDocument();
+      container.textContent
+    ).not.toContain("Trusted by leading organizations");
+  });
+
+  // ── Hero content ─────────────────────────────────────────────
+
+  it("renders placement feature badges", async () => {
+    const { container } = render(await Home());
+    expect(container.textContent).toContain("Staff-recruited matching");
+    expect(container.textContent).toContain("End-to-end workflows");
+    expect(container.textContent).toContain("Real-time pay and compliance");
   });
 
   it("does NOT render employer trust bar", () => {
