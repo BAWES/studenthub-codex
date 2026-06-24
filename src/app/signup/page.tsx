@@ -43,7 +43,16 @@ export default async function SignupPage({
     <main className="min-h-svh grid grid-cols-[minmax(0,1fr)_minmax(400px,520px)] bg-background max-[900px]:grid-cols-1 max-[900px]:grid-rows-[auto_minmax(0,1fr)]">
       {/* ── Brand side -- an ambient coral/blue gradient ──────────────── */}
       <div className="relative grid content-center gap-4 p-[clamp(32px,5vw,64px)] overflow-hidden">
-        <div className="absolute inset-0 shLoginGradient" aria-hidden="true" />
+        <div className="absolute inset-0" aria-hidden="true"
+          style={{
+            animation: "shLoginDrift 14s ease-in-out infinite alternate",
+            background: [
+              "radial-gradient(ellipse 90% 70% at 0% 100%, color-mix(in srgb, var(--sh-coral) 18%, transparent) 0%, transparent 70%)",
+              "radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in srgb, var(--sh-coral) 12%, transparent) 0%, transparent 60%)",
+              "radial-gradient(ellipse 60% 50% at 100% 80%, color-mix(in srgb, var(--ring) 8%, transparent) 0%, transparent 60%)",
+            ].join(", "),
+          }}
+        />
 
         <div className="relative z-1 animate-[shLoginBrandFadeIn_600ms_var(--sh-easing)_both]">
           <div className="inline-flex items-center gap-[10px] mb-3">
