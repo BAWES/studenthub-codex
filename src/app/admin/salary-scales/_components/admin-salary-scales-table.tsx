@@ -54,13 +54,14 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <button
+                <Button
                   type="button"
-                  className="text-sm hover:underline text-primary"
+                  variant="link"
+                  className="text-sm px-0 h-auto"
                   onClick={() => setEditingId(row.salary_scale_id)}
                 >
                   {row.salary_scale_name_en}
-                </button>
+                </Button>
               ),
           },
           {
@@ -99,9 +100,10 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
             label: "Delete",
             render: (row) =>
               editingId !== row.salary_scale_id ? (
-                <button
+                <Button
                   type="button"
-                  className="text-xs px-2 py-1 rounded hover:bg-red-500/10 text-destructive"
+                  variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     if (confirm(`Delete scale "${row.salary_scale_name_en}"?`)) {
                       await deleteSalaryScale(row.salary_scale_id);
@@ -110,7 +112,7 @@ export function AdminSalaryScalesTable({ session, records }: Props) {
                   }}
                 >
                   Delete
-                </button>
+                </Button>
               ) : null,
           },
         ]}
