@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireCapability } from "@/modules/auth/session";
+import { requireCapability, requireRoleCapability } from "@/modules/auth/session";
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { DOCUMENT_TYPES } from "./constants";
@@ -611,5 +611,150 @@ export async function getCandidateDocumentDownloadUrl(
     };
   } catch {
     return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Staff upload candidate document (accepts explicit candidateId)
+// ---------------------------------------------------------------------------
+
+/**
+ * List candidate documents — staff variant.
+ * Uses staff-level capability and queries directly (no candidate-role check).
+ */
+export async function staffListCandidateDocuments(
+  candidateId: number,
+): Promise<ListCandidateDocumentsResult> {
+  await requireRoleCapability("staff", "candidate.search");
+
+  const candidate = await prisma.candidate.findUnique({
+    where: { candidate_id: candidateId },
+    select: {
+      candidate_id: true,
+      candidate_personal_photo: true,
+      candidate_resume: true,
+      candidate_video: true,
+      candidate_civil_photo_front: true,
+      candidate_civil_photo_back: true,
+    },
+  });
+
+  if (!candidate) {
+    return { items: [], candidateId };
+  }
+
+  const items: CandidateDocumentItem[] = await Promise.all(
+    DOCUMENT_TYPES.map(async (type) => {
+      const field = DOCUMENT_FIELD_MAP[type];
+      const filePath = (candidate as Record<string, unknown>)[field] as string | null;
+      return toDocumentItem(type, filePath);
+    }),
+  );
+
+  const result: ListCandidateDocumentsResult = { items, candidateId: candidate.candidate_id };
+
+  const outputParsed = listCandidateDocumentsResultSchema.safeParse(result);
+  if (!outputParsed.success) {
+    console.error(
+      "[modules/candidates/documents] staffListCandidateDocuments output validation failed:",
+      outputParsed.error.issues,
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Upload a document for a candidate — staff variant.
+ * Accepts candidateId explicitly (not from session) and uses staff-level
+ * capability check so admins/staff can upload documents for any candidate.
+ */
+export async function staffUploadCandidateDocument(
+  candidateId: number,
+  _prevState: UploadDocumentState,
+  formData: FormData,
+): Promise<UploadDocumentState> {
+  await requireRoleCapability("staff", "candidate.search");
+
+  if (!Number.isInteger(candidateId) || candidateId <= 0) {
+    return { success: false, error: "Invalid candidate ID." };
+  }
+
+  let documentType: DocumentType | null = null;
+  let file: File | null = null;
+
+  for (const dt of DOCUMENT_TYPES) {
+    const f = formData.get(`file_${dt}`);
+    if (f instanceof File && f.size > 0) {
+      documentType = dt;
+      file = f;
+      break;
+    }
+  }
+
+  if (!documentType || !file || file.size === 0) {
+    return { success: false, error: "No file provided. Use file_{type} field (e.g. file_photo)." };
+  }
+
+  const parseResult = uploadDocumentParamsSchema.safeParse({ candidateId, documentType });
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.errors.map((e) => e.message).join("; ") };
+  }
+
+  const typeConfig = ALLOWED_TYPES[documentType];
+
+  const ext = path.extname(file.name).toLowerCase();
+  if (!typeConfig.ext.includes(ext)) {
+    return { success: false, error: `File type "${ext}" is not allowed for ${documentType}. Accepted: ${typeConfig.ext.join(", ")}.` };
+  }
+
+  if (file.type && !typeConfig.mime.includes(file.type)) {
+    return { success: false, error: `Invalid MIME type "${file.type}" for ${documentType}.` };
+  }
+
+  if (file.size > typeConfig.maxSize) {
+    const sizeMB = typeConfig.maxSize / 1024 / 1024;
+    return { success: false, error: `File is too large. Maximum size for ${documentType} is ${sizeMB} MB.` };
+  }
+
+  const useS3 = s3ConfigAvailable();
+
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const filename = `${documentType}_${crypto.randomUUID()}${ext}`;
+    let publicPath: string;
+    let s3Key: string | undefined;
+
+    if (useS3) {
+      const s3ObjectKey = `candidates/${candidateId}/${filename}`;
+      const command = new PutObjectCommand({
+        Bucket: getBucketName(),
+        Key: s3ObjectKey,
+        Body: buffer,
+        ContentType: file.type || undefined,
+      });
+      await getS3Client().send(command);
+
+      s3Key = s3ObjectKey;
+      publicPath = s3ObjectKey;
+    } else {
+      const dir = path.join(UPLOAD_DIR, String(candidateId));
+      await fs.mkdir(dir, { recursive: true });
+      const filepath = path.join(dir, filename);
+      await fs.writeFile(filepath, buffer);
+      publicPath = `/uploads/candidates/${candidateId}/${filename}`;
+    }
+
+    const field = DOCUMENT_FIELD_MAP[documentType];
+    await prisma.candidate.update({
+      where: { candidate_id: candidateId },
+      data: { [field]: publicPath },
+    });
+
+    revalidatePath("/staff/candidates");
+
+    return { success: true, filePath: publicPath, s3Key };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : "Upload failed due to an unknown error." };
   }
 }
