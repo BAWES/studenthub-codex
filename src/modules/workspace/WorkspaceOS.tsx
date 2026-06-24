@@ -12,6 +12,7 @@ import { WorkspaceMobileNavigation, WorkspaceNavigation } from "./WorkspaceNavig
 import { navForRole } from "./navigation";
 import type { NavItem } from "./navigation";
 import { searchCandidatesForPalette, type CandidatePaletteResult } from "./searchPalette";
+import { PageTransition } from "./PageTransition";
 import {
   CommandDialog,
   CommandEmpty,
@@ -276,7 +277,7 @@ export function WorkspaceOS({
 
         {/* ── Content Stage ───────────────────────────────── */}
         <section className="flex flex-1 flex-col overflow-auto">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </section>
 
         {/* ── Mobile Tab Bar ──────────────────────────────── */}
