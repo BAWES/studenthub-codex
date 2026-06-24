@@ -3,8 +3,7 @@ import { requireRoleCapability } from "@/modules/auth/session";
 import { getJob } from "../../actions";
 import { getMatchingCandidates } from "./actions";
 import { MatchingCandidatesTable } from "./matching-candidates-table";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
 
@@ -22,26 +21,21 @@ export default async function EmployerMatchingCandidatesPage({ params }: Props) 
   const result = await getMatchingCandidates({ jobId: Number(id), limit: 50 });
 
   return (
-    <div className="py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Matching Candidates</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Candidates matched to &ldquo;{job.title}&rdquo;
-          </p>
-        </div>
-        <Button asChild variant="outline">
-          <Link href={`/employer/jobs/${job.jobListingId}/applications`}>
-            View Applications
-          </Link>
-        </Button>
+    <WorkspaceShell
+      session={session}
+      eyebrow="Employer / Jobs / Matching"
+      title={job.title}
+      metrics={[
+        { label: "Matched Candidates", value: result.total, note: "scored by match algorithm" },
+      ]}
+    >
+      <div className="px-[22px] py-[18px]">
+        <MatchingCandidatesTable
+          candidates={result.candidates}
+          total={result.total}
+          jobTitle={job.title}
+        />
       </div>
-
-      <MatchingCandidatesTable
-        candidates={result.candidates}
-        total={result.total}
-        jobTitle={job.title}
-      />
-    </div>
+    </WorkspaceShell>
   );
 }

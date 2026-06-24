@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/modules/workspace/StatusBadge";
+import { WorkspaceShell } from "@/modules/workspace/WorkspaceShell";
 import { genericStatusVariant } from "@/modules/workspace/status-mapping";
 
 // ─── Types ────────────────────────────────────────────────────────────
@@ -111,7 +112,7 @@ function Pagination({
           key={p}
           variant={p === page ? "default" : "outline"}
           size="sm"
-          className={p === page ? "bg-[#eb6651] text-white hover:bg-[#d45441]" : ""}
+          className={p === page ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
           onClick={() => onGoToPage(p)}
         >
           {p}
@@ -220,7 +221,23 @@ export function EmployerJobsSearchPage({
   const totalPages = results ? Math.ceil(results.matchingCount / ITEMS_PER_PAGE) : 0;
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <WorkspaceShell
+      session={session}
+      eyebrow="Employer"
+      title="Job Postings"
+      metrics={
+        results
+          ? [
+              {
+                label: "Jobs Found",
+                value: results.matchingCount.toLocaleString(),
+                note: results.query ? `for "${results.query}"` : "all postings",
+              },
+            ]
+          : []
+      }
+    >
+      <div className="px-[22px] py-[18px]">
       <h1 className="sr-only">Job Postings</h1>
 
       {/* Search form */}
@@ -230,6 +247,7 @@ export function EmployerJobsSearchPage({
             ref={inputRef}
             type="text"
             placeholder="Search job postings by title, description, requirements..."
+            data-command-search
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
@@ -262,7 +280,7 @@ export function EmployerJobsSearchPage({
             <span className="font-semibold">
               {isTyping ? (
                 <>
-                  <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-[#eb6651] animate-pulse" />
+                  <span className="inline-block align-middle mr-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
                   Searching...
                 </>
               ) : (
@@ -308,6 +326,7 @@ export function EmployerJobsSearchPage({
                 <Link
                   key={row.jobListingId}
                   href={`/employer/jobs/${row.jobListingId}`}
+                  data-os-navigable
                   className="block transition-all duration-150 hover:shadow-md hover:-translate-y-px"
                   onClick={(e) => {
                     if (e.button === 1 || e.metaKey || e.ctrlKey) return;
@@ -424,5 +443,6 @@ export function EmployerJobsSearchPage({
         )}
       </div>
     </div>
+    </WorkspaceShell>
   );
 }
