@@ -49,7 +49,7 @@ export function RoleSwitcher({
         <button
           type="button"
           disabled={isPending}
-          className="flex w-full items-center gap-1.5 rounded-[var(--sh-radius-sm)] border border-[var(--sh-glass-border)] bg-transparent px-[10px] py-[4px] text-xs font-semibold text-[var(--muted)] min-h-[32px] cursor-default"
+          className="flex w-full items-center gap-1.5 rounded-[var(--sh-radius-sm)] border border-border bg-transparent px-[10px] py-[4px] text-xs font-semibold text-muted-foreground min-h-[32px] cursor-default"
         >
           {roleIcons[currentRole]} {roleDisplayLabels[currentRole]}
         </button>
