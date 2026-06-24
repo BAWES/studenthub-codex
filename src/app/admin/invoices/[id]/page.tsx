@@ -42,7 +42,7 @@ export default async function AdminInvoiceDetailPage({
         },
         {
           label: "Company",
-          value: invoice.transfer?.company?.company_name ?? "—",
+          value: invoice.company?.company_name ?? "—",
           note: "Billed company",
         },
       ]}
@@ -64,23 +64,19 @@ export default async function AdminInvoiceDetailPage({
             value: invoice.transfer_id ? String(invoice.transfer_id) : "—",
           },
           {
-            label: "Transfer Period",
-            value:
-              invoice.transfer?.start_date && invoice.transfer?.end_date
-                ? `${formatDate(invoice.transfer.start_date)} to ${formatDate(invoice.transfer.end_date)}`
-                : "—",
-          },
-          {
             label: "Total",
-            value: formatMoney(
-              invoice.transfer?.company_total ?? invoice.transfer?.total,
-              invoice.transfer?.currency_code ?? "KWD",
-            ),
+            value: formatMoney(invoice.total, invoice.currency_code ?? "KWD"),
           },
           {
-            label: "Transfer Status",
-            value: invoice.transfer?.transfer_status
-              ? `Status ${invoice.transfer.transfer_status}`
+            label: "Company Total",
+            value: invoice.company_total
+              ? formatMoney(invoice.company_total, invoice.currency_code ?? "KWD")
+              : "—",
+          },
+          {
+            label: "Payment Received",
+            value: invoice.payment_received_on
+              ? formatDate(invoice.payment_received_on)
               : "—",
           },
         ]}
